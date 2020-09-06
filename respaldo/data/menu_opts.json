@@ -1,0 +1,14 @@
+{
+    "NombreApp" : "Componentes",
+    "rutas":[
+        {
+            "ruta": "Mapas"
+        },
+        {
+            "ruta": "Balance"
+        },
+        {
+            "ruta": "Suelos"
+        }
+    ]
+}
