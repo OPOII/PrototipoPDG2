@@ -34,7 +34,7 @@ class NavigatorDrawerState extends State<NavitagorDrawer>
         builder: (context, widget) => getWidget(context, widget));
   }
 
-  Widget getWidget(context, widget) {
+  Widget getWidget(BuildContext context, widget) {
     return Container(
       width: widthAnimation.value,
       color: drawerBackgroundColor,

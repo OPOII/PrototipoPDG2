@@ -7,8 +7,8 @@ class NavigationModel {
 }
 
 List<NavigationModel> navigationItem = [
-  NavigationModel(title: "Settings", icon: Icons.settings),
-  NavigationModel(title: "Profile", icon: Icons.person),
-  NavigationModel(title: "Dashboard", icon: Icons.insert_chart),
-  NavigationModel(title: "Dashboard", icon: Icons.insert_chart),
+  NavigationModel(title: "Resumen", icon: Icons.assessment),
+  NavigationModel(title: "Info Excel", icon: Icons.insert_drive_file),
+  NavigationModel(title: "Buscar Hacienda", icon: Icons.search),
+  NavigationModel(title: "Configuración", icon: Icons.settings),
 ];
