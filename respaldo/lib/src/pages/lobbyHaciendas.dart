@@ -1,40 +1,66 @@
-import 'package:flutter/cupertino.dart';
-
 import 'package:flutter/material.dart';
 
-class ListadoHaciendas extends StatelessWidget {
+class ListadoHacienda extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
-    return Scaffold();
-  }
-}
-
-Container listaDibujable() {}
-Container botonAtras() {}
-Container barraDeBusqueda() {}
-
-class DataSearch extends SearchDelegate<String> {
-  @override
-  List<Widget> buildActions(BuildContext context) {
-    // TODO: implement buildActions
-    throw UnimplementedError();
+    return Scaffold(
+      backgroundColor: Color(0xFFF9F9F9),
+      appBar: _appBar(context),
+      body: Stack(
+        children: <Widget>[contenedor()],
+      ),
+    );
   }
 
-  @override
-  Widget buildLeading(BuildContext context) {
-    // TODO: implement buildLeading
-    throw UnimplementedError();
+  Widget _appBar(BuildContext context) {
+    return AppBar(
+      bottom: PreferredSize(
+        preferredSize: Size.fromHeight(0.5),
+        child: Container(
+          color: Color(0xFFF9F9F9),
+          height: 0.75,
+        ),
+      ),
+      backgroundColor: Color(0xFFF9F9F9),
+      elevation: 0,
+      centerTitle: true,
+      title: Text(
+        'Buscar Hacienda',
+        style: TextStyle(color: Colors.green[400]),
+      ),
+      leading: IconButton(
+        icon: Icon(Icons.arrow_back),
+        color: Colors.green[400],
+        onPressed: () {
+          Navigator.pushNamed(context, '/Mapas');
+        },
+      ),
+    );
   }
 
-  @override
-  Widget buildResults(BuildContext context) {
-    // TODO: implement buildResults
-    throw UnimplementedError();
+  Widget _etiquetas() {
+    return Text('Body');
   }
 
-  @override
-  Widget buildSuggestions(BuildContext context) {
-    // TODO: implement buildSuggestions
-    throw UnimplementedError();
+  Widget contenedor() {
+    return Container(
+      height: 70,
+      color: Colors.transparent,
+      child: new AppBar(
+        backgroundColor: Color(0xFFF9F9F9),
+        automaticallyImplyLeading: false,
+        title: new TextField(
+          // controller: _searchQuery,
+          style: new TextStyle(color: Colors.white),
+          decoration: new InputDecoration(
+              prefixIcon: new Icon(
+                Icons.search,
+                color: Colors.green,
+              ),
+              hintText: "Search...",
+              hintStyle: new TextStyle(color: Colors.black)),
+        ),
+      ),
+    );
   }
 }
