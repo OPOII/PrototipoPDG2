@@ -1,8 +1,10 @@
+import 'dart:math';
 import 'dart:ui';
 
 import 'package:flutter/material.dart';
 import 'package:latlong/latlong.dart';
 import 'package:respaldo/src/pages/hacienda.dart';
+import 'package:respaldo/src/pages/haciendaView.dart';
 
 class ListadoHacienda extends StatelessWidget {
   List<Hacienda> miniListado;
@@ -10,10 +12,16 @@ class ListadoHacienda extends StatelessWidget {
   Widget build(BuildContext context) {
     miniListado = cargarHacienda();
     return Scaffold(
-      backgroundColor: Color(0xFFF9F9F9),
+      backgroundColor: Colors.white,
       appBar: _appBar(context),
       body: Stack(
-        children: <Widget>[listadoHaciendas(context)],
+        children: <Widget>[
+          Padding(padding: EdgeInsets.only(top: 10), child: contenedor()),
+          Padding(
+            padding: EdgeInsets.only(top: 80),
+            child: listadoHaciendas(context),
+          )
+        ],
       ),
     );
   }
@@ -21,13 +29,13 @@ class ListadoHacienda extends StatelessWidget {
   Widget _appBar(BuildContext context) {
     return AppBar(
       bottom: PreferredSize(
-        preferredSize: Size.fromHeight(0.5),
+        preferredSize: Size.fromHeight(0.8),
         child: Container(
-          color: Color(0xFFF9F9F9),
+          color: Colors.white,
           height: 0.75,
         ),
       ),
-      backgroundColor: Color(0xFFF9F9F9),
+      backgroundColor: Colors.white,
       elevation: 0,
       centerTitle: true,
       title: Text(
@@ -44,16 +52,11 @@ class ListadoHacienda extends StatelessWidget {
     );
   }
 
-  //Widget _etiquetas() {
-  //return Text('Body');
-  //}
-
   Widget contenedor() {
     return Container(
-      height: 70,
-      color: Colors.transparent,
+      color: Colors.white,
       child: new AppBar(
-        backgroundColor: Color(0xFFF9F9F9),
+        backgroundColor: Colors.white,
         automaticallyImplyLeading: false,
         title: new TextField(
           // controller: _searchQuery,
@@ -64,7 +67,7 @@ class ListadoHacienda extends StatelessWidget {
                   const Radius.circular(30.0),
                 ),
               ),
-              filled: true,
+              filled: false,
               prefixIcon: new Icon(
                 Icons.search,
                 color: Colors.green,
@@ -78,33 +81,45 @@ class ListadoHacienda extends StatelessWidget {
 
   Widget listadoHaciendas(BuildContext context) {
     return Scaffold(
-        body: ListView.builder(
-            itemCount: miniListado.length,
-            itemBuilder: (context, index) {
-              return Padding(
-                padding:
-                    const EdgeInsets.symmetric(vertical: 1.0, horizontal: 4.0),
-                child: Card(
-                  child: ListTile(
-                    onTap: () {
-                      print(miniListado[index].id);
-                    },
-                    title: Text(miniListado[index].nombre),
-                    leading: CircleAvatar(
-                      backgroundImage:
-                          AssetImage('assets/${miniListado[index].imagen}'),
-                    ),
-                    subtitle: Text(miniListado[index].ubicacion),
+      backgroundColor: Colors.white,
+      body: ListView.builder(
+          itemCount: miniListado.length,
+          itemBuilder: (context, index) {
+            return Padding(
+              padding:
+                  const EdgeInsets.symmetric(vertical: 4.0, horizontal: 4.0),
+              child: Card(
+                color: Colors.green,
+                child: ListTile(
+                  onTap: () {
+                    Navigator.push(
+                        context,
+                        MaterialPageRoute(
+                            builder: (context) =>
+                                HaciendaView(hacienda: miniListado[index])));
+                  },
+                  title: Text(miniListado[index].nombre),
+                  leading: CircleAvatar(
+                    backgroundImage: AssetImage(
+                        'assets/haciendas/${miniListado[index].imagen}'),
                   ),
+                  subtitle: Text(miniListado[index].ubicacion),
                 ),
-              );
-            }));
+              ),
+            );
+          }),
+    );
   }
 
   List<Hacienda> cargarHacienda() {
     List<Hacienda> listado = [
-      new Hacienda('INGENIO PICHICHI S.A', 5468, null, "Cali, Valle del cauca",
-          new LatLng(3.4719911, -76.519074), 'ingenio_pichichi.jpeg'),
+      new Hacienda(
+          'INGENIO PICHICHI S.A',
+          654654,
+          null,
+          "Cali, Valle del cauca",
+          new LatLng(3.4719911, -76.519074),
+          'ingenio_pichichi.jpeg'),
       new Hacienda('Ingenio Manuelita', 5468, null, "Cali, Valle del cauca",
           new LatLng(3.4509319, -76.5393067), 'ingenio_manuelita.jpeg'),
       new Hacienda(

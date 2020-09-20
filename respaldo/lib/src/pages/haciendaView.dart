@@ -1,8 +1,14 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_map/flutter_map.dart';
 import 'package:latlong/latlong.dart';
+import 'package:path/path.dart';
+import 'package:respaldo/src/pages/hacienda.dart';
 
 class HaciendaView extends StatelessWidget {
+  final Hacienda hacienda;
+  //No se por que pero es necesario usar lo del key para poder pasar los parametros que necesitamos
+  HaciendaView({Key key, this.hacienda}) : super(key: key);
+
   @override
   Widget build(BuildContext context) {
     return new Scaffold(
@@ -14,7 +20,7 @@ class HaciendaView extends StatelessWidget {
           Positioned(
               child: Container(
             padding: EdgeInsets.only(top: 50, left: 125),
-            child: Text('Nombre de la Hacienda 1'),
+            child: Text(hacienda.nombre),
           )),
           Positioned(
             child: Container(
@@ -26,7 +32,7 @@ class HaciendaView extends StatelessWidget {
                   color: Colors.green.withOpacity(0.5),
                   child: Icon(Icons.arrow_back),
                   onPressed: () {
-                    Navigator.pushNamed(context, "/Mapas");
+                    Navigator.pushNamed(context, "/ListadoHaciendas");
                   },
                   shape: RoundedRectangleBorder(
                       borderRadius: new BorderRadius.circular(20.0)),
@@ -39,13 +45,13 @@ class HaciendaView extends StatelessWidget {
               padding: EdgeInsets.only(top: 90, left: 60),
               height: 340,
               width: 330,
-              child: mapaMiniatura(),
+              child: mapaMiniatura(hacienda.ubicacionExacta),
             ),
           ),
           Positioned(
             top: 320,
             child: Container(
-              child: contenerInfo(),
+              child: contenerInfo(hacienda),
             ),
           ),
           Padding(
@@ -76,7 +82,7 @@ Container boton(BuildContext context) {
   );
 }
 
-Container contenerInfo() {
+Container contenerInfo(Hacienda n) {
   return Container(
     //decoration: new BoxDecoration(color: Colors.red),
     width: 400,
@@ -93,7 +99,7 @@ Container contenerInfo() {
                 style: TextStyle(fontWeight: FontWeight.bold),
               ),
               Text(
-                'Entorno virtual',
+                n.nombre,
                 style: TextStyle(fontWeight: FontWeight.bold),
               )
             ],
@@ -110,7 +116,7 @@ Container contenerInfo() {
                 style: TextStyle(fontWeight: FontWeight.bold),
               ),
               Text(
-                'Nombre',
+                n.ubicacion,
                 style: TextStyle(fontWeight: FontWeight.bold),
               )
             ],
@@ -170,8 +176,9 @@ Container contenerInfo() {
   );
 }
 
-Container mapaMiniatura() {
-  final centro = LatLng(3.3591886, -76.3035153);
+Container mapaMiniatura(LatLng parametro) {
+  final centro = parametro;
+
   return Container(
     width: 400,
     height: 300,
@@ -179,8 +186,19 @@ Container mapaMiniatura() {
       options: new MapOptions(center: centro, minZoom: 5),
       layers: [
         new TileLayerOptions(
-            urlTemplate: "https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png",
-            subdomains: ['a', 'b', 'c'])
+          urlTemplate: "https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png",
+          subdomains: ['a', 'b', 'c'],
+        ),
+        new MarkerLayerOptions(markers: [
+          new Marker(
+              width: 30,
+              height: 30,
+              point: centro,
+              builder: (context) => new Container(
+                    child: IconButton(
+                        icon: Icon(Icons.location_on), onPressed: null),
+                  ))
+        ])
       ],
     ),
   );
