@@ -1,7 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_map/flutter_map.dart';
 import 'package:latlong/latlong.dart';
-import 'package:path/path.dart';
 import 'package:respaldo/src/pages/hacienda.dart';
 
 class HaciendaView extends StatelessWidget {
@@ -133,7 +132,7 @@ Container contenerInfo(Hacienda n) {
                 style: TextStyle(fontWeight: FontWeight.bold),
               ),
               Text(
-                'Nombre',
+                n.tareasHechas.toString(),
                 style: TextStyle(fontWeight: FontWeight.bold),
               )
             ],
@@ -149,7 +148,7 @@ Container contenerInfo(Hacienda n) {
                 style: TextStyle(fontWeight: FontWeight.bold),
               ),
               Text(
-                'Nombre',
+                n.tareasPorRealizar.toString(),
                 style: TextStyle(fontWeight: FontWeight.bold),
               )
             ],
@@ -165,7 +164,9 @@ Container contenerInfo(Hacienda n) {
                 style: TextStyle(fontWeight: FontWeight.bold),
               ),
               Text(
-                'Nombre',
+                ((n.tareasHechas / n.tareasPorRealizar) * 100)
+                        .toStringAsFixed(1) +
+                    "%",
                 style: TextStyle(fontWeight: FontWeight.bold),
               )
             ],
@@ -196,7 +197,9 @@ Container mapaMiniatura(LatLng parametro) {
               point: centro,
               builder: (context) => new Container(
                     child: IconButton(
-                        icon: Icon(Icons.location_on), onPressed: null),
+                        color: Colors.blue,
+                        icon: Icon(Icons.location_on),
+                        onPressed: null),
                   ))
         ])
       ],

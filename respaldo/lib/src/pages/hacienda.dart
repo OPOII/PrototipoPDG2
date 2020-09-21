@@ -8,6 +8,15 @@ class Hacienda {
   String ubicacion;
   LatLng ubicacionExacta;
   String imagen;
-  Hacienda(this.nombre, this.id, this.listadoSuertes, this.ubicacion,
-      this.ubicacionExacta, this.imagen);
+  int tareasHechas;
+  int tareasPorRealizar;
+  Hacienda(
+      this.nombre,
+      this.id,
+      this.listadoSuertes,
+      this.ubicacion,
+      this.ubicacionExacta,
+      this.imagen,
+      this.tareasHechas,
+      this.tareasPorRealizar);
 }
