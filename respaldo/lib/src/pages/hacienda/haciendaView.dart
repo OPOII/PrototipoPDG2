@@ -1,7 +1,9 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_map/flutter_map.dart';
 import 'package:latlong/latlong.dart';
-import 'package:respaldo/src/pages/hacienda.dart';
+import 'package:respaldo/src/pages/hacienda/hacienda.dart';
+import 'package:respaldo/src/pages/suerte/lobbySuerte.dart';
+import 'package:respaldo/src/pages/suerte/suerte.dart';
 
 class HaciendaView extends StatelessWidget {
   final Hacienda hacienda;
@@ -55,7 +57,7 @@ class HaciendaView extends StatelessWidget {
           ),
           Padding(
             padding: EdgeInsets.only(top: 630, left: 135),
-            child: boton(context),
+            child: boton(context, hacienda.listadoSuertes),
           )
         ],
         overflow: Overflow.visible,
@@ -68,12 +70,15 @@ Widget contener() {
   return Scaffold();
 }
 
-Container boton(BuildContext context) {
+Container boton(BuildContext context, List<Suerte> lista) {
   return Container(
     child: RaisedButton(
       child: Text('Buscar Suerte'),
       onPressed: () {
-        Navigator.pushNamed(context, "");
+        Navigator.push(
+            context,
+            MaterialPageRoute(
+                builder: (context) => ListadoSuerte(listadoSuertes: lista)));
       },
       shape:
           RoundedRectangleBorder(borderRadius: new BorderRadius.circular(20.0)),

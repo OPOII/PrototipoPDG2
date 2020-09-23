@@ -1,5 +1,5 @@
 import 'package:latlong/latlong.dart';
-import 'package:respaldo/src/pages/suerte.dart';
+import 'package:respaldo/src/pages/suerte/suerte.dart';
 
 class Hacienda {
   String nombre;

@@ -50,6 +50,7 @@ flutter:
   assets:
     - assets/imgs/logo.png
     - assets/haciendas/
+    - assets/suerte/
     - data/menu_opts.json
     - assets/imgs/perfil.jpg
   #   - images/a_dot_burr.jpeg

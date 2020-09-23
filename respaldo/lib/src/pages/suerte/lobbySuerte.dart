@@ -1,16 +1,12 @@
-import 'dart:math';
-import 'dart:ui';
-
 import 'package:flutter/material.dart';
-import 'package:latlong/latlong.dart';
-import 'package:respaldo/src/pages/hacienda.dart';
-import 'package:respaldo/src/pages/haciendaView.dart';
+import 'package:respaldo/src/pages/suerte/suerte.dart';
+import 'package:respaldo/src/pages/suerte/suerteView.dart';
 
-class ListadoHacienda extends StatelessWidget {
-  List<Hacienda> miniListado;
+class ListadoSuerte extends StatelessWidget {
+  final List<Suerte> listadoSuertes;
+  ListadoSuerte({Key key, this.listadoSuertes}) : super(key: key);
   @override
   Widget build(BuildContext context) {
-    miniListado = cargarHacienda();
     return Scaffold(
       backgroundColor: Colors.white,
       appBar: _appBar(context),
@@ -19,7 +15,7 @@ class ListadoHacienda extends StatelessWidget {
           Padding(padding: EdgeInsets.only(top: 10), child: contenedor()),
           Padding(
             padding: EdgeInsets.only(top: 80),
-            child: listadoHaciendas(context),
+            child: listadoSuerte(context),
           )
         ],
       ),
@@ -39,14 +35,14 @@ class ListadoHacienda extends StatelessWidget {
       elevation: 0,
       centerTitle: true,
       title: Text(
-        'Buscar Hacienda',
+        'Buscar Suerte',
         style: TextStyle(color: Colors.green[400]),
       ),
       leading: IconButton(
         icon: Icon(Icons.arrow_back),
         color: Colors.green[400],
         onPressed: () {
-          Navigator.pushNamed(context, '/Mapas');
+          Navigator.pushNamed(context, "/HaciendaView");
         },
       ),
     );
@@ -79,11 +75,11 @@ class ListadoHacienda extends StatelessWidget {
     );
   }
 
-  Widget listadoHaciendas(BuildContext context) {
+  Widget listadoSuerte(BuildContext context) {
     return Scaffold(
       backgroundColor: Colors.white,
       body: ListView.builder(
-          itemCount: miniListado.length,
+          itemCount: listadoSuertes.length,
           itemBuilder: (context, index) {
             return Padding(
               padding:
@@ -96,65 +92,18 @@ class ListadoHacienda extends StatelessWidget {
                         context,
                         MaterialPageRoute(
                             builder: (context) =>
-                                HaciendaView(hacienda: miniListado[index])));
+                                SuerteView(suerte: listadoSuertes[index])));
                   },
-                  title: Text(miniListado[index].nombre),
+                  title: Text(listadoSuertes[index].idSuerte),
                   leading: CircleAvatar(
-                    backgroundImage: AssetImage(
-                        'assets/haciendas/${miniListado[index].imagen}'),
+                    backgroundImage:
+                        AssetImage('assets/suerte/caña-azucar.jpg'),
                   ),
-                  subtitle: Text(miniListado[index].ubicacion),
+                  subtitle: Text(listadoSuertes[index].area),
                 ),
               ),
             );
           }),
     );
-  }
-
-  List<Hacienda> cargarHacienda() {
-    List<Hacienda> listado = [
-      new Hacienda(
-          'INGENIO PICHICHI S.A',
-          654654,
-          null,
-          "Cali, Valle del cauca",
-          new LatLng(3.4719911, -76.519074),
-          'ingenio_pichichi.jpeg',
-          90,
-          155),
-      new Hacienda(
-        'Ingenio Manuelita',
-        5468,
-        null,
-        "Cali, Valle del cauca",
-        new LatLng(3.4509319, -76.5393067),
-        'ingenio_manuelita.jpeg',
-        15,
-        64,
-      ),
-      new Hacienda(
-          'Ingenio Mayagüez',
-          5468,
-          null,
-          "Candelaria, Valle del cauca",
-          new LatLng(3.3991057, -76.3291369),
-          'ingenio_mayaguez.jpg',
-          55,
-          77),
-      new Hacienda('Ingenio la Cabaña', 5468, null, "Guachené, Caloto, Cauca",
-          new LatLng(3.1807526, -76.3985681), 'ingenio_la_cabaña.jpg', 8, 72),
-      new Hacienda(
-          'Ingenio Central Tumaco',
-          5468,
-          null,
-          "Riofrío, Palmira, Valle del Cauca",
-          new LatLng(3.5491588, -76.3303793),
-          'ingenio_central_tumaco.jpg',
-          28,
-          35),
-      new Hacienda('Asocaña', 5468, null, "Cali, Valle del cauca",
-          new LatLng(3.4874398, -76.5122882), 'ingenio_asocaña.jpg', 92, 144),
-    ];
-    return listado;
   }
 }
