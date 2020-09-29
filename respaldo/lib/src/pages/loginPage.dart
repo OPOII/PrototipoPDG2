@@ -19,7 +19,7 @@ class LoginPage extends StatelessWidget {
         decoration: InputDecoration(hintText: 'Insert your password'),
         obscureText: true,
       ),
-    );
+    );  
   }
 
   Widget createLoginButton(BuildContext context) {

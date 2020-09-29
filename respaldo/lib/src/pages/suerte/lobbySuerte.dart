@@ -9,10 +9,19 @@ class ListadoSuerte extends StatelessWidget {
   Widget build(BuildContext context) {
     return Scaffold(
       backgroundColor: Colors.white,
-      appBar: _appBar(context),
+      appBar: AppBar(
+        iconTheme: IconThemeData(color: Colors.green[400]),
+        elevation: 0,
+        backgroundColor: Colors.white,
+        centerTitle: true,
+        title: Text(
+          "Buscar Suerte",
+          style: TextStyle(color: Colors.green[400]),
+        ),
+      ),
       body: Stack(
         children: <Widget>[
-          Padding(padding: EdgeInsets.only(top: 10), child: contenedor()),
+          Padding(padding: EdgeInsets.only(top: 0), child: contenedor()),
           Padding(
             padding: EdgeInsets.only(top: 80),
             child: listadoSuerte(context),
