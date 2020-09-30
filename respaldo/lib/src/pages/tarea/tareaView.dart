@@ -31,7 +31,7 @@ class _TareaViewState extends State<TareaView> {
   TextEditingController horasProgramadasController = TextEditingController();
   TextEditingController actividadController = TextEditingController();
   TextEditingController horasEjecutadasController = TextEditingController();
-  TextEditingController pendientekController = TextEditingController();
+  TextEditingController pendienteController = TextEditingController();
   TextEditingController observacionController = TextEditingController();
 
   // Method to Submit Feedback and save it in Google Sheets
@@ -56,7 +56,7 @@ class _TareaViewState extends State<TareaView> {
           horasProgramadasController.text,
           actividadController.text,
           horasEjecutadasController.text,
-          pendientekController.text,
+          pendienteController.text,
           observacionController.text);
 
       FormController formController = FormController();
@@ -84,80 +84,78 @@ class _TareaViewState extends State<TareaView> {
 
   @override
   Widget build(BuildContext context) {
+    double primero = double.tryParse(horasProgramadasController.text);
+    double segundo = double.tryParse(horasEjecutadasController.text);
     return Scaffold(
+      resizeToAvoidBottomInset: false,
       key: _scaffoldKey,
       resizeToAvoidBottomPadding: false,
       appBar: AppBar(
         title: Text(widget.title),
       ),
-      body: Center(
-        child: Column(
-          mainAxisAlignment: MainAxisAlignment.start,
-          children: <Widget>[
-            Form(
-                key: _formKey,
-                child: Padding(
-                  padding: EdgeInsets.all(16),
-                  child: Column(
-                    crossAxisAlignment: CrossAxisAlignment.start,
-                    children: <Widget>[
-                      TextFormField(
-                        controller: hdasteController,
-                        validator: (value) {
-                          if (value.isEmpty) {
-                            return 'Enter Valid Name';
-                          }
-                          return null;
-                        },
-                        decoration: InputDecoration(labelText: 'Name'),
-                      ),
-                      TextFormField(
-                        controller: areaController,
-                        validator: (value) {
-                          if (!value.contains("@")) {
-                            return 'Enter Valid Email';
-                          }
-                          return null;
-                        },
-                        keyboardType: TextInputType.emailAddress,
-                        decoration: InputDecoration(labelText: 'Email'),
-                      ),
-                      TextFormField(
-                        controller: corteController,
-                        validator: (value) {
-                          if (value.trim().length != 10) {
-                            return 'Enter 10 Digit Mobile Number';
-                          }
-                          return null;
-                        },
-                        keyboardType: TextInputType.number,
-                        decoration: InputDecoration(
-                          labelText: 'Mobile Number',
-                        ),
-                      ),
-                      TextFormField(
-                        controller: edadController,
-                        validator: (value) {
-                          if (value.isEmpty) {
-                            return 'Enter Valid Feedback';
-                          }
-                          return null;
-                        },
-                        keyboardType: TextInputType.multiline,
-                        decoration: InputDecoration(labelText: 'Feedback'),
-                      ),
-                    ],
-                  ),
-                )),
-            RaisedButton(
-              color: Colors.blue,
-              textColor: Colors.white,
-              onPressed: _submitForm,
-              child: Text('Submit Feedback'),
-            ),
-          ],
+      body: SingleChildScrollView(
+        child: Center(
+          child: Column(
+            mainAxisAlignment: MainAxisAlignment.start,
+            children: <Widget>[
+              Form(
+                  key: _formKey,
+                  child: Padding(
+                    padding: EdgeInsets.all(16),
+                    child: Column(
+                      crossAxisAlignment: CrossAxisAlignment.start,
+                      children: <Widget>[
+                        CostumTextForField(hdasteController, "HDA-STE"),
+                        CostumTextForField(areaController, "Area"),
+                        CostumTextForField(hdasteController, "Corte"),
+                        CostumTextForField(hdasteController, "Edad"),
+                        CostumTextForField(
+                            hdasteController, "Nombre de la actividad"),
+                        CostumTextForField(hdasteController, "Grupo"),
+                        CostumTextForField(hdasteController, "Tipo cultivo"),
+                        CostumTextForField(
+                            hdasteController, "Nombre de la hacienda"),
+                        CostumTextForField(hdasteController, "Fecha"),
+                        CostumTextForField(hdasteController, "Hacienda"),
+                        CostumTextForField(hdasteController, "Suerte"),
+                        CostumTextForField(
+                            hdasteController, "Horas programadas"),
+                        CostumTextForField(hdasteController, "Actividad"),
+                        CostumTextForField(hdasteController, "Ejecutable"),
+                        CostumTextForField(hdasteController, "Pendiente"),
+                        CostumTextForField(hdasteController, "Observacion"),
+                      ],
+                    ),
+                  )),
+              RaisedButton(
+                color: Colors.blue,
+                textColor: Colors.white,
+                onPressed: _submitForm,
+                child: Text('Submit Feedback'),
+              ),
+            ],
+          ),
         ),
       ),
+    );
+  }
+}
+
+class CostumTextForField extends StatelessWidget {
+  TextEditingController control;
+  String texto;
+  CostumTextForField(this.control, this.texto);
+  Widget build(BuildContext context) {
+    return TextFormField(
+      controller: control,
+      validator: (value) {
+        if (value.isEmpty) {
+          return 'Enter Valid Information';
+        }
+        return null;
+      },
+      keyboardType: TextInputType.multiline,
+      decoration: InputDecoration(labelText: texto),
     );
   }
 }

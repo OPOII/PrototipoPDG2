@@ -12,9 +12,9 @@ class Tarea {
   String fecha; //DateTime
   String hacienda; //int
   String suerte;
-  String horasProgramadas; //double
+  String programa; //double
   String actividad; //int
-  String horasEjecutadas; //double
+  String ejecutable; //double
   String pendiente; //double
   String observacion;
   Tarea(
@@ -30,9 +30,9 @@ class Tarea {
       this.fecha,
       this.hacienda,
       this.suerte,
-      this.horasProgramadas,
+      this.programa,
       this.actividad,
-      this.horasEjecutadas,
+      this.ejecutable,
       this.pendiente,
       this.observacion);
   factory Tarea.fromJson(dynamic json) {
@@ -49,7 +49,7 @@ class Tarea {
         "${json['fecha']}",
         "${json['hacienda']}",
         "${json['suerte']}",
-        "${json['horasProgramadas']}",
+        "${json['programa']}",
         "${json['actividad']}",
         "${json['horasEjecutadas']}",
         "${json['pendiente']}",
@@ -70,9 +70,9 @@ class Tarea {
         'fecha': fecha,
         'hacienda': hacienda,
         'suerte': suerte,
-        'horasProgramadas': horasProgramadas,
+        'programa': programa,
         'actividad': actividad,
-        'horasEjecutadas': horasEjecutadas,
+        'ejecutable': ejecutable,
         'pendiente': pendiente,
         'observacion': observacion,
       };
