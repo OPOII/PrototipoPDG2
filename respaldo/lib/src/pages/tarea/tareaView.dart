@@ -1,7 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:flutter/widgets.dart';
 import 'package:respaldo/controller/form_controller.dart';
-import 'package:respaldo/model/form.dart';
 import 'package:respaldo/src/pages/tarea/tarea.dart';
 
 class TareaView extends StatefulWidget {
@@ -16,7 +15,8 @@ class _TareaViewState extends State<TareaView> {
   final _formKey = GlobalKey<FormState>();
   final _scaffoldKey = GlobalKey<ScaffoldState>();
 
-  TextEditingController hdaSteController = TextEditingController();
+  // ignore: non_constant_identifier_names
+  TextEditingController hda_steController = TextEditingController();
   TextEditingController areaController = TextEditingController();
   TextEditingController corteController = TextEditingController();
   TextEditingController edadController = TextEditingController();
@@ -41,7 +41,7 @@ class _TareaViewState extends State<TareaView> {
     if (_formKey.currentState.validate()) {
       // If the form is valid, proceed.
       Tarea feedbackForm = Tarea(
-          hdaSteController.text,
+          hda_steController.text,
           areaController.text,
           corteController.text,
           edadController.text,
@@ -102,7 +102,7 @@ class _TareaViewState extends State<TareaView> {
                     crossAxisAlignment: CrossAxisAlignment.start,
                     children: <Widget>[
                       TextFormField(
-                        controller: hdaSteController,
+                        controller: hda_steController,
                         validator: (value) {
                           if (value.isEmpty) {
                             return 'Enter Valid Name';
