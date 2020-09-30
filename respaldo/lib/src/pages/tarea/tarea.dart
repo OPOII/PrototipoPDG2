@@ -1,6 +1,6 @@
 class Tarea {
   // ignore: non_constant_identifier_names
-  String hda_ste;
+  String hdaste;
   String area; //doublle
   String corte; //int
   String edad; //double
@@ -18,7 +18,7 @@ class Tarea {
   String pendiente; //double
   String observacion;
   Tarea(
-      this.hda_ste,
+      this.hdaste,
       this.area,
       this.corte,
       this.edad,
@@ -37,7 +37,7 @@ class Tarea {
       this.observacion);
   factory Tarea.fromJson(dynamic json) {
     return Tarea(
-        "${json['hda_ste']}",
+        "${json['hdaste']}",
         "${json['area']}",
         "${json['corte']}",
         "${json['edad']}",
@@ -58,7 +58,7 @@ class Tarea {
 
   // Method to make GET parameters.
   Map toJson() => {
-        'hda_ste': hda_ste,
+        'hdaste': hdaste,
         'area': area,
         'corte': corte,
         'edad': edad,

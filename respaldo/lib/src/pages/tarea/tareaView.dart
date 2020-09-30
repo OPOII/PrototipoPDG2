@@ -16,7 +16,7 @@ class _TareaViewState extends State<TareaView> {
   final _scaffoldKey = GlobalKey<ScaffoldState>();
 
   // ignore: non_constant_identifier_names
-  TextEditingController hda_steController = TextEditingController();
+  TextEditingController hdasteController = TextEditingController();
   TextEditingController areaController = TextEditingController();
   TextEditingController corteController = TextEditingController();
   TextEditingController edadController = TextEditingController();
@@ -41,7 +41,7 @@ class _TareaViewState extends State<TareaView> {
     if (_formKey.currentState.validate()) {
       // If the form is valid, proceed.
       Tarea feedbackForm = Tarea(
-          hda_steController.text,
+          hdasteController.text,
           areaController.text,
           corteController.text,
           edadController.text,
@@ -102,7 +102,7 @@ class _TareaViewState extends State<TareaView> {
                     crossAxisAlignment: CrossAxisAlignment.start,
                     children: <Widget>[
                       TextFormField(
-                        controller: hda_steController,
+                        controller: hdasteController,
                         validator: (value) {
                           if (value.isEmpty) {
                             return 'Enter Valid Name';
