@@ -4,7 +4,6 @@ import 'package:respaldo/src/pages/hacienda/haciendaView.dart';
 import 'package:respaldo/src/pages/hacienda/lobbyHaciendas.dart';
 import 'package:respaldo/src/pages/loginPage.dart';
 import 'package:respaldo/src/pages/mapPage.dart';
-import 'package:respaldo/src/pages/suerte/lobbySuerte.dart';
 
 void main() => runApp(MyApp());
 

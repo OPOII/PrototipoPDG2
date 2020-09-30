@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:latlong/latlong.dart';
 import 'package:flutter_map/flutter_map.dart';
+import 'package:respaldo/src/pages/tarea/tareaView.dart';
 
 //Clase donde voy a dibujar el mapa con los botones de las
 //tareas importantes para realizar y el boton para deslizar la barra a un lado
@@ -115,7 +116,16 @@ Drawer barraDeslizante(context) {
               ),
             )),
         CustomListTile(Icons.assessment, 'Resumen', () => {}),
-        CustomListTile(Icons.insert_drive_file, 'Info Excel', () => {}),
+        CustomListTile(
+          Icons.insert_drive_file,
+          'Info Excel',
+          () => {
+            Navigator.push(
+                context,
+                MaterialPageRoute(
+                    builder: (context) => TareaView(title: 'Prueba')))
+          },
+        ),
         CustomListTile(Icons.search, 'Buscar Hacienda',
             () => {Navigator.pushNamed(context, '/ListadoHaciendas')}),
         CustomListTile(Icons.settings, 'Configuración', () => {}),
