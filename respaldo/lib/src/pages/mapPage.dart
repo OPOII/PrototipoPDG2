@@ -1,36 +1,29 @@
 import 'package:flutter/material.dart';
 import 'package:latlong/latlong.dart';
 import 'package:flutter_map/flutter_map.dart';
+import 'package:respaldo/src/pages/Ingenio.dart';
 import 'package:respaldo/src/pages/tarea/tareaView.dart';
 
-//Clase donde voy a dibujar el mapa con los botones de las
-//tareas importantes para realizar y el boton para deslizar la barra a un lado
+import 'hacienda/hacienda.dart';
+
 class Map extends StatelessWidget {
-  //Constante de la localización de cenicaña
-  final centro = LatLng(3.3591886, -76.3035153);
+  Ingenio pruebas = new Ingenio();
   @override
   Widget build(BuildContext context) {
+    pruebas.cargarSuertes();
+    pruebas.cargarHacienda();
     return new Scaffold(
-      //El cuerpo sera un stack para poder widgets encima de el sin tener que repintarlo
+      appBar: personalizada(context),
       body: Stack(
         children: <Widget>[
-          //Primer widget posicionado y guardado con un container, que es el del mapa
-          Positioned(
-            child: Container(
-              child: mapa(context),
-            ),
-          ),
-          //Pongo encima del widget los botones
-          Positioned(
-            top: 750,
-            child: Container(
-              child: botonesFlotantes(context),
-            ),
-          ),
+          Column(
+            children: <Widget>[
+              SizedBox(height: 400, child: grid(context, pruebas.listado))
+            ],
+          )
         ],
       ),
-      // drawer: NavitagorDrawer(),
-      // floatingActionButton: botonesFlotantes(),
+      drawer: Container(width: 200, child: barraDeslizante(context)),
     );
   }
 
@@ -39,7 +32,6 @@ class Map extends StatelessWidget {
     return Row(
       mainAxisAlignment: MainAxisAlignment.center,
       children: <Widget>[
-        //Botón de agua
         Padding(
           padding: const EdgeInsets.symmetric(horizontal: 10.0),
           child: RaisedButton(
@@ -69,16 +61,6 @@ class Map extends StatelessWidget {
                 borderRadius: new BorderRadius.circular(20.0)),
           ),
         ),
-        //Padding(
-        //  padding: const EdgeInsets.all(1.0),
-        //child: RaisedButton(
-        //child: Text('Productivity'),
-        //onPressed: () {},
-        //shape: RoundedRectangleBorder(
-        //      borderRadius: new BorderRadius.circular(20.0)),
-        //),
-        //),
-        //Botón de ver hectareas
       ],
     );
   }
@@ -90,8 +72,6 @@ Drawer barraDeslizante(context) {
       children: <Widget>[
         DrawerHeader(
             decoration: BoxDecoration(color: Colors.white),
-            //gradient: LinearGradient(
-            //  colors: <Color>[Colors.green, Colors.green[800]])),
             child: Container(
               child: Column(
                 children: <Widget>[
@@ -134,43 +114,6 @@ Drawer barraDeslizante(context) {
   );
 }
 
-Widget mapa(context) {
-  final centro = LatLng(3.3591886, -76.3035153);
-  return Scaffold(
-    body: Stack(
-      children: <Widget>[
-        Container(
-          child: FlutterMap(
-            options: new MapOptions(center: centro, minZoom: 5),
-            layers: [
-              new TileLayerOptions(
-                  urlTemplate:
-                      "https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png",
-                  subdomains: ['a', 'b', 'c'])
-            ],
-          ),
-        ),
-        appBarDeslizable()
-      ],
-    ),
-    // drawer: NavitagorDrawer(),
-    drawer: Container(width: 200, child: barraDeslizante(context)),
-  );
-}
-
-Container appBarDeslizable() {
-  return Container(
-    width: 100,
-    height: 80,
-    child: AppBar(
-      iconTheme: IconThemeData(color: Colors.blue),
-      title: Text(''),
-      backgroundColor: Colors.transparent,
-      elevation: 0.0,
-    ),
-  );
-}
-
 class CustomListTile extends StatelessWidget {
   IconData icon;
   String text;
@@ -208,4 +151,83 @@ class CustomListTile extends StatelessWidget {
       ),
     );
   }
+}
+
+Widget personalizada(BuildContext context) {
+  return AppBar(
+    iconTheme: IconThemeData(color: Colors.green),
+    centerTitle: true,
+    title: Text(
+      'Tus haciendas',
+      style: TextStyle(color: Colors.green[400]),
+    ),
+    backgroundColor: Colors.white,
+    elevation: 0.0,
+  );
+}
+
+Widget grid(BuildContext context, List<Hacienda> listadoHacienda) {
+  return Scaffold(
+    backgroundColor: Color(0xFFFCFAF8),
+    body: ListView(
+      shrinkWrap: true,
+      children: <Widget>[
+        SizedBox(
+          height: 15.0,
+        ),
+        Container(
+          padding: EdgeInsets.only(right: 15.0),
+          width: MediaQuery.of(context).size.width - 30.0,
+          height: MediaQuery.of(context).size.height - 50.0,
+          child: GridView.builder(
+            itemCount: listadoHacienda.length,
+            gridDelegate:
+                SliverGridDelegateWithFixedCrossAxisCount(crossAxisCount: 2),
+            itemBuilder: (BuildContext context, int index) {
+              return Padding(
+                  padding: const EdgeInsets.symmetric(
+                      vertical: 4.0, horizontal: 4.0),
+                  child: InkWell(
+                    onTap: () {
+                      print('Card numero: ' + index.toString());
+                    },
+                    child: Card(
+                      elevation: 10.0,
+                      child: new Column(
+                        children: <Widget>[
+                          Image.asset(
+                              'assets/haciendas/${listadoHacienda[index].imagen}'),
+                          SizedBox(
+                            height: 5.0,
+                          ),
+                          Column(
+                            children: <Widget>[
+                              SingleChildScrollView(
+                                child: Row(
+                                  children: [
+                                    Text('Ingenio:'),
+                                    Text(listadoHacienda[index].nombre)
+                                  ],
+                                ),
+                              ),
+                              SingleChildScrollView(
+                                child: Row(
+                                  children: [
+                                    Text('IDIngenio:'),
+                                    Text(listadoHacienda[index].id.toString())
+                                  ],
+                                ),
+                              )
+                            ],
+                          )
+                        ],
+                      ),
+                    ),
+                  ));
+            },
+          ),
+        )
+      ],
+    ),
+  );
 }

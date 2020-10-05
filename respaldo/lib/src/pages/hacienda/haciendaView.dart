@@ -1,9 +1,9 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_map/flutter_map.dart';
 import 'package:latlong/latlong.dart';
-import 'package:respaldo/src/pages/hacienda/hacienda.dart';
 import 'package:respaldo/src/pages/suerte/lobbySuerte.dart';
 import 'package:respaldo/src/pages/suerte/suerte.dart';
+import 'package:respaldo/src/pages/hacienda/hacienda.dart';
 
 class HaciendaView extends StatelessWidget {
   final Hacienda hacienda;

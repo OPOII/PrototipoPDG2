@@ -2,8 +2,8 @@ import 'package:flutter/cupertino.dart';
 import 'package:latlong/latlong.dart';
 import 'package:respaldo/src/pages/suerte/suerte.dart';
 
-class Hacienda {
-  String nombre;
+class Hacienda2 with ChangeNotifier {
+  String nombre = "Juan";
   int id;
   List<Suerte> listadoSuertes;
   String ubicacion;
@@ -11,13 +11,11 @@ class Hacienda {
   String imagen;
   int tareasHechas;
   int tareasPorRealizar;
-  Hacienda(
-      this.nombre,
-      this.id,
-      this.listadoSuertes,
-      this.ubicacion,
-      this.ubicacionExacta,
-      this.imagen,
-      this.tareasHechas,
-      this.tareasPorRealizar);
+  void notifyListeners() {
+    super.notifyListeners();
+  }
+
+  get n {
+    return nombre;
+  }
 }
