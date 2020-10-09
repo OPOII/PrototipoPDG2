@@ -2,8 +2,8 @@ import 'package:flutter/material.dart';
 import 'package:respaldo/src/pages/balancePage.dart';
 import 'package:respaldo/src/pages/hacienda/haciendaView.dart';
 import 'package:respaldo/src/pages/hacienda/lobbyHaciendas.dart';
+import 'package:respaldo/src/pages/lobby.dart';
 import 'package:respaldo/src/pages/loginPage.dart';
-import 'package:respaldo/src/pages/mapPage.dart';
 
 void main() => runApp(MyApp());
 
@@ -18,7 +18,7 @@ class MyApp extends StatelessWidget {
       initialRoute: '/',
       routes: <String, WidgetBuilder>{
         '/': (BuildContext context) => LoginPage(),
-        '/Mapas': (BuildContext context) => Map(),
+        '/Mapas': (BuildContext context) => Lobby(),
         '/BalanceHidrico': (BuildContext context) => BalanceHidrico(),
         '/HaciendaView': (BuildContext context) => HaciendaView(),
         '/ListadoHaciendas': (BuildContext context) => ListadoHacienda(),

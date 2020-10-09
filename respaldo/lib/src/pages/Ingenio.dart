@@ -143,4 +143,44 @@ class Ingenio {
           new LatLng(3.4874398, -76.5122882), 'ingenio_asocaña.jpg', 92, 144),
     ];
   }
+
+  int totalTareasHechas(List<Hacienda> hacienda) {
+    int tareasHechas = 0;
+    for (int i = 0; i < hacienda.length; i++) {
+      for (int k = 0; k < hacienda[i].listadoSuertes.length; k++) {
+        tareasHechas += hacienda[i].listadoSuertes[k].tareasRealizadas;
+      }
+    }
+    print(tareasHechas);
+    return tareasHechas;
+  }
+
+  int totalTareas(List<Hacienda> hacienda) {
+    int totalTareas = 0;
+    for (int i = 0; i < hacienda.length; i++) {
+      for (int k = 0; k < hacienda[i].listadoSuertes.length; k++) {
+        totalTareas += hacienda[i].listadoSuertes[k].totalTareas;
+      }
+    }
+    print(totalTareas);
+    return totalTareas;
+  }
+
+  String estado(double porcentaje) {
+    String porce = "";
+    if (porcentaje >= 0 && porcentaje < 30.0) {
+      porce = "Estas muy atrasado";
+    } else if (porcentaje >= 30 && porcentaje < 50.0) {
+      porce = "Todavia te hace falta";
+    } else if (porcentaje >= 50.0 && porcentaje < 75.0) {
+      porce = "Vas mas de la mitad";
+    } else if (porcentaje >= 75.0 && porcentaje < 85.0) {
+      porce = "El tiempo esta de tu lado";
+    } else if (porcentaje >= 85 && porcentaje < 99.9) {
+      porce = "Ya casi finalizas las tareas";
+    } else if (porcentaje == 100.0) {
+      porce = "Felicidades, has terminado tus tareas";
+    }
+    return porce;
+  }
 }

@@ -1,4 +1,3 @@
-import 'package:flutter/cupertino.dart';
 import 'package:latlong/latlong.dart';
 import 'package:respaldo/src/pages/suerte/suerte.dart';
 

@@ -1,5 +1,3 @@
-import 'package:latlong/latlong.dart';
-
 class Suerte {
   String idSuerte;
   int tareasRealizadas;
