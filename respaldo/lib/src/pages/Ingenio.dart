@@ -1,5 +1,7 @@
 import 'dart:math';
+import 'dart:ui';
 
+import 'package:flutter/material.dart';
 import 'package:latlong/latlong.dart';
 import 'package:respaldo/src/pages/hacienda/hacienda.dart';
 import 'package:respaldo/src/pages/suerte/suerte.dart';
@@ -182,5 +184,23 @@ class Ingenio {
       porce = "Felicidades, has terminado tus tareas";
     }
     return porce;
+  }
+
+  Color progreso(double porcentaje) {
+    Color devolver = Colors.white;
+    if (porcentaje >= 0 && porcentaje < 30.0) {
+      devolver = Colors.red[900];
+    } else if (porcentaje >= 30 && porcentaje < 50.0) {
+      devolver = Colors.red[100];
+    } else if (porcentaje >= 50.0 && porcentaje < 75.0) {
+      devolver = Colors.green[100];
+    } else if (porcentaje >= 75.0 && porcentaje < 85.0) {
+      devolver = Colors.red[200];
+    } else if (porcentaje >= 85 && porcentaje < 99.9) {
+      devolver = Colors.green[400];
+    } else if (porcentaje == 100.0) {
+      devolver = Colors.green[900];
+    }
+    return devolver;
   }
 }

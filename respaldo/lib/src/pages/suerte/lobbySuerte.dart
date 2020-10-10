@@ -5,6 +5,7 @@ import 'package:respaldo/src/pages/suerte/suerteView.dart';
 class ListadoSuerte extends StatelessWidget {
   final List<Suerte> listadoSuertes;
   ListadoSuerte({Key key, this.listadoSuertes}) : super(key: key);
+  Icon usIcon = Icon(Icons.search);
   @override
   Widget build(BuildContext context) {
     return Scaffold(
@@ -18,41 +19,22 @@ class ListadoSuerte extends StatelessWidget {
           "Buscar Suerte",
           style: TextStyle(color: Colors.green[400]),
         ),
-      ),
-      body: Stack(
-        children: <Widget>[
-          Padding(padding: EdgeInsets.only(top: 0), child: contenedor()),
-          Padding(
-            padding: EdgeInsets.only(top: 80),
-            child: listadoSuerte(context),
+        actions: <Widget>[
+          IconButton(
+            tooltip: 'search',
+            icon: usIcon,
+            onPressed: () {
+              showSearch(
+                  context: context,
+                  delegate: SuerteSearch(listado: listadoSuertes));
+            },
           )
         ],
       ),
-    );
-  }
-
-  Widget _appBar(BuildContext context) {
-    return AppBar(
-      bottom: PreferredSize(
-        preferredSize: Size.fromHeight(0.8),
-        child: Container(
-          color: Colors.white,
-          height: 0.75,
-        ),
-      ),
-      backgroundColor: Colors.white,
-      elevation: 0,
-      centerTitle: true,
-      title: Text(
-        'Buscar Suerte',
-        style: TextStyle(color: Colors.green[400]),
-      ),
-      leading: IconButton(
-        icon: Icon(Icons.arrow_back),
-        color: Colors.green[400],
-        onPressed: () {
-          Navigator.pushNamed(context, "/HaciendaView");
-        },
+      body: Stack(
+        children: <Widget>[
+          listadoSuerte(context),
+        ],
       ),
     );
   }
@@ -94,7 +76,7 @@ class ListadoSuerte extends StatelessWidget {
               padding:
                   const EdgeInsets.symmetric(vertical: 4.0, horizontal: 4.0),
               child: Card(
-                color: Colors.green,
+                elevation: 0.5,
                 child: ListTile(
                   onTap: () {
                     Navigator.push(
@@ -103,16 +85,93 @@ class ListadoSuerte extends StatelessWidget {
                             builder: (context) =>
                                 SuerteView(suerte: listadoSuertes[index])));
                   },
-                  title: Text(listadoSuertes[index].idSuerte),
+                  title: Text("ID suerte: " + listadoSuertes[index].idSuerte),
                   leading: CircleAvatar(
                     backgroundImage:
                         AssetImage('assets/suerte/caña-azucar.jpg'),
                   ),
-                  subtitle: Text(listadoSuertes[index].area),
+                  subtitle:
+                      Text("Area perteneciente: " + listadoSuertes[index].area),
                 ),
               ),
             );
           }),
     );
+  }
+}
+
+class SuerteSearch extends SearchDelegate<Suerte> {
+  List<Suerte> listado;
+  SuerteSearch({this.listado});
+  @override
+  List<Widget> buildActions(BuildContext context) {
+    return [
+      IconButton(
+        icon: Icon(Icons.clear),
+        onPressed: () {
+          query = "";
+        },
+      )
+    ];
+  }
+
+  @override
+  Widget buildLeading(BuildContext context) {
+    return IconButton(
+      onPressed: () {
+        close(context, null);
+      },
+      icon: Icon(Icons.arrow_back),
+    );
+  }
+
+  @override
+  Widget buildResults(BuildContext context) {
+    // TODO: implement buildResults
+    throw UnimplementedError();
+  }
+
+  @override
+  Widget buildSuggestions(BuildContext context) {
+    final myList = query.isEmpty
+        ? listado
+        : listado
+            .where((p) => p.idSuerte.toString().startsWith(query))
+            .toList();
+    return myList.isEmpty
+        ? Text(
+            'No results found...',
+            style: TextStyle(fontSize: 20),
+          )
+        : ListView.builder(
+            itemCount: myList.length,
+            itemBuilder: (context, index) {
+              final Suerte nuevoListado = myList[index];
+              return ListTile(
+                onTap: () {
+                  Navigator.push(
+                      context,
+                      MaterialPageRoute(
+                          builder: (context) =>
+                              SuerteView(suerte: listado[index])));
+                },
+                title: Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    Text(
+                      'ID Suerte: ' + nuevoListado.idSuerte,
+                      style: TextStyle(
+                        fontSize: 20,
+                      ),
+                    ),
+                    Text(
+                      'Area Suerte: ' + nuevoListado.area,
+                      style: TextStyle(fontSize: 20),
+                    ),
+                    Divider()
+                  ],
+                ),
+              );
+            });
   }
 }

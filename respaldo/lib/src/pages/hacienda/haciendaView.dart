@@ -94,7 +94,7 @@ Container contenerInfo(Hacienda n) {
           mainAxisAlignment: MainAxisAlignment.spaceEvenly,
           children: <Widget>[
             CostumInfo('Hacienda', n.nombre),
-            CostumInfo('Ubicación', n.ubicacion),
+            CostumInfo('Identificación', n.id.toString()),
             CostumInfo('Tareas Hechas', n.tareasHechas.toString()),
             CostumInfo('Tareas Totales', n.tareasPorRealizar.toString()),
             CostumInfo(
@@ -118,9 +118,12 @@ class CostumInfo extends StatelessWidget {
     return Row(
       mainAxisAlignment: MainAxisAlignment.spaceAround,
       children: <Widget>[
-        Text(
-          ladoIzq,
-          style: TextStyle(fontSize: 16.0),
+        Padding(
+          padding: const EdgeInsets.only(left: 50.0),
+          child: Text(
+            ladoIzq,
+            style: TextStyle(fontSize: 16.0),
+          ),
         ),
         Text(ladoDer, style: TextStyle(fontSize: 16.0))
       ],

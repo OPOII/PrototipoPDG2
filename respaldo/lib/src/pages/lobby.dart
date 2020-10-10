@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:percent_indicator/linear_percent_indicator.dart';
 import 'package:respaldo/src/pages/Ingenio.dart';
 import 'package:respaldo/src/pages/tarea/tareaView.dart';
 
@@ -19,11 +20,11 @@ class Lobby extends StatelessWidget {
         children: <Widget>[
           Column(
             children: [
+              barraInfo(pruebas),
               Padding(
                 padding: const EdgeInsets.all(8.0),
                 child: haciendaListado(context, listado),
               ),
-              barraInfo(pruebas)
             ],
           )
         ],
@@ -215,38 +216,85 @@ Widget barraInfo(Ingenio ingenio) {
     decoration: BoxDecoration(
       borderRadius: BorderRadius.only(
           topRight: Radius.circular(10.0), bottomRight: Radius.circular(10.0)),
-      color: Colors.green,
     ),
     child: Column(
       children: <Widget>[
         Row(
           mainAxisAlignment: MainAxisAlignment.center,
-          children: [Text('Información de las haciendas')],
-        ),
-        Row(
-          mainAxisAlignment: MainAxisAlignment.spaceBetween,
-          children: [Text('Total Tareas:'), Text(totalTareas.toString())],
-        ),
-        Row(
-          mainAxisAlignment: MainAxisAlignment.spaceBetween,
           children: [
-            Text('Total Tareas Realizadas:'),
-            Text(totalTareasRealizadas.toString())
+            Text(
+              'Información de las haciendas',
+              style: TextStyle(fontSize: 20),
+            )
           ],
         ),
         Row(
-          mainAxisAlignment: MainAxisAlignment.spaceBetween,
-          children: [
-            Text('Porcentaje de progreso:'),
-            Text(porcentaje.toStringAsFixed(1) + '%')
+          mainAxisAlignment: MainAxisAlignment.spaceAround,
+          children: <Widget>[
+            Column(
+              mainAxisAlignment: MainAxisAlignment.center,
+              children: [
+                Text('Total Tareas'),
+                Text(
+                  totalTareas.toString(),
+                  style: TextStyle(fontSize: 20, fontWeight: FontWeight.bold),
+                )
+              ],
+            ),
+            Column(
+              mainAxisAlignment: MainAxisAlignment.center,
+              children: [
+                Text('Tareas Realizadas'),
+                Text(
+                  totalTareasRealizadas.toString(),
+                  style: TextStyle(fontSize: 20, fontWeight: FontWeight.bold),
+                )
+              ],
+            )
           ],
         ),
-        Container(
-          child: Row(
-            mainAxisAlignment: MainAxisAlignment.spaceBetween,
-            children: [Text('Estado:'), Text(ingenio.estado(porcentaje))],
-          ),
-        )
+        Row(
+          children: [
+            Padding(
+              padding: const EdgeInsets.only(left: 55),
+              child: Text(
+                'Porcentaje de progreso',
+                style: TextStyle(fontSize: 18),
+              ),
+            ),
+          ],
+        ),
+        Row(
+          children: [
+            Padding(
+              padding: const EdgeInsets.only(left: 55.0),
+              child: Container(
+                height: 10,
+                width: 100,
+                child: ClipRRect(
+                  borderRadius: BorderRadius.all(Radius.circular(10)),
+                  child: LinearPercentIndicator(
+                    progressColor: ingenio.progreso(porcentaje),
+                    animation: true,
+                    animationDuration: 3000,
+                    lineHeight: 20.0,
+                    percent: porcentaje / 100,
+                    backgroundColor: Colors.grey,
+                  ),
+                ),
+              ),
+            ),
+            Padding(
+              padding: const EdgeInsets.only(left: 8.0),
+              child: Text(
+                porcentaje.toStringAsFixed(1) + '%',
+                style: TextStyle(fontSize: 15, fontWeight: FontWeight.bold),
+              ),
+            )
+          ],
+        ),
+        Text('Estado'),
+        Text(ingenio.estado(porcentaje))
       ],
     ),
   );
@@ -289,7 +337,7 @@ class HaciendaSearch extends SearchDelegate<Hacienda> {
         : listado.where((p) => p.id.toString().startsWith(query)).toList();
     return myList.isEmpty
         ? Text(
-            'No resoults found...',
+            'No results found...',
             style: TextStyle(fontSize: 20),
           )
         : ListView.builder(
