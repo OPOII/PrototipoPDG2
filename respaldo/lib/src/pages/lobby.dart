@@ -346,25 +346,30 @@ class HaciendaSearch extends SearchDelegate<Hacienda> {
             itemBuilder: (context, index) {
               final Hacienda nuevoListado = myList[index];
               return ListTile(
-                  onTap: () {
-                    Navigator.push(
-                        context,
-                        MaterialPageRoute(
-                            builder: (context) =>
-                                HaciendaView(hacienda: listado[index])));
-                  },
-                  title: Column(
-                    crossAxisAlignment: CrossAxisAlignment.start,
-                    children: <Widget>[
-                      Text(
-                        nuevoListado.nombre,
-                        style: TextStyle(fontSize: 20),
-                      ),
-                      Text('ID hacienda: ' + nuevoListado.id.toString(),
-                          style: TextStyle(color: Colors.grey)),
-                      Divider()
-                    ],
-                  ));
+                onTap: () {
+                  Navigator.push(
+                      context,
+                      MaterialPageRoute(
+                          builder: (context) =>
+                              HaciendaView(hacienda: listado[index])));
+                },
+                title: Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: <Widget>[
+                    Text(
+                      nuevoListado.nombre,
+                      style: TextStyle(fontSize: 20),
+                    ),
+                    Text('ID hacienda: ' + nuevoListado.id.toString(),
+                        style: TextStyle(color: Colors.grey)),
+                    Divider()
+                  ],
+                ),
+                leading: CircleAvatar(
+                  backgroundImage:
+                      AssetImage('assets/haciendas/${listado[index].imagen}'),
+                ),
+              );
             });
   }
 }
