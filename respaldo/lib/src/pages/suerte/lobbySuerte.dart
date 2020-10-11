@@ -171,6 +171,9 @@ class SuerteSearch extends SearchDelegate<Suerte> {
                     Divider()
                   ],
                 ),
+                leading: CircleAvatar(
+                  backgroundImage: AssetImage('assets/suerte/caña-azucar.jpg'),
+                ),
               );
             });
   }
