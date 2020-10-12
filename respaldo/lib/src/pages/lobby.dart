@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:percent_indicator/linear_percent_indicator.dart';
 import 'package:respaldo/src/pages/Ingenio.dart';
+import 'package:respaldo/src/pages/tablaDatos/tablaDatos.dart';
 import 'package:respaldo/src/pages/tarea/tareaView.dart';
 
 import 'hacienda/hacienda.dart';
@@ -65,7 +66,13 @@ Drawer menuDeslizante(context) {
                 ],
               ),
             )),
-        CustomListTile(Icons.assessment, 'Resumen', () => {}),
+        CustomListTile(
+            Icons.assessment,
+            'Resumen',
+            () => {
+                  Navigator.push(
+                      context, MaterialPageRoute(builder: (context) => tabla()))
+                }),
         CustomListTile(
           Icons.insert_drive_file,
           'Info Excel',
