@@ -4,6 +4,7 @@ import 'package:respaldo/src/pages/Ingenio.dart';
 import 'package:respaldo/src/pages/tablaDatos/tablaDatos.dart';
 import 'package:respaldo/src/pages/tarea/tareaView.dart';
 
+import 'Calendarrio/CalendarioView.dart';
 import 'hacienda/hacienda.dart';
 import 'hacienda/haciendaView.dart';
 
@@ -81,6 +82,14 @@ Drawer menuDeslizante(context) {
                 context,
                 MaterialPageRoute(
                     builder: (context) => TareaView(title: 'Prueba')))
+          },
+        ),
+        CustomListTile(
+          Icons.calendar_today,
+          'Calendario',
+          () => {
+            Navigator.push(context,
+                MaterialPageRoute(builder: (context) => CalendarioView()))
           },
         ),
         CustomListTile(Icons.settings, 'Configuración', () => {}),
