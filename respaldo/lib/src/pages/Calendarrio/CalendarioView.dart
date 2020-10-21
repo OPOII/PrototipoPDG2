@@ -1,5 +1,4 @@
 import 'dart:convert';
-
 import 'package:flutter/material.dart';
 import 'package:flutter/widgets.dart';
 import 'package:shared_preferences/shared_preferences.dart';
@@ -81,12 +80,12 @@ class _CalendarioViewState extends State<CalendarioView> {
                 formatButtonTextStyle: TextStyle(color: Colors.white),
                 formatButtonShowsNext: false,
               ),
-              startingDayOfWeek: StartingDayOfWeek.sunday,
-              //onDaySelected: (date, events) {
-              //setState(() {
-              //_selectedEvents = events;
-              //});
-              //},
+              startingDayOfWeek: StartingDayOfWeek.monday,
+              onDaySelected: (date, events, event) {
+                setState(() {
+                  _selectedEvents = events;
+                });
+              },
               builders: CalendarBuilders(
                 selectedDayBuilder: (context, date, events) => Container(
                     margin: const EdgeInsets.all(4.0),
@@ -128,6 +127,7 @@ class _CalendarioViewState extends State<CalendarioView> {
     await showDialog(
         context: context,
         builder: (context) => AlertDialog(
+              title: Text("Evento"),
               content: TextField(
                 controller: _eventController,
               ),
