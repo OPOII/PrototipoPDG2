@@ -193,12 +193,13 @@ class tablaDatos extends State<tabla> {
       appBar: AppBar(
         title: Text("Tabla de datos"),
       ),
-      body: Container(
-        child: bodyData(),
-      ),
+      body: SingleChildScrollView(
+          scrollDirection: Axis.vertical, child: bodyData()),
     );
   }
 }
+
+class FlittedBox {}
 
 class Activity {
   String haciendaName;

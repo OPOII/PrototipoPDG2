@@ -1,82 +1,91 @@
+import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
 
-class LoginPage extends StatelessWidget {
-  //Simplifico la forma de crear el padding para encapsular el texto
-  Widget createEmailInput() {
-    return Padding(
-      padding: const EdgeInsets.only(top: 47),
-      child: TextFormField(
-        decoration: InputDecoration(hintText: 'Insert your username'),
-      ),
-    );
-  }
+import 'lobby.dart';
 
-  //Simplifico la forma de crear el padding para encapsular el texto
-  Widget createPasswordInput() {
-    return Padding(
-      padding: const EdgeInsets.only(top: 61),
-      child: TextFormField(
-        decoration: InputDecoration(hintText: 'Insert your password'),
-        obscureText: true,
-      ),
-    );  
-  }
+class LoginPage extends StatefulWidget {
+  @override
+  _LoginPageState createState() => new _LoginPageState();
+}
 
-  Widget createLoginButton(BuildContext context) {
-    return Container(
-        padding: const EdgeInsets.only(top: 50),
-        child: RaisedButton(
-          child: Text('Sing in'),
-          onPressed: () {
-            Navigator.pushNamed(context, '/Mapas');
-          },
-          shape: RoundedRectangleBorder(
-              borderRadius: new BorderRadius.circular(20.0)),
-        ));
-  }
-
-  Widget forgotPassword() {
-    return Container(
-      padding: EdgeInsets.only(top: 32),
-      child: Text(
-        'Forgot your password?',
-        textAlign: TextAlign.center,
-        style: TextStyle(fontWeight: FontWeight.bold),
-      ),
-    );
-  }
-
-  //Widget crearDatos() {
-  // return FutureBuilder(
-  //  future: menuProvider.cargarData(),
-  // initialData: [],
-  //builder: (context, AsyncSnapshot<List<dynamic>> snapshot) {
-  // return build(context);
-  //},
-  //);
-  // }
-
+class _LoginPageState extends State<LoginPage> {
+  String _email, _password;
+  final GlobalKey<FormState> _formKey = GlobalKey<FormState>();
   @override
   Widget build(BuildContext context) {
     return Scaffold(
+      resizeToAvoidBottomInset: false,
       body: Container(
         padding: EdgeInsets.symmetric(horizontal: 16),
         decoration: new BoxDecoration(color: Colors.white),
         //voy a construir un arbol con los widgets mas grandes
-        child: ListView(children: [
-          Padding(
-            padding: const EdgeInsets.only(top: 63),
-            child: Image.asset(
-              'assets/imgs/logo.png',
-              height: 300,
+        child: Column(
+          children: <Widget>[
+            Padding(
+              padding: const EdgeInsets.only(top: 63),
+              child: Image.asset('assets/imgs/logo.png'),
             ),
-          ),
-          createEmailInput(),
-          createPasswordInput(),
-          createLoginButton(context),
-          forgotPassword(),
-        ]),
+            Form(
+              key: _formKey,
+              child: Column(
+                mainAxisAlignment: MainAxisAlignment.spaceAround,
+                children: <Widget>[
+                  Padding(
+                    padding: const EdgeInsets.only(top: 20.0),
+                    child: TextFormField(
+                      validator: (input) {
+                        if (input.isEmpty) {
+                          return 'Please enter an email';
+                        }
+                      },
+                      onSaved: (input) => _email = input,
+                      decoration: InputDecoration(labelText: 'Email'),
+                    ),
+                  ),
+                  Padding(
+                    padding: const EdgeInsets.only(top: 40),
+                    child: TextFormField(
+                      validator: (input) {
+                        if (input.length < 6) {
+                          return 'You have to enter at least 6 characters';
+                        }
+                      },
+                      onSaved: (input) => _password = input,
+                      decoration: InputDecoration(labelText: 'Password'),
+                      obscureText: true,
+                    ),
+                  ),
+                ],
+              ),
+            ),
+            Padding(
+              padding: const EdgeInsets.only(top: 90.0),
+              child: RaisedButton(
+                child: Text('Login'),
+                onPressed: signIn,
+                shape: RoundedRectangleBorder(
+                    borderRadius: new BorderRadius.circular(20.0)),
+              ),
+            )
+          ],
+        ),
       ),
     );
+  }
+
+  Future<void> signIn() async {
+    final formState = _formKey.currentState;
+
+    if (formState.validate()) {
+      try {
+        formState.save();
+        UserCredential user = await FirebaseAuth.instance
+            .signInWithEmailAndPassword(email: _email, password: _password);
+        Navigator.push(
+            context, MaterialPageRoute(builder: (context) => Lobby()));
+      } catch (e) {
+        print(e.message);
+      }
+    }
   }
 }

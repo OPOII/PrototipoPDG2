@@ -1,0 +1,48 @@
+{
+  "project_info": {
+    "project_number": "666041885461",
+    "firebase_url": "https://pdg2-840fc.firebaseio.com",
+    "project_id": "pdg2-840fc",
+    "storage_bucket": "pdg2-840fc.appspot.com"
+  },
+  "client": [
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:666041885461:android:6d94f33782530296b33f1c",
+        "android_client_info": {
+          "package_name": "com.example.respaldo"
+        }
+      },
+      "oauth_client": [
+        {
+          "client_id": "666041885461-q8u9hniudk2gfkeapulc1michj967s0t.apps.googleusercontent.com",
+          "client_type": 1,
+          "android_info": {
+            "package_name": "com.example.respaldo",
+            "certificate_hash": "d2f58d16e6109504e085ac4f9720972b7ea17f0d"
+          }
+        },
+        {
+          "client_id": "666041885461-79nshfa8ia6uk25dkjvlk49b4onk9nj9.apps.googleusercontent.com",
+          "client_type": 3
+        }
+      ],
+      "api_key": [
+        {
+          "current_key": "AIzaSyA9y4zU55aREnzxYHgW3fwq4Y3EcDz0024"
+        }
+      ],
+      "services": {
+        "appinvite_service": {
+          "other_platform_oauth_client": [
+            {
+              "client_id": "666041885461-79nshfa8ia6uk25dkjvlk49b4onk9nj9.apps.googleusercontent.com",
+              "client_type": 3
+            }
+          ]
+        }
+      }
+    }
+  ],
+  "configuration_version": "1"
+}

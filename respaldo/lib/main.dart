@@ -1,3 +1,4 @@
+import 'package:firebase_core/firebase_core.dart';
 import 'package:flutter/material.dart';
 import 'package:respaldo/src/pages/balancePage.dart';
 import 'package:respaldo/src/pages/hacienda/haciendaView.dart';
@@ -5,7 +6,11 @@ import 'package:respaldo/src/pages/hacienda/lobbyHaciendas.dart';
 import 'package:respaldo/src/pages/lobby.dart';
 import 'package:respaldo/src/pages/loginPage.dart';
 
-void main() => runApp(MyApp());
+void main() async {
+  WidgetsFlutterBinding.ensureInitialized();
+  await Firebase.initializeApp();
+  runApp(MyApp());
+}
 
 class MyApp extends StatelessWidget {
   @override
