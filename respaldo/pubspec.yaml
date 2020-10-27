@@ -37,7 +37,7 @@ dependencies:
   cupertino_icons: ^0.1.3
   table_calendar: ^2.2.1
   shared_preferences: ^0.5.4+5
-  provider: ^2.0.1
+  provider: ^4.3.2+2
   flutter_icons: ^1.1.0
   faker: any
   csv: ^4.0.3

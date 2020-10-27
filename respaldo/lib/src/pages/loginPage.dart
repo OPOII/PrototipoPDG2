@@ -84,11 +84,7 @@ class _LoginPageState extends State<LoginPage> {
         UserCredential user = await FirebaseAuth.instance
             .signInWithEmailAndPassword(email: email, password: password);
         Navigator.push(
-            context,
-            MaterialPageRoute(
-                builder: (context) => Lobby(
-                      identificadorBuscar: user.user.email,
-                    )));
+            context, MaterialPageRoute(builder: (context) => Lobby()));
       } catch (e) {
         print(e.message);
       }

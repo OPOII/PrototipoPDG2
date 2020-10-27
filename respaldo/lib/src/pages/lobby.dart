@@ -13,19 +13,11 @@ import 'hacienda/haciendaView.dart';
 class Lobby extends StatelessWidget {
   Ingenio pruebas = new Ingenio();
   List<Hacienda> listado = new List<Hacienda>();
-  var user = FirebaseAuth.instance.currentUser;
-  final db = FirebaseFirestore.instance;
-  final String identificadorBuscar;
-  String revisar = "";
-  DocumentSnapshot prueba;
-  Lobby({Key key, this.identificadorBuscar}) : super(key: key);
   @override
   Widget build(BuildContext context) {
-    readData();
     pruebas.cargarSuertes();
     pruebas.cargarHacienda();
     listado = pruebas.listado;
-    print(revisar + "----");
     return new Scaffold(
       appBar: personalizada(context, listado),
       body: Stack(
@@ -42,25 +34,14 @@ class Lobby extends StatelessWidget {
         ],
       ),
 
-      drawer: Container(width: 200, child: menuDeslizante(context, revisar)),
+      drawer: Container(width: 200, child: menuDeslizante(context)),
       //endDrawer: ,
     );
-  }
-
-  void readData() async {
-    prueba = await db
-        .collection('Ingenio')
-        .doc('1')
-        .collection('users')
-        .doc(user.uid)
-        .get();
-    String r = prueba.data()['charge'].toString();
   }
   //Control shift + R para hacer WRAP e including
 }
 
-Drawer menuDeslizante(context, String clave) {
-  print(clave);
+Drawer menuDeslizante(context) {
   return Drawer(
     child: ListView(
       children: <Widget>[
@@ -115,8 +96,7 @@ Drawer menuDeslizante(context, String clave) {
           },
         ),
         CustomListTile(Icons.settings, 'Configuración', () => {}),
-        if (clave == 'admin')
-          (CustomListTile(Icons.verified_user, 'Admin Area', () => {}))
+        CustomListTile(Icons.power_settings_new, 'Salir', () => {}),
       ],
     ),
   );
