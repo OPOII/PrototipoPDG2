@@ -1,3 +1,5 @@
+import 'package:cloud_firestore/cloud_firestore.dart';
+import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
 import 'package:percent_indicator/linear_percent_indicator.dart';
 import 'package:respaldo/src/pages/Ingenio.dart';
@@ -11,11 +13,19 @@ import 'hacienda/haciendaView.dart';
 class Lobby extends StatelessWidget {
   Ingenio pruebas = new Ingenio();
   List<Hacienda> listado = new List<Hacienda>();
+  var user = FirebaseAuth.instance.currentUser;
+  final db = FirebaseFirestore.instance;
+  final String identificadorBuscar;
+  String revisar = "";
+  DocumentSnapshot prueba;
+  Lobby({Key key, this.identificadorBuscar}) : super(key: key);
   @override
   Widget build(BuildContext context) {
+    readData();
     pruebas.cargarSuertes();
     pruebas.cargarHacienda();
     listado = pruebas.listado;
+    print(revisar + "----");
     return new Scaffold(
       appBar: personalizada(context, listado),
       body: Stack(
@@ -31,14 +41,26 @@ class Lobby extends StatelessWidget {
           )
         ],
       ),
-      drawer: Container(width: 200, child: menuDeslizante(context)),
+
+      drawer: Container(width: 200, child: menuDeslizante(context, revisar)),
       //endDrawer: ,
     );
+  }
+
+  void readData() async {
+    prueba = await db
+        .collection('Ingenio')
+        .doc('1')
+        .collection('users')
+        .doc(user.uid)
+        .get();
+    String r = prueba.data()['charge'].toString();
   }
   //Control shift + R para hacer WRAP e including
 }
 
-Drawer menuDeslizante(context) {
+Drawer menuDeslizante(context, String clave) {
+  print(clave);
   return Drawer(
     child: ListView(
       children: <Widget>[
@@ -46,7 +68,7 @@ Drawer menuDeslizante(context) {
             decoration: BoxDecoration(color: Colors.white),
             child: Container(
               child: Column(
-                children: <Widget>[
+                children: [
                   Material(
                     borderRadius: BorderRadius.all(Radius.circular(50)),
                     child: Padding(
@@ -93,6 +115,8 @@ Drawer menuDeslizante(context) {
           },
         ),
         CustomListTile(Icons.settings, 'Configuración', () => {}),
+        if (clave == 'admin')
+          (CustomListTile(Icons.verified_user, 'Admin Area', () => {}))
       ],
     ),
   );

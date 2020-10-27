@@ -3,18 +3,14 @@ class User {
   String telephone;
   String email;
   String cargo;
-  bool rolID;
-  int userID;
   DateTime birthday;
-  int idHaciendaInCharge;
+  List<String> idHaciendaInCharge;
   String urlFoto;
   User(
       {this.name,
       this.telephone,
       this.email,
       this.cargo,
-      this.rolID,
-      this.userID,
       this.birthday,
       this.idHaciendaInCharge});
 }

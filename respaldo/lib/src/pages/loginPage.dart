@@ -1,7 +1,8 @@
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
-
 import 'lobby.dart';
+import 'package:firebase_core/firebase_core.dart';
+import 'package:cloud_firestore/cloud_firestore.dart';
 
 class LoginPage extends StatefulWidget {
   @override
@@ -9,7 +10,7 @@ class LoginPage extends StatefulWidget {
 }
 
 class _LoginPageState extends State<LoginPage> {
-  String _email, _password;
+  String email, password;
   final GlobalKey<FormState> _formKey = GlobalKey<FormState>();
   @override
   Widget build(BuildContext context) {
@@ -38,7 +39,7 @@ class _LoginPageState extends State<LoginPage> {
                           return 'Please enter an email';
                         }
                       },
-                      onSaved: (input) => _email = input,
+                      onSaved: (input) => email = input,
                       decoration: InputDecoration(labelText: 'Email'),
                     ),
                   ),
@@ -50,7 +51,7 @@ class _LoginPageState extends State<LoginPage> {
                           return 'You have to enter at least 6 characters';
                         }
                       },
-                      onSaved: (input) => _password = input,
+                      onSaved: (input) => password = input,
                       decoration: InputDecoration(labelText: 'Password'),
                       obscureText: true,
                     ),
@@ -77,12 +78,17 @@ class _LoginPageState extends State<LoginPage> {
     final formState = _formKey.currentState;
 
     if (formState.validate()) {
+      print(email);
       try {
         formState.save();
         UserCredential user = await FirebaseAuth.instance
-            .signInWithEmailAndPassword(email: _email, password: _password);
+            .signInWithEmailAndPassword(email: email, password: password);
         Navigator.push(
-            context, MaterialPageRoute(builder: (context) => Lobby()));
+            context,
+            MaterialPageRoute(
+                builder: (context) => Lobby(
+                      identificadorBuscar: user.user.email,
+                    )));
       } catch (e) {
         print(e.message);
       }
