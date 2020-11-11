@@ -1,28 +1,47 @@
 import 'package:firebase_auth/firebase_auth.dart';
+import 'package:respaldo/src/pages/user/usuario.dart';
 
 class AuthenticationService {
-  final FirebaseAuth _firebaseAuth;
-  AuthenticationService(this._firebaseAuth);
-  Stream<User> get authStateChanges => _firebaseAuth.authStateChanges();
+  final FirebaseAuth _auth = FirebaseAuth.instance;
 
-  Future<String> signIn({String email, String password}) async {
+  Usuario _userFromFirebaseUser(User fbUsuario) {
+    return fbUsuario != null ? Usuario(id: fbUsuario.uid) : null;
+  }
+
+  Future signEmailPassword(String email, String password) async {
     try {
-      await _firebaseAuth.signInWithEmailAndPassword(
+      UserCredential result = await _auth.signInWithEmailAndPassword(
           email: email, password: password);
-      return "Sign in";
-    } on FirebaseAuthException catch (e) {
-      return e.message;
+      User usuario = result.user;
+      return _userFromFirebaseUser(usuario);
+    } catch (e) {
+      print(e.toString());
+      return null;
     }
   }
 
+  User get currentUser {
+    return _auth.currentUser;
+  }
 
-  Future<String> signUp({String email, String password}) async {
-    try {
-      await _firebaseAuth.createUserWithEmailAndPassword(
-          email: email, password: password);
-      return "Sign up";
-    } on FirebaseAuthException catch (e) {
-      return e.message;
+  Stream<Usuario> get user {
+    return _auth.authStateChanges().map(_userFromFirebaseUser);
+    // .map((User user) => _userFromFirebaseUser(user));
+  }
+
+  Stream<User> get usuario {
+    return _auth.authStateChanges();
+  }
+
+  String get uid {
+    if (_auth.currentUser != null) {
+      return _auth.currentUser.uid.toString();
+    } else {
+      return "vacio";
     }
+  }
+
+  void signOut() async {
+    await _auth.signOut();
   }
 }

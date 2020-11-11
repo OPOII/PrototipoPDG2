@@ -11,13 +11,13 @@ class ListadoSuerte extends StatelessWidget {
     return Scaffold(
       backgroundColor: Colors.white,
       appBar: AppBar(
-        iconTheme: IconThemeData(color: Colors.green[400]),
+        iconTheme: IconThemeData(color: Colors.white),
         elevation: 0,
-        backgroundColor: Colors.white,
+        backgroundColor: Colors.green,
         centerTitle: true,
         title: Text(
           "Buscar Suerte",
-          style: TextStyle(color: Colors.green[400]),
+          style: TextStyle(color: Colors.white),
         ),
         actions: <Widget>[
           IconButton(

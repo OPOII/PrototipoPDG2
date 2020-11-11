@@ -2,46 +2,87 @@ import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
 import 'package:percent_indicator/linear_percent_indicator.dart';
+import 'package:provider/provider.dart';
+import 'package:respaldo/authentication_service.dart';
 import 'package:respaldo/src/pages/Ingenio.dart';
 import 'package:respaldo/src/pages/tablaDatos/tablaDatos.dart';
 import 'package:respaldo/src/pages/tarea/tareaView.dart';
+import 'package:respaldo/src/pages/user/usuario.dart';
 
 import 'Calendarrio/CalendarioView.dart';
+import 'admin area/adminArea.dart';
 import 'hacienda/hacienda.dart';
 import 'hacienda/haciendaView.dart';
 
-class Lobby extends StatelessWidget {
+class Lobby extends StatefulWidget {
+  @override
+  _LobbyState createState() => _LobbyState();
+}
+
+class _LobbyState extends State<Lobby> with SingleTickerProviderStateMixin {
+  @override
+  void initState() {
+    super.initState();
+  }
+
   Ingenio pruebas = new Ingenio();
+  AuthenticationService _authenticationService = AuthenticationService();
   List<Hacienda> listado = new List<Hacienda>();
   @override
   Widget build(BuildContext context) {
-    pruebas.cargarSuertes();
-    pruebas.cargarHacienda();
-    listado = pruebas.listado;
-    return new Scaffold(
-      appBar: personalizada(context, listado),
-      body: Stack(
-        children: <Widget>[
-          Column(
-            children: [
-              barraInfo(pruebas),
-              Padding(
-                padding: const EdgeInsets.all(8.0),
-                child: haciendaListado(context, listado),
-              ),
-            ],
-          )
-        ],
-      ),
-
-      drawer: Container(width: 200, child: menuDeslizante(context)),
-      //endDrawer: ,
-    );
+    if (_authenticationService.currentUser == null) {
+      Navigator.of(context).pop();
+    } else {
+      pruebas.cargarSuertes();
+      pruebas.cargarHacienda();
+      listado = pruebas.listado;
+      return StreamBuilder(
+          stream: FirebaseFirestore.instance
+              .collection('Ingenio')
+              .doc('1')
+              .collection('users')
+              .doc(_authenticationService.uid)
+              .snapshots(),
+          builder:
+              (BuildContext context, AsyncSnapshot<DocumentSnapshot> snapshot) {
+            if (snapshot.hasError) {
+              return Text('Error: ${snapshot.error}');
+            }
+            switch (snapshot.connectionState) {
+              case ConnectionState.waiting:
+                return Text('Loading');
+              default:
+                return Scaffold(
+                  backgroundColor: Colors.white,
+                  appBar: personalizada(context, listado),
+                  body: Stack(
+                    children: <Widget>[
+                      Column(
+                        children: [
+                          barraInfo(pruebas),
+                          Padding(
+                            padding: const EdgeInsets.all(8.0),
+                            child: haciendaListado(context, listado),
+                          ),
+                        ],
+                      )
+                    ],
+                  ),
+                  drawer: Container(
+                      width: 200,
+                      child: menuDeslizante(context, snapshot.data['charge'],
+                          snapshot.data['name'], snapshot.data['urlfoto'])),
+                );
+            }
+          });
+    }
   }
-  //Control shift + R para hacer WRAP e including
 }
 
-Drawer menuDeslizante(context) {
+Drawer menuDeslizante(context, data, data1, data2) {
+  print(data);
+  final usuario = Provider.of<Usuario>(context);
+  final AuthenticationService _auth = AuthenticationService();
   return Drawer(
     child: ListView(
       children: <Widget>[
@@ -49,13 +90,13 @@ Drawer menuDeslizante(context) {
             decoration: BoxDecoration(color: Colors.white),
             child: Container(
               child: Column(
-                children: [
+                children: <Widget>[
                   Material(
                     borderRadius: BorderRadius.all(Radius.circular(50)),
                     child: Padding(
                         padding: EdgeInsets.all(8.0),
-                        child: Image.asset(
-                          'assets/imgs/perfil.jpg',
+                        child: Image.network(
+                          data2.toString(),
                           width: 80,
                           height: 80,
                         )),
@@ -63,7 +104,7 @@ Drawer menuDeslizante(context) {
                   Padding(
                     padding: EdgeInsets.all(8.0),
                     child: Text(
-                      'Nombre de la persona',
+                      data1.toString(),
                       style: TextStyle(color: Colors.black, fontSize: 15.0),
                     ),
                   )
@@ -96,7 +137,18 @@ Drawer menuDeslizante(context) {
           },
         ),
         CustomListTile(Icons.settings, 'Configuración', () => {}),
-        CustomListTile(Icons.power_settings_new, 'Salir', () => {}),
+        if (data != null && data == 'admin')
+          CustomListTile(
+              Icons.assignment_ind,
+              'Area de admin',
+              () => {
+                    Navigator.push(context,
+                        MaterialPageRoute(builder: (context) => AdminArea()))
+                  }),
+        CustomListTile(Icons.power_settings_new, 'Salir', () async {
+          await FirebaseAuth.instance.signOut();
+          Navigator.of(context).pop();
+        }),
       ],
     ),
   );
@@ -144,11 +196,11 @@ class CustomListTile extends StatelessWidget {
 Widget personalizada(BuildContext context, List<Hacienda> haciendas) {
   Icon usIcon = Icon(Icons.search);
   return AppBar(
-    iconTheme: IconThemeData(color: Colors.green),
+    iconTheme: IconThemeData(color: Colors.white),
     centerTitle: true,
     title: Text(
       'Tus haciendas',
-      style: TextStyle(color: Colors.green[400]),
+      style: TextStyle(color: Colors.white),
     ),
     actions: <Widget>[
       IconButton(
@@ -159,7 +211,7 @@ Widget personalizada(BuildContext context, List<Hacienda> haciendas) {
                 context: context, delegate: HaciendaSearch(listado: haciendas));
           })
     ],
-    backgroundColor: Colors.white,
+    backgroundColor: Colors.green,
     elevation: 0.0,
   );
 }

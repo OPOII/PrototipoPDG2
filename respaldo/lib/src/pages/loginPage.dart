@@ -1,5 +1,6 @@
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
+import '../../authentication_service.dart';
 import 'lobby.dart';
 import 'package:firebase_core/firebase_core.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
@@ -12,6 +13,7 @@ class LoginPage extends StatefulWidget {
 class _LoginPageState extends State<LoginPage> {
   String email, password;
   final GlobalKey<FormState> _formKey = GlobalKey<FormState>();
+  final AuthenticationService _authenticationService = AuthenticationService();
   @override
   Widget build(BuildContext context) {
     return Scaffold(
@@ -63,7 +65,41 @@ class _LoginPageState extends State<LoginPage> {
               padding: const EdgeInsets.only(top: 90.0),
               child: RaisedButton(
                 child: Text('Login'),
-                onPressed: signIn,
+                onPressed: () async {
+                  final formState = _formKey.currentState;
+                  if (formState.validate()) {
+                    formState.save();
+                    dynamic result = await _authenticationService
+                        .signEmailPassword(email, password);
+                    if (result == null) {
+                      showDialog(
+                          context: context,
+                          builder: (context) => AlertDialog(
+                                title: Text('Usuario no valido'),
+                                content: Text(
+                                    'El usuario con el que esta intentando acceder no se encuentra en nuestra base de datos, por favor ingrese con un usuario valido'),
+                                actions: <Widget>[
+                                  FlatButton(
+                                    child: Text('OK'),
+                                    onPressed: () {
+                                      Navigator.of(context).pop();
+                                    },
+                                  ),
+                                  FlatButton(
+                                    child: Text('Cancel'),
+                                    onPressed: () {
+                                      Navigator.of(context).pop();
+                                    },
+                                  )
+                                ],
+                              ));
+                    } else if (_authenticationService.currentUser != null) {
+                      Navigator.of(context).push(MaterialPageRoute(
+                          settings: RouteSettings(name: '/Lobby'),
+                          builder: (context) => Lobby()));
+                    }
+                  }
+                },
                 shape: RoundedRectangleBorder(
                     borderRadius: new BorderRadius.circular(20.0)),
               ),
@@ -74,20 +110,19 @@ class _LoginPageState extends State<LoginPage> {
     );
   }
 
-  Future<void> signIn() async {
-    final formState = _formKey.currentState;
+  //Future<void> signIn() async {
+  //final formState = _formKey.currentState;
 
-    if (formState.validate()) {
-      print(email);
-      try {
-        formState.save();
-        UserCredential user = await FirebaseAuth.instance
-            .signInWithEmailAndPassword(email: email, password: password);
-        Navigator.push(
-            context, MaterialPageRoute(builder: (context) => Lobby()));
-      } catch (e) {
-        print(e.message);
-      }
-    }
-  }
+  // if (formState.validate()) {
+  //  try {
+  //   formState.save();
+  //  UserCredential user = await FirebaseAuth.instance
+  //     .signInWithEmailAndPassword(email: email, password: password);
+  // Navigator.push(
+  //      context, MaterialPageRoute(builder: (context) => Lobby()));
+  //} catch (e) {
+  //   print(e.message);
+  //}
+  //}
+  //}
 }
