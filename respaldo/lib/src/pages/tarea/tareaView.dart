@@ -33,7 +33,7 @@ class _TareaViewState extends State<TareaView> {
   TextEditingController horasEjecutadasController = TextEditingController();
   TextEditingController pendienteController = TextEditingController();
   TextEditingController observacionController = TextEditingController();
-
+  TextEditingController delegadoController = TextEditingController();
   // Method to Submit Feedback and save it in Google Sheets
   void _submitForm() {
     // Validate returns true if the form is valid, or false
@@ -91,7 +91,13 @@ class _TareaViewState extends State<TareaView> {
       key: _scaffoldKey,
       resizeToAvoidBottomPadding: false,
       appBar: AppBar(
-        title: Text(widget.title),
+        iconTheme: IconThemeData(color: Colors.white),
+        backgroundColor: Colors.green,
+        centerTitle: true,
+        title: Text(
+          widget.title,
+          style: TextStyle(color: Colors.white, fontWeight: FontWeight.bold),
+        ),
       ),
       body: SingleChildScrollView(
         child: Center(
@@ -128,6 +134,8 @@ class _TareaViewState extends State<TareaView> {
                         CostumTextForField(pendienteController, "Pendiente"),
                         CostumTextForField(
                             observacionController, "Observacion"),
+                        CostumTextForField(
+                            delegadoController, "Encargado de la tarea"),
                       ],
                     ),
                   )),

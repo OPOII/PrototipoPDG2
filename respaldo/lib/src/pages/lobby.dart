@@ -119,16 +119,6 @@ Drawer menuDeslizante(context, data, data1, data2) {
                       context, MaterialPageRoute(builder: (context) => tabla()))
                 }),
         CustomListTile(
-          Icons.insert_drive_file,
-          'Info Excel',
-          () => {
-            Navigator.push(
-                context,
-                MaterialPageRoute(
-                    builder: (context) => TareaView(title: 'Prueba')))
-          },
-        ),
-        CustomListTile(
           Icons.calendar_today,
           'Calendario',
           () => {

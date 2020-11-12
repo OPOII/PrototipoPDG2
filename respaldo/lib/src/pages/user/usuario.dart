@@ -7,5 +7,6 @@ class Usuario {
   List<String> idHaciendaInCharge;
   String urlFoto;
   String id;
+  String cedula;
   Usuario({this.id});
 }

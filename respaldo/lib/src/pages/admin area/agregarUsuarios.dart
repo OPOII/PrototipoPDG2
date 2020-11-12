@@ -1,3 +1,5 @@
+import 'dart:math';
+
 import 'package:datetime_picker_formfield/datetime_picker_formfield.dart';
 import 'package:flutter/material.dart';
 import 'package:intl/intl.dart';
@@ -17,11 +19,33 @@ class _UsersState extends State<AgregarUsuarios> {
   final emailController = TextEditingController();
   final cargoController = TextEditingController();
   final birthdayController = TextEditingController();
-  final haciendaInChargeController = TextEditingController();
-  final urlfotocontroller = TextEditingController();
+  final cedulaController = TextEditingController();
   final format = DateFormat("dd-MM-yyyy");
   List _charges = ["", "admin", "user"];
   String _currentCharge;
+  List _haciendas;
+  final _datos = [
+    {
+      "display": "Hacienda #468865",
+      "value": "Hacienda #468865",
+    },
+    {
+      "display": "Hacienda #6498633",
+      "value": "Hacienda #6498633",
+    },
+    {
+      "display": "Hacienda #268979778",
+      "value": "Hacienda #268979778",
+    },
+    {
+      "display": "Hacienda #798626936",
+      "value": "Hacienda #798626936",
+    },
+    {
+      "display": "Hacienda #51654687986",
+      "value": "Hacienda #51654687986",
+    },
+  ];
   List<DropdownMenuItem<String>> _dropDownMenuItems;
   @override
   void initState() {
@@ -67,6 +91,20 @@ class _UsersState extends State<AgregarUsuarios> {
                   validator: (value) {
                     if (value.isEmpty) {
                       return "Este campo no debe de estar vacio";
+                    }
+                  },
+                ),
+                TextFormField(
+                  controller: cedulaController,
+                  decoration: InputDecoration(labelText: 'Cedula'),
+                  onSaved: (value) {
+                    name = value;
+                  },
+                  validator: (value) {
+                    if (value.isEmpty) {
+                      return "Este campo no debe de estar vacio";
+                    } else if (int.tryParse(value.toString()) == null) {
+                      return "Este campo solo admite numeros";
                     }
                   },
                 ),
@@ -129,12 +167,30 @@ class _UsersState extends State<AgregarUsuarios> {
                     }
                   },
                 ),
-                MultiSelectFormField(),
+
+                /*MultiSelectFormField(
+                  autovalidate: false,
+                  title: Text(''),
+                  validator: (value) {
+                    if (value == null || value.legth == 0) {
+                      return 'Please select one or more options';
+                    }
+                  },
+                  dataSource: _datos,
+                  textField: 'display',
+                  valueField: 'value',
+                  okButtonLabel: 'OK',
+                  cancelButtonLabel: 'CANCEL',
+                  hintWidget: Text('Please choose one or more'),
+                ),
+                */
                 RaisedButton(
                   child: Text('Add new User'),
                   onPressed: () {
-                    formKey.currentState.validate();
-                    print(telephoneController.text);
+                    if (formKey.currentState.validate()) {
+                      print(
+                          contra() + "------------>" + birthdayController.text);
+                    }
                   },
                 ),
               ],
@@ -147,5 +203,14 @@ class _UsersState extends State<AgregarUsuarios> {
     setState(() {
       _currentCharge = charge;
     });
+  }
+
+  String contra() {
+    const _chars =
+        'AaBbCcDdEeFfGgHhIiJjKkLlMmNnOoPpQqRrSsTtUuVvWwXxYyZz1234567890';
+    Random _rnd = Random();
+    int largoContra = 15;
+    return String.fromCharCodes(Iterable.generate(
+        largoContra, (_) => _chars.codeUnitAt(_rnd.nextInt(_chars.length))));
   }
 }
