@@ -6,9 +6,7 @@ import 'package:provider/provider.dart';
 import 'package:respaldo/authentication_service.dart';
 import 'package:respaldo/src/pages/Ingenio.dart';
 import 'package:respaldo/src/pages/tablaDatos/tablaDatos.dart';
-import 'package:respaldo/src/pages/tarea/tareaView.dart';
 import 'package:respaldo/src/pages/user/usuario.dart';
-
 import 'Calendarrio/CalendarioView.dart';
 import 'admin area/adminArea.dart';
 import 'hacienda/hacienda.dart';
@@ -127,7 +125,7 @@ Drawer menuDeslizante(context, data, data1, data2) {
           },
         ),
         CustomListTile(Icons.settings, 'Configuración', () => {}),
-        if (data != null && data == 'admin')
+        if (data != null && data == 'admin') ...[
           CustomListTile(
               Icons.assignment_ind,
               'Area de admin',
@@ -135,6 +133,9 @@ Drawer menuDeslizante(context, data, data1, data2) {
                     Navigator.push(context,
                         MaterialPageRoute(builder: (context) => AdminArea()))
                   }),
+        ] else if (data != null && data == 'user') ...[
+          CustomListTile(Icons.assignment_late, 'Tus tareas', () => {})
+        ],
         CustomListTile(Icons.power_settings_new, 'Salir', () async {
           await FirebaseAuth.instance.signOut();
           Navigator.of(context).pop();

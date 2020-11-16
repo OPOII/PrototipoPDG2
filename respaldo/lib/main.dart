@@ -7,6 +7,7 @@ import 'package:respaldo/src/pages/hacienda/lobbyHaciendas.dart';
 import 'package:respaldo/src/pages/lobby.dart';
 import 'package:respaldo/src/pages/loginPage.dart';
 import 'package:respaldo/src/pages/user/usuario.dart';
+import 'package:respaldo/src/providers/push_notifications_provider.dart';
 
 import 'authentication_service.dart';
 
@@ -16,7 +17,19 @@ void main() async {
   runApp(MyApp());
 }
 
-class MyApp extends StatelessWidget {
+class MyApp extends StatefulWidget {
+  @override
+  _MyAppState createState() => _MyAppState();
+}
+
+class _MyAppState extends State<MyApp> {
+  @override
+  void initState() {
+    super.initState();
+    final provider = new PushNotificationProvider();
+    provider.initNotifications();
+  }
+
   @override
   Widget build(BuildContext context) {
     return StreamProvider<Usuario>.value(

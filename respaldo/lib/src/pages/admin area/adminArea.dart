@@ -1,7 +1,7 @@
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
-import 'package:respaldo/src/pages/tarea/tareaView.dart';
 
+import 'agregarTareas.dart';
 import 'agregarUsuarios.dart';
 
 class AdminArea extends StatefulWidget {
