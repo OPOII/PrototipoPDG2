@@ -53,18 +53,20 @@ class _LobbyState extends State<Lobby> with SingleTickerProviderStateMixin {
                 return Scaffold(
                   backgroundColor: Colors.white,
                   appBar: personalizada(context, listado),
-                  body: Stack(
-                    children: <Widget>[
-                      Column(
-                        children: [
-                          barraInfo(pruebas),
-                          Padding(
-                            padding: const EdgeInsets.all(8.0),
-                            child: haciendaListado(context, listado),
-                          ),
-                        ],
-                      )
-                    ],
+                  body: SingleChildScrollView(
+                    child: Stack(
+                      children: <Widget>[
+                        Column(
+                          children: [
+                            barraInfo(pruebas),
+                            Padding(
+                              padding: const EdgeInsets.all(8.0),
+                              child: haciendaListado(context, listado),
+                            ),
+                          ],
+                        )
+                      ],
+                    ),
                   ),
                   drawer: Container(
                       width: 200,

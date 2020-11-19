@@ -18,93 +18,95 @@ class _LoginPageState extends State<LoginPage> {
   Widget build(BuildContext context) {
     return Scaffold(
       resizeToAvoidBottomInset: false,
-      body: Container(
-        padding: EdgeInsets.symmetric(horizontal: 16),
-        decoration: new BoxDecoration(color: Colors.white),
-        //voy a construir un arbol con los widgets mas grandes
-        child: Column(
-          children: <Widget>[
-            Padding(
-              padding: const EdgeInsets.only(top: 63),
-              child: Image.asset('assets/imgs/logo.png'),
-            ),
-            Form(
-              key: _formKey,
-              child: Column(
-                mainAxisAlignment: MainAxisAlignment.spaceAround,
-                children: <Widget>[
-                  Padding(
-                    padding: const EdgeInsets.only(top: 20.0),
-                    child: TextFormField(
-                      validator: (input) {
-                        if (input.isEmpty) {
-                          return 'Please enter an email';
-                        }
-                      },
-                      onSaved: (input) => email = input,
-                      decoration: InputDecoration(labelText: 'Email'),
-                    ),
-                  ),
-                  Padding(
-                    padding: const EdgeInsets.only(top: 40),
-                    child: TextFormField(
-                      validator: (input) {
-                        if (input.length < 6) {
-                          return 'You have to enter at least 6 characters';
-                        }
-                      },
-                      onSaved: (input) => password = input,
-                      decoration: InputDecoration(labelText: 'Password'),
-                      obscureText: true,
-                    ),
-                  ),
-                ],
+      body: SingleChildScrollView(
+        child: Container(
+          padding: EdgeInsets.symmetric(horizontal: 16),
+          decoration: new BoxDecoration(color: Colors.white),
+          //voy a construir un arbol con los widgets mas grandes
+          child: Column(
+            children: <Widget>[
+              Padding(
+                padding: const EdgeInsets.only(top: 63),
+                child: Image.asset('assets/imgs/logo.png'),
               ),
-            ),
-            Padding(
-              padding: const EdgeInsets.only(top: 90.0),
-              child: RaisedButton(
-                child: Text('Login'),
-                onPressed: () async {
-                  final formState = _formKey.currentState;
-                  if (formState.validate()) {
-                    formState.save();
-                    dynamic result = await _authenticationService
-                        .signEmailPassword(email, password);
-                    if (result == null) {
-                      showDialog(
-                          context: context,
-                          builder: (context) => AlertDialog(
-                                title: Text('Usuario no valido'),
-                                content: Text(
-                                    'El usuario con el que esta intentando acceder no se encuentra en nuestra base de datos, por favor ingrese con un usuario valido'),
-                                actions: <Widget>[
-                                  FlatButton(
-                                    child: Text('OK'),
-                                    onPressed: () {
-                                      Navigator.of(context).pop();
-                                    },
-                                  ),
-                                  FlatButton(
-                                    child: Text('Cancel'),
-                                    onPressed: () {
-                                      Navigator.of(context).pop();
-                                    },
-                                  )
-                                ],
-                              ));
-                    } else if (_authenticationService.currentUser != null) {
-                      Navigator.of(context).push(MaterialPageRoute(
-                          settings: RouteSettings(name: '/Lobby'),
-                          builder: (context) => Lobby()));
+              Form(
+                key: _formKey,
+                child: Column(
+                  mainAxisAlignment: MainAxisAlignment.spaceAround,
+                  children: <Widget>[
+                    Padding(
+                      padding: const EdgeInsets.only(top: 20.0),
+                      child: TextFormField(
+                        validator: (input) {
+                          if (input.isEmpty) {
+                            return 'Please enter an email';
+                          }
+                        },
+                        onSaved: (input) => email = input,
+                        decoration: InputDecoration(labelText: 'Email'),
+                      ),
+                    ),
+                    Padding(
+                      padding: const EdgeInsets.only(top: 40),
+                      child: TextFormField(
+                        validator: (input) {
+                          if (input.length < 6) {
+                            return 'You have to enter at least 6 characters';
+                          }
+                        },
+                        onSaved: (input) => password = input,
+                        decoration: InputDecoration(labelText: 'Password'),
+                        obscureText: true,
+                      ),
+                    ),
+                  ],
+                ),
+              ),
+              Padding(
+                padding: const EdgeInsets.only(top: 90.0),
+                child: RaisedButton(
+                  child: Text('Login'),
+                  onPressed: () async {
+                    final formState = _formKey.currentState;
+                    if (formState.validate()) {
+                      formState.save();
+                      dynamic result = await _authenticationService
+                          .signEmailPassword(email, password);
+                      if (result == null) {
+                        showDialog(
+                            context: context,
+                            builder: (context) => AlertDialog(
+                                  title: Text('Usuario no valido'),
+                                  content: Text(
+                                      'El usuario con el que esta intentando acceder no se encuentra en nuestra base de datos, por favor ingrese con un usuario valido'),
+                                  actions: <Widget>[
+                                    FlatButton(
+                                      child: Text('OK'),
+                                      onPressed: () {
+                                        Navigator.of(context).pop();
+                                      },
+                                    ),
+                                    FlatButton(
+                                      child: Text('Cancel'),
+                                      onPressed: () {
+                                        Navigator.of(context).pop();
+                                      },
+                                    )
+                                  ],
+                                ));
+                      } else if (_authenticationService.currentUser != null) {
+                        Navigator.of(context).push(MaterialPageRoute(
+                            settings: RouteSettings(name: '/Lobby'),
+                            builder: (context) => Lobby()));
+                      }
                     }
-                  }
-                },
-                shape: RoundedRectangleBorder(
-                    borderRadius: new BorderRadius.circular(20.0)),
-              ),
-            )
-          ],
+                  },
+                  shape: RoundedRectangleBorder(
+                      borderRadius: new BorderRadius.circular(20.0)),
+                ),
+              )
+            ],
+          ),
         ),
       ),
     );

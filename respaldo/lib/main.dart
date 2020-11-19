@@ -28,6 +28,11 @@ class _MyAppState extends State<MyApp> {
     super.initState();
     final provider = new PushNotificationProvider();
     provider.initNotifications();
+
+    provider.mensajes.listen((argumento) {
+      print('Argumento del push');
+      print(argumento);
+    });
   }
 
   @override
