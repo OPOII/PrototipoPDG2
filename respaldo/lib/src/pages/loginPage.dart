@@ -1,5 +1,6 @@
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
+import 'package:respaldo/databaseConnection.dart';
 import '../../authentication_service.dart';
 import 'lobby.dart';
 import 'package:firebase_core/firebase_core.dart';
@@ -14,8 +15,10 @@ class _LoginPageState extends State<LoginPage> {
   String email, password;
   final GlobalKey<FormState> _formKey = GlobalKey<FormState>();
   final AuthenticationService _authenticationService = AuthenticationService();
+  final ConeccionBaseDatos baseDatos = ConeccionBaseDatos();
   @override
   Widget build(BuildContext context) {
+    baseDatos.dataBaseConnection();
     return Scaffold(
       resizeToAvoidBottomInset: false,
       body: SingleChildScrollView(
