@@ -5,8 +5,10 @@ import 'package:percent_indicator/linear_percent_indicator.dart';
 import 'package:provider/provider.dart';
 import 'package:respaldo/authentication_service.dart';
 import 'package:respaldo/src/pages/Ingenio.dart';
+import 'package:respaldo/src/pages/loginPage.dart';
 import 'package:respaldo/src/pages/tablaDatos/tablaDatos.dart';
 import 'package:respaldo/src/pages/user/usuario.dart';
+import 'package:respaldo/src/services/services.dart';
 import 'Calendarrio/CalendarioView.dart';
 import 'admin area/adminArea.dart';
 import 'hacienda/hacienda.dart';
@@ -83,6 +85,7 @@ Drawer menuDeslizante(context, data, data1, data2) {
   print(data);
   final usuario = Provider.of<Usuario>(context);
   final AuthenticationService _auth = AuthenticationService();
+  Services nuevo = new Services();
   return Drawer(
     child: ListView(
       children: <Widget>[
@@ -126,7 +129,8 @@ Drawer menuDeslizante(context, data, data1, data2) {
                 MaterialPageRoute(builder: (context) => CalendarioView()))
           },
         ),
-        CustomListTile(Icons.settings, 'Configuración', () => {}),
+        CustomListTile(Icons.settings, 'Configuración',
+            () => {nuevo.sendAndRetrieveMessage()}),
         if (data != null && data == 'admin') ...[
           CustomListTile(
               Icons.assignment_ind,
@@ -136,11 +140,16 @@ Drawer menuDeslizante(context, data, data1, data2) {
                         MaterialPageRoute(builder: (context) => AdminArea()))
                   }),
         ] else if (data != null && data == 'user') ...[
-          CustomListTile(Icons.assignment_late, 'Tus tareas', () => {})
+          CustomListTile(Icons.assignment_late, 'Tus tareas',
+              () => {nuevo.sendAndRetrieveMessage()})
         ],
         CustomListTile(Icons.power_settings_new, 'Salir', () async {
           await FirebaseAuth.instance.signOut();
-          Navigator.of(context).pop();
+          print("Entro a esta parte");
+          Navigator.pushReplacement(
+              context,
+              MaterialPageRoute(
+                  builder: (BuildContext context) => LoginPage()));
         }),
       ],
     ),

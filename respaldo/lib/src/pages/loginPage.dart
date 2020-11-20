@@ -18,7 +18,7 @@ class _LoginPageState extends State<LoginPage> {
   final ConeccionBaseDatos baseDatos = ConeccionBaseDatos();
   @override
   Widget build(BuildContext context) {
-    baseDatos.dataBaseConnection();
+    // baseDatos.dataBaseConnection();
     return Scaffold(
       resizeToAvoidBottomInset: false,
       body: SingleChildScrollView(
@@ -98,6 +98,7 @@ class _LoginPageState extends State<LoginPage> {
                                   ],
                                 ));
                       } else if (_authenticationService.currentUser != null) {
+                        print(_authenticationService.currentUser.uid);
                         Navigator.of(context).push(MaterialPageRoute(
                             settings: RouteSettings(name: '/Lobby'),
                             builder: (context) => Lobby()));
