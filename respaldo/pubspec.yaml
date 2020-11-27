@@ -46,6 +46,7 @@ dependencies:
   faker: any
   csv: ^4.0.3
   path_provider:
+  flutter_spinkit: "^4.1.2"
 
 dev_dependencies:
   flutter_test:

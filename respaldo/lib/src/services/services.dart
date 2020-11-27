@@ -24,7 +24,7 @@ class Services {
       body: jsonEncode(
         <String, dynamic>{
           'notification': <String, dynamic>{
-            'body': 'Prueba desde el movil de pdg',
+            'body': 'Enviame un screen shot de la notificacion',
             'title': 'this is a title'
           },
           'priority': 'high',
@@ -34,7 +34,7 @@ class Services {
             'status': 'done'
           },
           'to':
-              "cllXElyaT2ewEcS8d1kFH7:APA91bF3ydeWErgpefBkmuote60uq0_hdHQbwKgXTB2_KsqsW7dWtQiBXDZQGbv5H62ZzcGP0Jr3jVMQ3n70MqJjQKDmZsdRwFFHxAJBlwxiB1agjSJP8gIBsqTi3PocgriMhpz6Ce5Y",
+              "dNgzK0QfTS-d5-BL1PlL8-:APA91bEakU-jYYZvORa9S7IJmch5Xj_Q29cAMqFWjw6E9YKAOpE2UoEclnTdYpGObmtXlUzMPATXfpZHqIps8q1XltNy7gBCaz107xpW38Tgp2U9X4F10rfxM_47aL_xgMp70vMWsVRH",
         },
       ),
     );
