@@ -4,7 +4,10 @@ import 'dart:ui';
 import 'package:flutter/material.dart';
 import 'package:latlong/latlong.dart';
 import 'package:respaldo/src/pages/hacienda/hacienda.dart';
+import 'package:respaldo/src/pages/hacienda/haciendaPrueba.dart';
 import 'package:respaldo/src/pages/suerte/suerte.dart';
+import 'package:respaldo/src/pages/suerte/suertePrueba.dart';
+import 'package:respaldo/src/services/crud.dart';
 
 class Ingenio {
   String nombre;
@@ -12,6 +15,9 @@ class Ingenio {
   String ubicacion;
   List<Hacienda> listado;
   List<List<Suerte>> listadoSuertes;
+  CrudConsultas consultas = new CrudConsultas();
+  List<HaciendaPrueba> listadoPruebas;
+  List<SuertePrueba> suertePruebas;
   Ingenio();
 
   void cargarSuertes() {
@@ -203,4 +209,6 @@ class Ingenio {
     }
     return devolver;
   }
+
+  void cargarTodo() async {}
 }

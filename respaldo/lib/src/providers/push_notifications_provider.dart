@@ -16,6 +16,7 @@ class PushNotificationProvider {
       //Hay que guardar este token en una base de datos
     });
 
+    // ignore: missing_return
     _firebaseMessaging.configure(onMessage: (info) {
       print('===== On Message ==========');
       print(info);
@@ -24,9 +25,11 @@ class PushNotificationProvider {
         argument = info['data']['Comida'] ?? 'no-data';
       }
       _streamController.sink.add(argument);
+      // ignore: missing_return
     }, onLaunch: (info) {
       print('===== On Launch ==========');
       print(info);
+      // ignore: missing_return
     }, onResume: (info) {
       print('===== On Resume ==========');
       print(info);

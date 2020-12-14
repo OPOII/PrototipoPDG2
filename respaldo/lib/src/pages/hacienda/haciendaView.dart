@@ -1,36 +1,33 @@
+import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_map/flutter_map.dart';
 import 'package:latlong/latlong.dart';
 import 'package:respaldo/src/pages/suerte/lobbySuerte.dart';
-import 'package:respaldo/src/pages/suerte/suerte.dart';
-import 'package:respaldo/src/pages/hacienda/hacienda.dart';
 
 class HaciendaView extends StatelessWidget {
-  final Hacienda hacienda;
+  final QueryDocumentSnapshot hacienda;
   //No se por que pero es necesario usar lo del key para poder pasar los parametros que necesitamos
   HaciendaView({Key key, this.hacienda}) : super(key: key);
-
   @override
   Widget build(BuildContext context) {
+    print(hacienda.id);
     return new Scaffold(
       backgroundColor: Colors.white,
       appBar: AppBar(
-        iconTheme: IconThemeData(color: Colors.green[400]),
+        iconTheme: IconThemeData(color: Colors.white),
         elevation: 0,
-        backgroundColor: Colors.white,
+        backgroundColor: Colors.green,
         centerTitle: true,
-        title: Text(
-          hacienda.nombre,
-          style: TextStyle(color: Colors.green[400]),
-        ),
+        title: Text('Información Hacienda',
+            style: TextStyle(color: Colors.white, fontWeight: FontWeight.bold)),
       ),
       body: Stack(
         children: <Widget>[
           Column(
             children: <Widget>[
-              mapaMiniatura(hacienda.ubicacionExacta),
+              mapaMiniatura(hacienda.data()['location']),
               contenerInfo(hacienda),
-              boton(context, hacienda.listadoSuertes)
+              boton(context, hacienda)
             ],
           )
         ],
@@ -39,7 +36,7 @@ class HaciendaView extends StatelessWidget {
   }
 }
 
-Container boton(BuildContext context, List<Suerte> lista) {
+Container boton(BuildContext context, QueryDocumentSnapshot hacienda) {
   return Container(
     child: RaisedButton(
       child: Text('Buscar Suerte'),
@@ -47,7 +44,7 @@ Container boton(BuildContext context, List<Suerte> lista) {
         Navigator.push(
             context,
             MaterialPageRoute(
-                builder: (context) => ListadoSuerte(listadoSuertes: lista)));
+                builder: (context) => ListadoSuerte(listadoSuertes: hacienda)));
       },
       shape:
           RoundedRectangleBorder(borderRadius: new BorderRadius.circular(20.0)),
@@ -55,8 +52,8 @@ Container boton(BuildContext context, List<Suerte> lista) {
   );
 }
 
-Container mapaMiniatura(LatLng parametro) {
-  final centro = parametro;
+Container mapaMiniatura(GeoPoint parametro) {
+  LatLng centro = new LatLng(parametro.latitude, parametro.longitude);
   return Container(
     width: 300,
     height: 300,
@@ -84,7 +81,7 @@ Container mapaMiniatura(LatLng parametro) {
   );
 }
 
-Container contenerInfo(Hacienda n) {
+Container contenerInfo(QueryDocumentSnapshot hacienda) {
   return Container(
     width: 400,
     height: 300,
@@ -93,14 +90,12 @@ Container contenerInfo(Hacienda n) {
         Column(
           mainAxisAlignment: MainAxisAlignment.spaceEvenly,
           children: <Widget>[
-            CostumInfo('Hacienda', n.nombre),
-            CostumInfo('Identificación', n.id.toString()),
-            CostumInfo('Tareas Hechas', n.tareasHechas.toString()),
-            CostumInfo('Tareas Totales', n.tareasPorRealizar.toString()),
+            CostumInfo('Hacienda', hacienda.data()['hacienda_name']),
             CostumInfo(
-                'Porcentaje',
-                ((n.tareasHechas / n.tareasPorRealizar) * 100)
-                    .toStringAsFixed(1))
+                'Identificación', hacienda.data()['id_hacienda'].toString()),
+            CostumInfo('Tareas Hechas', "55"),
+            CostumInfo('Tareas Totales', "88"),
+            CostumInfo('Porcentaje', ((55 / 88) * 100).toStringAsFixed(1))
           ],
         ),
       ],
@@ -108,6 +103,7 @@ Container contenerInfo(Hacienda n) {
   );
 }
 
+// ignore: must_be_immutable
 class CostumInfo extends StatelessWidget {
   String ladoIzq;
   String ladoDer;

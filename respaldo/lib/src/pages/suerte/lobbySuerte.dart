@@ -1,41 +1,85 @@
+import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:flutter/material.dart';
-import 'package:respaldo/src/pages/suerte/suerte.dart';
 import 'package:respaldo/src/pages/suerte/suerteView.dart';
+import 'package:respaldo/src/services/crud.dart';
 
+import '../loading.dart';
+
+// ignore: must_be_immutable
 class ListadoSuerte extends StatelessWidget {
-  final List<Suerte> listadoSuertes;
+  final QueryDocumentSnapshot listadoSuertes;
   ListadoSuerte({Key key, this.listadoSuertes}) : super(key: key);
+  CrudConsultas consultas = new CrudConsultas();
   Icon usIcon = Icon(Icons.search);
   @override
   Widget build(BuildContext context) {
-    return Scaffold(
-      backgroundColor: Colors.white,
-      appBar: AppBar(
-        iconTheme: IconThemeData(color: Colors.white),
-        elevation: 0,
-        backgroundColor: Colors.green,
-        centerTitle: true,
-        title: Text(
-          "Buscar Suerte",
-          style: TextStyle(color: Colors.white),
-        ),
-        actions: <Widget>[
-          IconButton(
-            tooltip: 'search',
-            icon: usIcon,
-            onPressed: () {
-              showSearch(
-                  context: context,
-                  delegate: SuerteSearch(listado: listadoSuertes));
-            },
-          )
-        ],
-      ),
-      body: Stack(
-        children: <Widget>[
-          listadoSuerte(context),
-        ],
-      ),
+    Stream suertes = consultas.obtenerSuertes(listadoSuertes.id);
+    return StreamBuilder<QuerySnapshot>(
+      stream: suertes,
+      builder: (context, snapshot) {
+        if (snapshot.hasError) {
+          return Center(
+            child: Text('Error ${snapshot.error}'),
+          );
+        }
+        switch (snapshot.connectionState) {
+          case ConnectionState.waiting:
+            return Loading();
+          case ConnectionState.none:
+            return Text('There is no data');
+          case ConnectionState.done:
+            return Text('Done');
+          default:
+            return Scaffold(
+              appBar: AppBar(
+                iconTheme: IconThemeData(color: Colors.white),
+                elevation: 0,
+                backgroundColor: Colors.green,
+                centerTitle: true,
+                title: Text(
+                  "Buscar Suerte",
+                  style: TextStyle(color: Colors.white),
+                ),
+                actions: <Widget>[
+                  IconButton(
+                    tooltip: 'search',
+                    icon: usIcon,
+                    onPressed: () {
+                      Navigator.push(
+                          context,
+                          MaterialPageRoute(
+                              builder: (context) =>
+                                  SearchPages(listadoSuertes.id)));
+                    },
+                  )
+                ],
+              ),
+              body: Card(
+                elevation: 0.5,
+                child: new ListView(
+                  children: snapshot.data.docs.map((DocumentSnapshot document) {
+                    return new ListTile(
+                      onTap: () {
+                        Navigator.push(
+                            context,
+                            MaterialPageRoute(
+                                builder: (context) =>
+                                    SuerteView(suerte: document)));
+                      },
+                      title: Text('ID suerte: ' + document['id_suerte']),
+                      leading: CircleAvatar(
+                          backgroundImage: NetworkImage(
+                              'https://www.teldeactualidad.com/userfiles/economia/2020/06/5621/AURI%20SAAVEDRA%20VISITA%20LA%20FINCA%20LA%20SUERTE.jpeg'),
+                          backgroundColor: Colors.transparent),
+                      subtitle: Text(
+                          'Area perteneciente: ' + document['area'].toString()),
+                    );
+                  }).toList(),
+                ),
+              ),
+            );
+        }
+      },
     );
   }
 
@@ -65,116 +109,139 @@ class ListadoSuerte extends StatelessWidget {
       ),
     );
   }
+}
 
-  Widget listadoSuerte(BuildContext context) {
-    return Scaffold(
-      backgroundColor: Colors.white,
-      body: ListView.builder(
-          itemCount: listadoSuertes.length,
-          itemBuilder: (context, index) {
-            return Padding(
-              padding:
-                  const EdgeInsets.symmetric(vertical: 4.0, horizontal: 4.0),
-              child: Card(
-                elevation: 0.5,
-                child: ListTile(
-                  onTap: () {
-                    Navigator.push(
-                        context,
-                        MaterialPageRoute(
-                            builder: (context) =>
-                                SuerteView(suerte: listadoSuertes[index])));
-                  },
-                  title: Text("ID suerte: " + listadoSuertes[index].idSuerte),
-                  leading: CircleAvatar(
-                    backgroundImage:
-                        AssetImage('assets/suerte/caña-azucar.jpg'),
-                  ),
-                  subtitle:
-                      Text("Area perteneciente: " + listadoSuertes[index].area),
-                ),
-              ),
-            );
-          }),
-    );
+class SearchPages extends StatefulWidget {
+  final String id;
+  SearchPages(this.id);
+  @override
+  State<StatefulWidget> createState() {
+    return _SearchPageSuerte();
   }
 }
 
-class SuerteSearch extends SearchDelegate<Suerte> {
-  List<Suerte> listado;
-  SuerteSearch({this.listado});
+class _SearchPageSuerte extends State<SearchPages> {
+  String idDoc;
   @override
-  List<Widget> buildActions(BuildContext context) {
-    return [
-      IconButton(
-        icon: Icon(Icons.clear),
-        onPressed: () {
-          query = "";
-        },
-      )
-    ];
+  void initState() {
+    idDoc = widget.id;
+    super.initState();
   }
 
+  TextEditingController search = TextEditingController();
+  final database = FirebaseFirestore.instance;
+  String searchString;
   @override
-  Widget buildLeading(BuildContext context) {
-    return IconButton(
-      onPressed: () {
-        close(context, null);
-      },
-      icon: Icon(Icons.arrow_back),
-    );
-  }
-
-  @override
-  Widget buildResults(BuildContext context) {
-    // TODO: implement buildResults
-    throw UnimplementedError();
-  }
-
-  @override
-  Widget buildSuggestions(BuildContext context) {
-    final myList = query.isEmpty
-        ? listado
-        : listado
-            .where((p) => p.idSuerte.toString().startsWith(query))
-            .toList();
-    return myList.isEmpty
-        ? Text(
-            'No results found...',
-            style: TextStyle(fontSize: 20),
-          )
-        : ListView.builder(
-            itemCount: myList.length,
-            itemBuilder: (context, index) {
-              final Suerte nuevoListado = myList[index];
-              return ListTile(
-                onTap: () {
-                  Navigator.push(
-                      context,
-                      MaterialPageRoute(
-                          builder: (context) =>
-                              SuerteView(suerte: listado[index])));
-                },
-                title: Column(
-                  crossAxisAlignment: CrossAxisAlignment.start,
-                  children: [
-                    Text(
-                      'ID Suerte: ' + nuevoListado.idSuerte,
-                      style: TextStyle(
-                        fontSize: 20,
+  Widget build(BuildContext context) {
+    return Scaffold(
+      appBar: AppBar(
+        iconTheme: IconThemeData(color: Colors.white),
+        elevation: 0,
+        backgroundColor: Colors.green,
+        centerTitle: true,
+        title: Text(
+          'Busca tu suerte',
+          style: TextStyle(color: Colors.white),
+        ),
+      ),
+      body: Column(
+        children: <Widget>[
+          Expanded(
+            child: Column(
+              children: <Widget>[
+                Padding(
+                    padding: const EdgeInsets.all(15.0),
+                    child: Container(
+                        child: TextField(
+                      onChanged: (val) {
+                        setState(() {
+                          searchString = val.toLowerCase();
+                        });
+                      },
+                      controller: search,
+                      decoration: InputDecoration(
+                        suffixIcon: IconButton(
+                            icon: Icon(Icons.clear),
+                            onPressed: () => search.clear()),
+                        hintText: 'Search the suerte',
+                        hintStyle: TextStyle(
+                            color: Colors.grey,
+                            fontFamily: 'Antra',
+                            fontSize: 20),
                       ),
-                    ),
-                    Text(
-                      'Area Suerte: ' + nuevoListado.area,
-                      style: TextStyle(fontSize: 20),
-                    ),
-                    Divider()
-                  ],
-                ),
-                leading: CircleAvatar(
-                  backgroundImage: AssetImage('assets/suerte/caña-azucar.jpg'),
-                ),
-              );
-            });
+                    ))),
+                Expanded(
+                  child: StreamBuilder<QuerySnapshot>(
+                    stream: (searchString == null || searchString.trim() == '')
+                        ? FirebaseFirestore.instance
+                            .collection('Ingenio')
+                            .doc('1')
+                            .collection('Hacienda')
+                            .doc(idDoc)
+                            .collection('Suerte')
+                            .snapshots()
+                        : FirebaseFirestore.instance
+                            .collection('Ingenio')
+                            .doc('1')
+                            .collection('Hacienda')
+                            .doc(idDoc)
+                            .collection('Suerte')
+                            .where('searchIndex', arrayContains: searchString)
+                            .snapshots(),
+                    builder: (context, snapshot) {
+                      if (snapshot.hasError) {
+                        return Text('We got an error ${snapshot.error}');
+                      }
+                      switch (snapshot.connectionState) {
+                        case ConnectionState.waiting:
+                          return Loading();
+                        case ConnectionState.none:
+                          return Text('There is no data');
+                        case ConnectionState.done:
+                          return Text('Done');
+                        default:
+                          return new ListView(
+                            children: snapshot.data.docs
+                                .map((DocumentSnapshot document) {
+                              return new ListTile(
+                                onTap: () {
+                                  Navigator.push(
+                                      context,
+                                      MaterialPageRoute(
+                                          builder: (context) => SuerteView(
+                                                suerte: document,
+                                              )));
+                                },
+                                title: Column(
+                                  crossAxisAlignment: CrossAxisAlignment.start,
+                                  children: <Widget>[
+                                    Text(
+                                      'ID suerte: ' + document['id_suerte'],
+                                      style: TextStyle(fontSize: 20),
+                                    ),
+                                    Text(
+                                        'Area suerte: ' +
+                                            document['area'].toString(),
+                                        style: TextStyle(color: Colors.grey)),
+                                    Divider()
+                                  ],
+                                ),
+                                leading: CircleAvatar(
+                                    backgroundImage: NetworkImage(
+                                        'https://www.teldeactualidad.com/userfiles/economia/2020/06/5621/AURI%20SAAVEDRA%20VISITA%20LA%20FINCA%20LA%20SUERTE.jpeg'),
+                                    backgroundColor: Colors.transparent),
+                              );
+                            }).toList(),
+                          );
+                      }
+                    },
+                  ),
+                )
+              ],
+            ),
+          )
+        ],
+      ),
+    );
   }
 }

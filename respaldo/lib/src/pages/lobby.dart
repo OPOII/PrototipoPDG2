@@ -1,14 +1,18 @@
+import 'dart:async';
+
 import 'package:cloud_firestore/cloud_firestore.dart';
+import 'package:connectivity/connectivity.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
 import 'package:percent_indicator/linear_percent_indicator.dart';
-import 'package:provider/provider.dart';
 import 'package:respaldo/authentication_service.dart';
 import 'package:respaldo/src/pages/Ingenio.dart';
+import 'package:respaldo/src/pages/hacienda/haciendaPrueba.dart';
+import 'package:respaldo/src/pages/loading.dart';
 import 'package:respaldo/src/pages/loginPage.dart';
 import 'package:respaldo/src/pages/tablaDatos/tablaDatos.dart';
-import 'package:respaldo/src/pages/user/usuario.dart';
-import 'package:respaldo/src/services/services.dart';
+import 'package:respaldo/src/services/crud.dart';
+import 'package:respaldo/src/services/notificationServices.dart';
 import 'Calendarrio/CalendarioView.dart';
 import 'admin area/adminArea.dart';
 import 'hacienda/hacienda.dart';
@@ -19,16 +23,44 @@ class Lobby extends StatefulWidget {
   _LobbyState createState() => _LobbyState();
 }
 
-class _LobbyState extends State<Lobby> with SingleTickerProviderStateMixin {
-  @override
-  void initState() {
-    super.initState();
-  }
-
+class _LobbyState extends State<Lobby> {
+  List haciendasNuevo = [];
   Ingenio pruebas = new Ingenio();
   AuthenticationService _authenticationService = AuthenticationService();
   List<Hacienda> listado = new List<Hacienda>();
+  List idHaciendas = [];
+  CrudConsultas consultas = new CrudConsultas();
+  List usuario;
+  List<HaciendaPrueba> listadoHacienda = new List<HaciendaPrueba>();
+  StreamSubscription connectivityStream;
+  ConnectivityResult oldres;
   @override
+  void initState() {
+    probar();
+    super.initState();
+    connectivityStream =
+        Connectivity().onConnectivityChanged.listen((ConnectivityResult resu) {
+      oldres = resu;
+    });
+  }
+
+  @override
+  void dispose() {
+    super.dispose();
+    connectivityStream.cancel();
+  }
+
+  probar() async {
+    dynamic resultado = await consultas
+        .getEmpleadoActual(_authenticationService.currentUser.uid);
+    setState(() {
+      usuario = resultado;
+    });
+    print(usuario.toList());
+  }
+
+  @override
+  // ignore: missing_return
   Widget build(BuildContext context) {
     if (_authenticationService.currentUser == null) {
       Navigator.of(context).pop();
@@ -36,56 +68,57 @@ class _LobbyState extends State<Lobby> with SingleTickerProviderStateMixin {
       pruebas.cargarSuertes();
       pruebas.cargarHacienda();
       listado = pruebas.listado;
-      return StreamBuilder(
-          stream: FirebaseFirestore.instance
-              .collection('Ingenio')
-              .doc('1')
-              .collection('users')
-              .doc(_authenticationService.uid)
-              .snapshots(),
+      pruebas.cargarTodo();
+      Stream haciendas = consultas.haciendas;
+
+      ///printear();
+      return StreamBuilder<QuerySnapshot>(
+          stream: haciendas,
           builder:
-              (BuildContext context, AsyncSnapshot<DocumentSnapshot> snapshot) {
+              (BuildContext context, AsyncSnapshot<QuerySnapshot> snapshot) {
             if (snapshot.hasError) {
               return Text('Error: ${snapshot.error}');
             }
             switch (snapshot.connectionState) {
               case ConnectionState.waiting:
-                return Text('Loading');
+                return Loading();
               default:
                 return Scaffold(
-                  backgroundColor: Colors.white,
-                  appBar: personalizada(context, listado),
-                  body: SingleChildScrollView(
-                    child: Stack(
-                      children: <Widget>[
-                        Column(
-                          children: [
-                            barraInfo(pruebas),
-                            Padding(
-                              padding: const EdgeInsets.all(8.0),
-                              child: haciendaListado(context, listado),
-                            ),
-                          ],
-                        )
-                      ],
+                    backgroundColor: Colors.white,
+                    appBar: iconoBuscarHaciendas(context),
+                    body: SingleChildScrollView(
+                      child: Stack(
+                        children: <Widget>[
+                          Column(
+                            children: [
+                              barraInfo(pruebas),
+                              Padding(
+                                padding: const EdgeInsets.all(8.0),
+                                child: haciendaListado(context, snapshot),
+                              ),
+                            ],
+                          )
+                        ],
+                      ),
                     ),
-                  ),
-                  drawer: Container(
+                    drawer: Container(
                       width: 200,
-                      child: menuDeslizante(context, snapshot.data['charge'],
-                          snapshot.data['name'], snapshot.data['urlfoto'])),
-                );
+                      //Esta condicion ternaria es para que cuando le pida el estado para que se cargue
+                      //le de el tiempo de que se cargue y no se muestre un null, por eso se muestra la pantalla del loading
+                      //Esto sirve por que la funcion es asincrona, entonces mientras se carga muestra el widget de loading
+                      child: usuario != null
+                          ? menuDeslizante(context, usuario)
+                          : Loading(),
+                    ));
             }
           });
     }
   }
 }
 
-Drawer menuDeslizante(context, data, data1, data2) {
-  print(data);
-  final usuario = Provider.of<Usuario>(context);
-  final AuthenticationService _auth = AuthenticationService();
+Drawer menuDeslizante(context, List usuario) {
   Services nuevo = new Services();
+
   return Drawer(
     child: ListView(
       children: <Widget>[
@@ -99,7 +132,7 @@ Drawer menuDeslizante(context, data, data1, data2) {
                     child: Padding(
                         padding: EdgeInsets.all(8.0),
                         child: Image.network(
-                          data2.toString(),
+                          usuario[0]['urlfoto'],
                           width: 80,
                           height: 80,
                         )),
@@ -107,7 +140,7 @@ Drawer menuDeslizante(context, data, data1, data2) {
                   Padding(
                     padding: EdgeInsets.all(8.0),
                     child: Text(
-                      data1.toString(),
+                      usuario[0]['name'],
                       style: TextStyle(color: Colors.black, fontSize: 15.0),
                     ),
                   )
@@ -119,7 +152,9 @@ Drawer menuDeslizante(context, data, data1, data2) {
             'Resumen',
             () => {
                   Navigator.push(
-                      context, MaterialPageRoute(builder: (context) => tabla()))
+                    context,
+                    MaterialPageRoute(builder: (context) => Tabla()),
+                  )
                 }),
         CustomListTile(
           Icons.calendar_today,
@@ -131,7 +166,7 @@ Drawer menuDeslizante(context, data, data1, data2) {
         ),
         CustomListTile(Icons.settings, 'Configuración',
             () => {nuevo.sendAndRetrieveMessage()}),
-        if (data != null && data == 'admin') ...[
+        if (usuario[0] != null && usuario[0]['charge'] == 'admin') ...[
           CustomListTile(
               Icons.assignment_ind,
               'Area de admin',
@@ -139,13 +174,12 @@ Drawer menuDeslizante(context, data, data1, data2) {
                     Navigator.push(context,
                         MaterialPageRoute(builder: (context) => AdminArea()))
                   }),
-        ] else if (data != null && data == 'user') ...[
+        ] else if (usuario[0] != null && usuario[0]['charge'] == 'user') ...[
           CustomListTile(Icons.assignment_late, 'Tus tareas',
               () => {nuevo.sendAndRetrieveMessage()})
         ],
         CustomListTile(Icons.power_settings_new, 'Salir', () async {
           await FirebaseAuth.instance.signOut();
-          print("Entro a esta parte");
           Navigator.pushReplacement(
               context,
               MaterialPageRoute(
@@ -156,6 +190,7 @@ Drawer menuDeslizante(context, data, data1, data2) {
   );
 }
 
+// ignore: must_be_immutable
 class CustomListTile extends StatelessWidget {
   IconData icon;
   String text;
@@ -195,7 +230,7 @@ class CustomListTile extends StatelessWidget {
   }
 }
 
-Widget personalizada(BuildContext context, List<Hacienda> haciendas) {
+Widget iconoBuscarHaciendas(BuildContext context) {
   Icon usIcon = Icon(Icons.search);
   return AppBar(
     iconTheme: IconThemeData(color: Colors.white),
@@ -209,8 +244,8 @@ Widget personalizada(BuildContext context, List<Hacienda> haciendas) {
           tooltip: 'search',
           icon: usIcon,
           onPressed: () {
-            showSearch(
-                context: context, delegate: HaciendaSearch(listado: haciendas));
+            Navigator.push(
+                context, MaterialPageRoute(builder: (context) => SearchPage()));
           })
     ],
     backgroundColor: Colors.green,
@@ -218,15 +253,18 @@ Widget personalizada(BuildContext context, List<Hacienda> haciendas) {
   );
 }
 
-Widget haciendaListado(BuildContext context, List<Hacienda> listadoHacienda) {
+Widget haciendaListado(
+  BuildContext context,
+  AsyncSnapshot<QuerySnapshot> snapshot,
+) {
   return SizedBox(
     height: 500,
     child: Scaffold(
-      backgroundColor: Colors.white,
+      backgroundColor: Colors.transparent,
       body: Container(
           padding: EdgeInsets.only(right: 15.0, left: 10),
           child: GridView.builder(
-              itemCount: listadoHacienda.length,
+              itemCount: snapshot.data.docs.length,
               gridDelegate:
                   SliverGridDelegateWithFixedCrossAxisCount(crossAxisCount: 2),
               itemBuilder: (BuildContext context, int index) {
@@ -235,44 +273,51 @@ Widget haciendaListado(BuildContext context, List<Hacienda> listadoHacienda) {
                       vertical: 4.0, horizontal: 4.0),
                   child: InkWell(
                     onTap: () {
+                      print(snapshot.data.docs[index].data());
                       Navigator.push(
                           context,
                           MaterialPageRoute(
                               builder: (context) => HaciendaView(
-                                  hacienda: listadoHacienda[index])));
+                                  hacienda: snapshot.data.docs[index]))); //
                     },
-                    child: Card(
-                      elevation: 0,
-                      shape: RoundedRectangleBorder(
-                        borderRadius: BorderRadius.circular(10),
-                      ),
-                      child: new Column(
-                        children: <Widget>[
-                          Container(
-                            decoration: BoxDecoration(
-                                borderRadius:
-                                    BorderRadius.all(Radius.circular(20))),
-                            child: Image.asset(
-                                'assets/haciendas/${listadoHacienda[index].imagen}'),
-                          ),
-                          SizedBox(
-                            height: 5.0,
-                          ),
-                          Row(
-                            mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                            children: <Widget>[
-                              Text('Ingenio:'),
-                              Text(listadoHacienda[index].nombre)
-                            ],
-                          ),
-                          Row(
-                            mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                            children: [
-                              Text('ID Ingenio:'),
-                              Text(listadoHacienda[index].id.toString())
-                            ],
-                          )
-                        ],
+                    child: SingleChildScrollView(
+                      child: Card(
+                        color: Colors.transparent,
+                        elevation: 0,
+                        shape: RoundedRectangleBorder(
+                          borderRadius: BorderRadius.circular(10),
+                        ),
+                        child: new Wrap(
+                          children: <Widget>[
+                            Container(
+                              decoration: BoxDecoration(
+                                  borderRadius:
+                                      BorderRadius.all(Radius.circular(20))),
+                              child: Image.network(
+                                  snapshot.data.docs[index].data()['imagen']),
+                            ),
+                            SizedBox(
+                              height: 5.0,
+                            ),
+                            Wrap(
+                              direction: Axis.horizontal,
+                              children: <Widget>[
+                                Text('Ingenio:'),
+                                Text(snapshot.data.docs[index]
+                                    .data()['hacienda_name'])
+                              ],
+                            ),
+                            Wrap(
+                              direction: Axis.horizontal,
+                              children: [
+                                Text('Identificación:'),
+                                Text(snapshot.data.docs[index]
+                                    .data()['id_hacienda']
+                                    .toString())
+                              ],
+                            )
+                          ],
+                        ),
                       ),
                     ),
                   ),
@@ -374,76 +419,121 @@ Widget barraInfo(Ingenio ingenio) {
   );
 }
 
-class HaciendaSearch extends SearchDelegate<Hacienda> {
-  List<Hacienda> listado;
-  HaciendaSearch({this.listado});
+class SearchPage extends StatefulWidget {
   @override
-  List<Widget> buildActions(BuildContext context) {
-    return [
-      IconButton(
-        icon: Icon(Icons.clear),
-        onPressed: () {
-          query = "";
-        },
-      )
-    ];
-  }
+  _SearchPage createState() => _SearchPage();
+}
 
+class _SearchPage extends State<SearchPage> {
+  TextEditingController search = TextEditingController();
+  final database = FirebaseFirestore.instance;
+  String searchString;
   @override
-  Widget buildLeading(BuildContext context) {
-    return IconButton(
-      onPressed: () {
-        close(context, null);
-      },
-      icon: Icon(Icons.arrow_back_ios),
-    );
-  }
-
-  @override
-  Widget buildResults(BuildContext context) {
-    throw UnimplementedError();
-  }
-
-  @override
-  Widget buildSuggestions(BuildContext context) {
-    final myList = query.isEmpty
-        ? listado
-        : listado.where((p) => p.id.toString().startsWith(query)).toList();
-    return myList.isEmpty
-        ? Text(
-            'No results found...',
-            style: TextStyle(fontSize: 20),
+  Widget build(BuildContext context) {
+    return Scaffold(
+      appBar: AppBar(
+        iconTheme: IconThemeData(color: Colors.white),
+        elevation: 0,
+        backgroundColor: Colors.green,
+        centerTitle: true,
+        title: Text(
+          'Buscar Haciendas',
+          style: TextStyle(color: Colors.white),
+        ),
+      ),
+      body: Column(
+        children: <Widget>[
+          Expanded(
+            child: Column(
+              children: <Widget>[
+                Padding(
+                    padding: const EdgeInsets.all(15.0),
+                    child: Container(
+                        child: TextField(
+                      onChanged: (val) {
+                        setState(() {
+                          searchString = val.toLowerCase();
+                        });
+                      },
+                      controller: search,
+                      decoration: InputDecoration(
+                        suffixIcon: IconButton(
+                            icon: Icon(Icons.clear),
+                            onPressed: () => search.clear()),
+                        hintText: 'Search the hacienda',
+                        hintStyle: TextStyle(
+                            color: Colors.grey,
+                            fontFamily: 'Antra',
+                            fontSize: 20),
+                      ),
+                    ))),
+                Expanded(
+                  child: StreamBuilder<QuerySnapshot>(
+                    stream: (searchString == null || searchString.trim() == '')
+                        ? FirebaseFirestore.instance
+                            .collection('Ingenio')
+                            .doc('1')
+                            .collection('Hacienda')
+                            .snapshots()
+                        : FirebaseFirestore.instance
+                            .collection('Ingenio')
+                            .doc('1')
+                            .collection('Hacienda')
+                            .where('searchIndex', arrayContains: searchString)
+                            .snapshots(),
+                    builder: (context, snapshot) {
+                      if (snapshot.hasError) {
+                        return Text('We got an error ${snapshot.error}');
+                      }
+                      switch (snapshot.connectionState) {
+                        case ConnectionState.waiting:
+                          return Loading();
+                        case ConnectionState.none:
+                          return Text('There is no data');
+                        case ConnectionState.done:
+                          return Text('Done');
+                        default:
+                          return new ListView(
+                            children: snapshot.data.docs
+                                .map((DocumentSnapshot document) {
+                              return new ListTile(
+                                onTap: () {
+                                  Navigator.push(
+                                      context,
+                                      MaterialPageRoute(
+                                          builder: (context) => HaciendaView(
+                                              hacienda: document)));
+                                },
+                                title: Column(
+                                  crossAxisAlignment: CrossAxisAlignment.start,
+                                  children: <Widget>[
+                                    Text(
+                                      document['hacienda_name'],
+                                      style: TextStyle(fontSize: 20),
+                                    ),
+                                    Text(
+                                        'ID hacienda: ' +
+                                            document['id_hacienda'].toString(),
+                                        style: TextStyle(color: Colors.grey)),
+                                    Divider()
+                                  ],
+                                ),
+                                leading: CircleAvatar(
+                                    backgroundImage:
+                                        NetworkImage(document['imagen']),
+                                    backgroundColor: Colors.transparent),
+                              );
+                            }).toList(),
+                          );
+                      }
+                    },
+                  ),
+                )
+              ],
+            ),
           )
-        : ListView.builder(
-            itemCount: myList
-                .length, //Aqui esta el problema, si lo pongo listado.length.compareTo(0) entonces solo me deja ver el primer elemento => update, el error era que le estaba pasando el "listado" en vez de "myList"
-            itemBuilder: (context, index) {
-              final Hacienda nuevoListado = myList[index];
-              return ListTile(
-                onTap: () {
-                  Navigator.push(
-                      context,
-                      MaterialPageRoute(
-                          builder: (context) =>
-                              HaciendaView(hacienda: listado[index])));
-                },
-                title: Column(
-                  crossAxisAlignment: CrossAxisAlignment.start,
-                  children: <Widget>[
-                    Text(
-                      nuevoListado.nombre,
-                      style: TextStyle(fontSize: 20),
-                    ),
-                    Text('ID hacienda: ' + nuevoListado.id.toString(),
-                        style: TextStyle(color: Colors.grey)),
-                    Divider()
-                  ],
-                ),
-                leading: CircleAvatar(
-                  backgroundImage:
-                      AssetImage('assets/haciendas/${listado[index].imagen}'),
-                ),
-              );
-            });
+        ],
+      ),
+    );
   }
 }

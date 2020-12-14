@@ -1,14 +1,14 @@
 import 'package:flutter/material.dart';
-import 'package:flutter_icons/flutter_icons.dart';
 
-class tabla extends StatefulWidget {
+class Tabla extends StatefulWidget {
   @override
-  tablaDatos createState() {
-    return new tablaDatos();
+  TablaDatos createState() {
+    return new TablaDatos();
   }
 }
 
-class tablaDatos extends State<tabla> {
+// ignore: camel_case_types
+class TablaDatos extends State<Tabla> {
   Widget bodyData() => DataTable(
       onSelectAll: (b) {},
       sortColumnIndex: 1,
