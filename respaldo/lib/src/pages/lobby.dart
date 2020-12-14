@@ -32,8 +32,7 @@ class _LobbyState extends State<Lobby> {
   CrudConsultas consultas = new CrudConsultas();
   List usuario;
   List<HaciendaPrueba> listadoHacienda = new List<HaciendaPrueba>();
-  StreamSubscription connectivityStream;
-  ConnectivityResult oldres;
+
   @override
   void initState() {
     probar();
