@@ -5,13 +5,16 @@ import 'package:connectivity/connectivity.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
 import 'package:percent_indicator/linear_percent_indicator.dart';
+import 'package:provider/provider.dart';
 import 'package:respaldo/authentication_service.dart';
 import 'package:respaldo/src/pages/Ingenio.dart';
 import 'package:respaldo/src/pages/hacienda/haciendaPrueba.dart';
 import 'package:respaldo/src/pages/loading.dart';
 import 'package:respaldo/src/pages/loginPage.dart';
+import 'package:respaldo/src/pages/networkAwareWidget.dart';
 import 'package:respaldo/src/pages/tablaDatos/tablaDatos.dart';
 import 'package:respaldo/src/services/crud.dart';
+import 'package:respaldo/src/services/networkStatusService.dart';
 import 'package:respaldo/src/services/notificationServices.dart';
 import 'Calendarrio/CalendarioView.dart';
 import 'admin area/adminArea.dart';
@@ -72,46 +75,62 @@ class _LobbyState extends State<Lobby> {
       Stream haciendas = consultas.haciendas;
 
       ///printear();
-      return StreamBuilder<QuerySnapshot>(
-          stream: haciendas,
-          builder:
-              (BuildContext context, AsyncSnapshot<QuerySnapshot> snapshot) {
-            if (snapshot.hasError) {
-              return Text('Error: ${snapshot.error}');
-            }
-            switch (snapshot.connectionState) {
-              case ConnectionState.waiting:
-                return Loading();
-              default:
-                return Scaffold(
-                    backgroundColor: Colors.white,
-                    appBar: iconoBuscarHaciendas(context),
-                    body: SingleChildScrollView(
-                      child: Stack(
-                        children: <Widget>[
-                          Column(
-                            children: [
-                              barraInfo(pruebas),
-                              Padding(
-                                padding: const EdgeInsets.all(8.0),
-                                child: haciendaListado(context, snapshot),
-                              ),
-                            ],
-                          )
-                        ],
-                      ),
-                    ),
-                    drawer: Container(
-                      width: 200,
-                      //Esta condicion ternaria es para que cuando le pida el estado para que se cargue
-                      //le de el tiempo de que se cargue y no se muestre un null, por eso se muestra la pantalla del loading
-                      //Esto sirve por que la funcion es asincrona, entonces mientras se carga muestra el widget de loading
-                      child: usuario != null
-                          ? menuDeslizante(context, usuario)
-                          : Loading(),
-                    ));
-            }
-          });
+      return StreamProvider<NetworkStatus>(
+          create: (BuildContext context) =>
+              NetworkStatusService().networkStatusController.stream,
+          child: NetworkAwareWidget(
+            onlineChild: StreamBuilder<QuerySnapshot>(
+                stream: haciendas,
+                builder: (BuildContext context,
+                    AsyncSnapshot<QuerySnapshot> snapshot) {
+                  if (snapshot.hasError) {
+                    return Text('Error: ${snapshot.error}');
+                  }
+                  switch (snapshot.connectionState) {
+                    case ConnectionState.waiting:
+                      return Loading();
+                    default:
+                      return Scaffold(
+                          backgroundColor: Colors.white,
+                          appBar: iconoBuscarHaciendas(context),
+                          body: SingleChildScrollView(
+                            child: Stack(
+                              children: <Widget>[
+                                Column(
+                                  children: [
+                                    barraInfo(pruebas),
+                                    Padding(
+                                      padding: const EdgeInsets.all(8.0),
+                                      child: haciendaListado(context, snapshot),
+                                    ),
+                                  ],
+                                )
+                              ],
+                            ),
+                          ),
+                          drawer: Container(
+                            width: 200,
+                            //Esta condicion ternaria es para que cuando le pida el estado para que se cargue
+                            //le de el tiempo de que se cargue y no se muestre un null, por eso se muestra la pantalla del loading
+                            //Esto sirve por que la funcion es asincrona, entonces mientras se carga muestra el widget de loading
+                            child: usuario != null
+                                ? menuDeslizante(context, usuario)
+                                : Loading(),
+                          ));
+                  }
+                }),
+            offlineChild: Container(
+              child: Center(
+                child: Text(
+                  "No internet connection!",
+                  style: TextStyle(
+                      color: Colors.grey[400],
+                      fontWeight: FontWeight.w600,
+                      fontSize: 20.0),
+                ),
+              ),
+            ),
+          ));
     }
   }
 }

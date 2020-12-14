@@ -48,7 +48,7 @@ class _LoginPageState extends State<LoginPage> {
             backgroundColor: Colors.white,
             resizeToAvoidBottomInset: false,
             body: StreamProvider<NetworkStatus>(
-              create: (context) =>
+              create: (BuildContext context) =>
                   NetworkStatusService().networkStatusController.stream,
               child: NetworkAwareWidget(
                 onlineChild: SingleChildScrollView(
