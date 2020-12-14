@@ -7,8 +7,9 @@ class Activity {
   double hoursDone;
   double missingHours;
   String observations;
-  int idSuerte;
-  int idActivity;
+  String idSuerte;
+  String idActivity;
+  bool isFinish;
 
   Activity(
       {this.haciendaName,
@@ -20,5 +21,6 @@ class Activity {
       this.missingHours,
       this.observations,
       this.idSuerte,
-      this.idActivity});
+      this.idActivity,
+      this.isFinish});
 }

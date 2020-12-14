@@ -3,7 +3,6 @@ import 'dart:math';
 import 'package:datetime_picker_formfield/datetime_picker_formfield.dart';
 import 'package:flutter/material.dart';
 import 'package:intl/intl.dart';
-import 'package:multiselect_formfield/multiselect_formfield.dart';
 
 class AgregarUsuarios extends StatefulWidget {
   @override
@@ -23,7 +22,6 @@ class _UsersState extends State<AgregarUsuarios> {
   final format = DateFormat("dd-MM-yyyy");
   List _charges = ["", "admin", "user"];
   String _currentCharge;
-  List _haciendas;
   final _datos = [
     {
       "display": "Hacienda #468865",

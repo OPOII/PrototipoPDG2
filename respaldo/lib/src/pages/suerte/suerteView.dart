@@ -1,31 +1,31 @@
+import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_map/flutter_map.dart';
 import 'package:latlong/latlong.dart';
-import 'package:respaldo/src/pages/suerte/suerte.dart';
 
 class SuerteView extends StatelessWidget {
-  final Suerte suerte;
+  final QueryDocumentSnapshot suerte;
   SuerteView({Key key, this.suerte}) : super(key: key);
   @override
   Widget build(BuildContext context) {
     return new Scaffold(
       backgroundColor: Colors.white,
       appBar: AppBar(
-        iconTheme: IconThemeData(color: Colors.green[400]),
+        iconTheme: IconThemeData(color: Colors.white),
         elevation: 0,
-        backgroundColor: Colors.white,
+        backgroundColor: Colors.green,
         centerTitle: true,
         title: Text(
-          suerte.haciendaPerteneciente,
-          style: TextStyle(color: Colors.green[400]),
+          'Hacienda perteneciente: \n' + suerte['haciendaPerteneciente'],
+          style: TextStyle(color: Colors.white),
         ),
       ),
       body: Stack(
         children: <Widget>[
           Column(
             children: <Widget>[
-              mapaMiniatura(new LatLng(3.3591886, -76.3035153)),
+              mapaMiniatura(suerte.data()['direccion']),
               contenerInfo(suerte),
               boton(context)
             ],
@@ -41,7 +41,10 @@ Container boton(BuildContext context) {
     child: RaisedButton(
       child: Text('Ver tareas'),
       onPressed: () {
-        Navigator.push(context, MaterialPageRoute());
+        Navigator.push(
+            context,
+            // ignore: missing_return
+            MaterialPageRoute(builder: (BuildContext context) {}));
         // builder: (context) => ListadoSuerte(listadoSuertes: lista)));
       },
       shape:
@@ -50,7 +53,7 @@ Container boton(BuildContext context) {
   );
 }
 
-Container contenerInfo(Suerte n) {
+Container contenerInfo(QueryDocumentSnapshot n) {
   return Container(
     width: 400,
     height: 300,
@@ -59,12 +62,11 @@ Container contenerInfo(Suerte n) {
         Column(
           mainAxisAlignment: MainAxisAlignment.spaceEvenly,
           children: <Widget>[
-            CostumRow('Hacienda', n.idSuerte),
-            CostumRow('Ubicación', n.area),
-            CostumRow('Tareas Hechas', n.tareasRealizadas.toString()),
-            CostumRow('Tareas Totales', n.totalTareas.toString()),
-            CostumRow('Porcentaje',
-                ((n.tareasRealizadas / n.totalTareas) * 100).toStringAsFixed(1))
+            CostumRow('Suerte', n['id_suerte']),
+            CostumRow('Ubicación', n['area'].toString()),
+            CostumRow('Tareas Hechas', '85'),
+            CostumRow('Tareas Totales', '200'),
+            CostumRow('Porcentaje', ((85 / 200) * 100).toStringAsFixed(1))
           ],
         ),
       ],
@@ -72,8 +74,8 @@ Container contenerInfo(Suerte n) {
   );
 }
 
-Container mapaMiniatura(LatLng parametro) {
-  final centro = parametro;
+Container mapaMiniatura(GeoPoint data) {
+  LatLng centro = new LatLng(data.latitude, data.longitude);
 
   return Container(
     width: 300,
@@ -102,6 +104,7 @@ Container mapaMiniatura(LatLng parametro) {
   );
 }
 
+// ignore: must_be_immutable
 class CostumRow extends StatelessWidget {
   String ladoIzq;
   String ladoDer;

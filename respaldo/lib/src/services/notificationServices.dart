@@ -9,6 +9,7 @@ class Services {
   final FirebaseMessaging firebaseMessaging = FirebaseMessaging();
   final String serverToken =
       "AAAAmxMwoxU:APA91bFCUe2VQ6573KLpxubdN_cKhpK0MkQCY2O1f8DACIGEBfXNmQ_8mptBvbLR1Cv87KxL5gZYg6GdTGtPowkQpss9Tu90kMmcfCiTOzKNnpoS8oLPzo1hK45s99DM59LWRarMxOSK";
+  //Esto es para enviar el mensaje de notificacion
   Future<Map<String, dynamic>> sendAndRetrieveMessage() async {
     await firebaseMessaging.requestNotificationPermissions(
       const IosNotificationSettings(

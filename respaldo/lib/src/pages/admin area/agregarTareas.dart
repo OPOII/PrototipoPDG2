@@ -84,8 +84,6 @@ class _TareaViewState extends State<TareaView> {
 
   @override
   Widget build(BuildContext context) {
-    double primero = double.tryParse(horasProgramadasController.text);
-    double segundo = double.tryParse(horasEjecutadasController.text);
     return Scaffold(
       resizeToAvoidBottomInset: false,
       key: _scaffoldKey,
@@ -153,6 +151,7 @@ class _TareaViewState extends State<TareaView> {
   }
 }
 
+// ignore: must_be_immutable
 class CostumTextForField extends StatelessWidget {
   TextEditingController control;
   String texto;
