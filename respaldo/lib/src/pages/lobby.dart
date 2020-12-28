@@ -1,21 +1,22 @@
 import 'dart:async';
+import 'dart:io';
 
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:connectivity/connectivity.dart';
 import 'package:firebase_auth/firebase_auth.dart';
+import 'package:firebase_messaging/firebase_messaging.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter/services.dart';
 import 'package:percent_indicator/linear_percent_indicator.dart';
-import 'package:provider/provider.dart';
 import 'package:respaldo/authentication_service.dart';
 import 'package:respaldo/src/pages/Ingenio.dart';
+import 'package:respaldo/src/pages/activity/activityLobby.dart';
 import 'package:respaldo/src/pages/hacienda/haciendaPrueba.dart';
 import 'package:respaldo/src/pages/loading.dart';
 import 'package:respaldo/src/pages/loginPage.dart';
-import 'package:respaldo/src/pages/networkAwareWidget.dart';
 import 'package:respaldo/src/pages/tablaDatos/tablaDatos.dart';
+import 'package:respaldo/src/pages/user/userView.dart';
 import 'package:respaldo/src/services/crud.dart';
-import 'package:respaldo/src/services/networkStatusService.dart';
-import 'package:respaldo/src/services/notificationServices.dart';
 import 'Calendarrio/CalendarioView.dart';
 import 'admin area/adminArea.dart';
 import 'hacienda/hacienda.dart';
@@ -27,24 +28,67 @@ class Lobby extends StatefulWidget {
 }
 
 class _LobbyState extends State<Lobby> {
-  List haciendasNuevo = [];
   Ingenio pruebas = new Ingenio();
   AuthenticationService _authenticationService = AuthenticationService();
+  List haciendasNuevo = [];
   List<Hacienda> listado = new List<Hacienda>();
   List idHaciendas = [];
-  CrudConsultas consultas = new CrudConsultas();
   List usuario;
   List<HaciendaPrueba> listadoHacienda = new List<HaciendaPrueba>();
-  StreamSubscription connectivityStream;
+  CrudConsultas consultas = new CrudConsultas();
   ConnectivityResult oldres;
+  StreamSubscription connectivityStream;
+  bool dialogshown = false;
+  Future<bool> checkInternet() async {
+    try {
+      final result = await InternetAddress.lookup('google.com');
+      if (result.isNotEmpty && result[0].rawAddress.isNotEmpty) {
+        return Future.value(true);
+      }
+    } on SocketException catch (_) {
+      return Future.value(false);
+    }
+  }
+
   @override
   void initState() {
-    probar();
     super.initState();
+
     connectivityStream =
         Connectivity().onConnectivityChanged.listen((ConnectivityResult resu) {
+      if (resu == ConnectivityResult.none) {
+        dialogshown = true;
+        showDialog(
+          context: context,
+          barrierDismissible: false,
+          child: AlertDialog(
+            title: Text('Error'),
+            content: Text('No Data Connection Available'),
+            actions: <Widget>[
+              FlatButton(
+                onPressed: () => {
+                  SystemChannels.platform.invokeMethod('SystemNavigator.pop'),
+                },
+                child: Text('Exit'),
+              )
+            ],
+          ),
+        );
+      } else if (oldres == ConnectivityResult.none) {
+        checkInternet().then((result) {
+          if (result == true) {
+            if (dialogshown == true) {
+              dialogshown = false;
+              Navigator.pop(context);
+            }
+          }
+        });
+      }
       oldres = resu;
     });
+
+    guardarToken();
+    probar();
   }
 
   @override
@@ -62,6 +106,18 @@ class _LobbyState extends State<Lobby> {
     print(usuario.toList());
   }
 
+  guardarToken() async {
+    FirebaseMessaging firebaseMessaging = FirebaseMessaging();
+    await firebaseMessaging.getToken().then((value) {
+      FirebaseFirestore.instance
+          .collection('Ingenio')
+          .doc('1')
+          .collection('users')
+          .doc(_authenticationService.currentUser.uid)
+          .update({'Token_ID': value});
+    });
+  }
+
   @override
   // ignore: missing_return
   Widget build(BuildContext context) {
@@ -72,71 +128,55 @@ class _LobbyState extends State<Lobby> {
       pruebas.cargarHacienda();
       listado = pruebas.listado;
       pruebas.cargarTodo();
+      //Filtrar por haciendas encargadas
       Stream haciendas = consultas.haciendas;
-
-      ///printear();
-      return StreamProvider<NetworkStatus>(
-          create: (BuildContext context) =>
-              NetworkStatusService().networkStatusController.stream,
-          child: NetworkAwareWidget(
-            onlineChild: StreamBuilder<QuerySnapshot>(
-                stream: haciendas,
-                builder: (BuildContext context,
-                    AsyncSnapshot<QuerySnapshot> snapshot) {
-                  if (snapshot.hasError) {
-                    return Text('Error: ${snapshot.error}');
-                  }
-                  switch (snapshot.connectionState) {
-                    case ConnectionState.waiting:
-                      return Loading();
-                    default:
-                      return Scaffold(
-                          backgroundColor: Colors.white,
-                          appBar: iconoBuscarHaciendas(context),
-                          body: SingleChildScrollView(
-                            child: Stack(
-                              children: <Widget>[
-                                Column(
-                                  children: [
-                                    barraInfo(pruebas),
-                                    Padding(
-                                      padding: const EdgeInsets.all(8.0),
-                                      child: haciendaListado(context, snapshot),
-                                    ),
-                                  ],
-                                )
-                              ],
-                            ),
-                          ),
-                          drawer: Container(
-                            width: 200,
-                            //Esta condicion ternaria es para que cuando le pida el estado para que se cargue
-                            //le de el tiempo de que se cargue y no se muestre un null, por eso se muestra la pantalla del loading
-                            //Esto sirve por que la funcion es asincrona, entonces mientras se carga muestra el widget de loading
-                            child: usuario != null
-                                ? menuDeslizante(context, usuario)
-                                : Loading(),
-                          ));
-                  }
-                }),
-            offlineChild: Container(
-              child: Center(
-                child: Text(
-                  "No internet connection!",
-                  style: TextStyle(
-                      color: Colors.grey[400],
-                      fontWeight: FontWeight.w600,
-                      fontSize: 20.0),
-                ),
-              ),
-            ),
-          ));
+      return StreamBuilder<QuerySnapshot>(
+          stream: haciendas,
+          builder:
+              (BuildContext context, AsyncSnapshot<QuerySnapshot> snapshot) {
+            if (snapshot.hasError) {
+              return Text('Error: ${snapshot.error}');
+            }
+            switch (snapshot.connectionState) {
+              case ConnectionState.waiting:
+                return Loading();
+              default:
+                return Scaffold(
+                    backgroundColor: Colors.white,
+                    appBar: iconoBuscarHaciendas(context),
+                    body: SingleChildScrollView(
+                      child: Stack(
+                        children: <Widget>[
+                          Column(
+                            children: [
+                              barraInfo(pruebas),
+                              Padding(
+                                padding: const EdgeInsets.all(8.0),
+                                child: haciendaListado(context, snapshot),
+                              ),
+                            ],
+                          )
+                        ],
+                      ),
+                    ),
+                    drawer: Container(
+                      width: 200,
+                      //Esta condicion ternaria es para que cuando le pida el estado para que se cargue
+                      //le de el tiempo de que se cargue y no se muestre un null, por eso se muestra la pantalla del loading
+                      //Esto sirve por que la funcion es asincrona, entonces mientras se carga muestra el widget de loading
+                      child: usuario != null
+                          ? menuDeslizante(context, usuario)
+                          : Loading(),
+                    ));
+            }
+          });
     }
   }
 }
 
 Drawer menuDeslizante(context, List usuario) {
-  Services nuevo = new Services();
+  //Aqui se imprime el token
+  // Services nuevo = new Services();
 
   return Drawer(
     child: ListView(
@@ -183,8 +223,17 @@ Drawer menuDeslizante(context, List usuario) {
                 MaterialPageRoute(builder: (context) => CalendarioView()))
           },
         ),
-        CustomListTile(Icons.settings, 'Configuración',
-            () => {nuevo.sendAndRetrieveMessage()}),
+        CustomListTile(
+            Icons.settings,
+            'Configuración',
+            () => {
+                  Navigator.push(
+                      context,
+                      MaterialPageRoute(
+                          builder: (context) => UserView(
+                                user: usuario[0],
+                              )))
+                }),
         if (usuario[0] != null && usuario[0]['charge'] == 'admin') ...[
           CustomListTile(
               Icons.assignment_ind,
@@ -194,8 +243,15 @@ Drawer menuDeslizante(context, List usuario) {
                         MaterialPageRoute(builder: (context) => AdminArea()))
                   }),
         ] else if (usuario[0] != null && usuario[0]['charge'] == 'user') ...[
-          CustomListTile(Icons.assignment_late, 'Tus tareas',
-              () => {nuevo.sendAndRetrieveMessage()})
+          CustomListTile(
+              Icons.assignment_late,
+              'Tus tareas',
+              () => {
+                    Navigator.push(
+                        context,
+                        MaterialPageRoute(
+                            builder: (context) => ActivityWidget()))
+                  })
         ],
         CustomListTile(Icons.power_settings_new, 'Salir', () async {
           await FirebaseAuth.instance.signOut();
@@ -346,6 +402,7 @@ Widget haciendaListado(
   );
 }
 
+//Implementarlo con la base de datos
 Widget barraInfo(Ingenio ingenio) {
   int totalTareas = ingenio.totalTareas(ingenio.listado);
   int totalTareasRealizadas = ingenio.totalTareasHechas(ingenio.listado);
@@ -438,6 +495,7 @@ Widget barraInfo(Ingenio ingenio) {
   );
 }
 
+// Mejorar el metodo de buscar
 class SearchPage extends StatefulWidget {
   @override
   _SearchPage createState() => _SearchPage();

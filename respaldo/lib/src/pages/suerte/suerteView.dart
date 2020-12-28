@@ -21,17 +21,41 @@ class SuerteView extends StatelessWidget {
           style: TextStyle(color: Colors.white),
         ),
       ),
-      body: Stack(
+      body: SingleChildScrollView(
+          child: Column(
         children: <Widget>[
-          Column(
-            children: <Widget>[
-              mapaMiniatura(suerte.data()['direccion']),
-              contenerInfo(suerte),
-              boton(context)
-            ],
-          )
+          mapaMiniatura(suerte.data()['direccion']),
+          SizedBox(
+            height: 20,
+          ),
+          CostumRow(
+            text: 'Suerte: ' + suerte['id_suerte'],
+            press: () => {},
+            icon: Icons.location_on,
+          ),
+          CostumRow(
+            text: 'Ubicacion: ' + suerte['area'].toString(),
+            press: () => {},
+            icon: Icons.article,
+          ),
+          CostumRow(
+            text: 'Tareas Hechas: ',
+            press: () => {},
+            icon: Icons.done,
+          ),
+          CostumRow(
+            text: 'Tareas Totales: ',
+            press: () => {},
+            icon: Icons.note_add,
+          ),
+          CostumRow(
+            text: 'Porcentaje: ' + ((85 / 200) * 100).toStringAsFixed(1),
+            press: () => {},
+            icon: Icons.bar_chart,
+          ),
+          boton(context)
         ],
-      ),
+      )),
     );
   }
 }
@@ -53,32 +77,11 @@ Container boton(BuildContext context) {
   );
 }
 
-Container contenerInfo(QueryDocumentSnapshot n) {
-  return Container(
-    width: 400,
-    height: 300,
-    child: Stack(
-      children: <Widget>[
-        Column(
-          mainAxisAlignment: MainAxisAlignment.spaceEvenly,
-          children: <Widget>[
-            CostumRow('Suerte', n['id_suerte']),
-            CostumRow('Ubicación', n['area'].toString()),
-            CostumRow('Tareas Hechas', '85'),
-            CostumRow('Tareas Totales', '200'),
-            CostumRow('Porcentaje', ((85 / 200) * 100).toStringAsFixed(1))
-          ],
-        ),
-      ],
-    ),
-  );
-}
-
 Container mapaMiniatura(GeoPoint data) {
   LatLng centro = new LatLng(data.latitude, data.longitude);
 
   return Container(
-    width: 300,
+    width: 400,
     height: 300,
     child: FlutterMap(
       options: new MapOptions(center: centro, minZoom: 5),
@@ -106,17 +109,35 @@ Container mapaMiniatura(GeoPoint data) {
 
 // ignore: must_be_immutable
 class CostumRow extends StatelessWidget {
-  String ladoIzq;
-  String ladoDer;
-  CostumRow(this.ladoIzq, this.ladoDer);
+  String text;
+  VoidCallback press;
+  IconData icon;
+  CostumRow({this.text, this.press, this.icon});
+
   @override
   Widget build(BuildContext context) {
-    return Row(
-      mainAxisAlignment: MainAxisAlignment.spaceAround,
-      children: <Widget>[
-        Text(ladoIzq, style: TextStyle(fontSize: 16.0)),
-        Text(ladoDer, style: TextStyle(fontSize: 16.0))
-      ],
+    return Padding(
+      padding: EdgeInsets.symmetric(horizontal: 20, vertical: 10),
+      child: FlatButton(
+        padding: EdgeInsets.all(20),
+        shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(15)),
+        color: Color(0xFFF5F6F9),
+        onPressed: press,
+        child: Row(
+          children: [
+            Icon(
+              icon,
+              color: Colors.black,
+            ),
+            SizedBox(width: 20),
+            Expanded(
+                child: Text(
+              text,
+              textAlign: TextAlign.justify,
+            )),
+          ],
+        ),
+      ),
     );
   }
 }

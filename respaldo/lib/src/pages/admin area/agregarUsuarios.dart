@@ -1,8 +1,11 @@
 import 'dart:math';
 
+import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:datetime_picker_formfield/datetime_picker_formfield.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter/services.dart';
 import 'package:intl/intl.dart';
+import 'package:respaldo/authentication_service.dart';
 
 class AgregarUsuarios extends StatefulWidget {
   @override
@@ -11,7 +14,9 @@ class AgregarUsuarios extends StatefulWidget {
 
 class _UsersState extends State<AgregarUsuarios> {
   final formKey = GlobalKey<FormState>();
+  AuthenticationService service = new AuthenticationService();
   String name, telephone, email, cargo, hacienda, url;
+  String uid;
   DateTime fecha;
   final nameController = TextEditingController();
   final telephoneController = TextEditingController();
@@ -22,28 +27,6 @@ class _UsersState extends State<AgregarUsuarios> {
   final format = DateFormat("dd-MM-yyyy");
   List _charges = ["", "admin", "user"];
   String _currentCharge;
-  final _datos = [
-    {
-      "display": "Hacienda #468865",
-      "value": "Hacienda #468865",
-    },
-    {
-      "display": "Hacienda #6498633",
-      "value": "Hacienda #6498633",
-    },
-    {
-      "display": "Hacienda #268979778",
-      "value": "Hacienda #268979778",
-    },
-    {
-      "display": "Hacienda #798626936",
-      "value": "Hacienda #798626936",
-    },
-    {
-      "display": "Hacienda #51654687986",
-      "value": "Hacienda #51654687986",
-    },
-  ];
   List<DropdownMenuItem<String>> _dropDownMenuItems;
   @override
   void initState() {
@@ -74,127 +57,152 @@ class _UsersState extends State<AgregarUsuarios> {
               style:
                   TextStyle(color: Colors.white, fontWeight: FontWeight.bold)),
         ),
-        body: Padding(
-          padding: const EdgeInsets.all(16.0),
-          child: Form(
-            key: formKey,
-            child: ListView(
-              children: <Widget>[
-                TextFormField(
-                  controller: nameController,
-                  decoration: InputDecoration(labelText: 'Nombre'),
-                  onSaved: (value) {
-                    name = value;
-                  },
-                  validator: (value) {
-                    if (value.isEmpty) {
-                      return "Este campo no debe de estar vacio";
-                    }
-                  },
-                ),
-                TextFormField(
-                  controller: cedulaController,
-                  decoration: InputDecoration(labelText: 'Cedula'),
-                  onSaved: (value) {
-                    name = value;
-                  },
-                  validator: (value) {
-                    if (value.isEmpty) {
-                      return "Este campo no debe de estar vacio";
-                    } else if (int.tryParse(value.toString()) == null) {
-                      return "Este campo solo admite numeros";
-                    }
-                  },
-                ),
-                TextFormField(
-                  controller: telephoneController,
-                  decoration: InputDecoration(labelText: 'Telephone'),
-                  keyboardType: TextInputType.phone,
-                  onSaved: (value) {
-                    telephone = value;
-                  },
-                  validator: (value) {
-                    if (value.isEmpty) {
-                      return "Este campo no debe de estar vacio";
-                    }
-                  },
-                ),
-                TextFormField(
-                  controller: emailController,
-                  decoration: InputDecoration(labelText: 'Email'),
-                  keyboardType: TextInputType.emailAddress,
-                  onSaved: (value) {
-                    email = value;
-                  },
-                  validator: (value) {
-                    if (value.isEmpty) {
-                      return "Este campo no debe de estar vacio";
-                    } else if (!(value.contains("@"))) {
-                      return "Debes de agregar un correo electronico";
-                    }
-                  },
-                ),
-                Row(
-                  mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                  children: <Widget>[
-                    Text("Charge:", style: TextStyle(fontSize: 20)),
-                    DropdownButton(
-                      value: _currentCharge,
-                      items: _dropDownMenuItems,
-                      onChanged: changedDropDownItems,
-                    ),
-                  ],
-                ),
-                DateTimeField(
-                  controller: birthdayController,
-                  decoration: InputDecoration(labelText: 'Fecha Nacimiento'),
-                  format: format,
-                  onShowPicker: (context, currentValue) {
-                    return showDatePicker(
-                        context: context,
-                        initialDate: currentValue ?? DateTime.now(),
-                        firstDate: DateTime(1920),
-                        lastDate: DateTime(2030));
-                  },
-                  onSaved: (value) {
-                    fecha = value;
-                  },
-                  validator: (value) {
-                    if (value.toString().isEmpty) {
-                      return "Debes de elegir una fecha de nacimiento";
-                    }
-                  },
-                ),
+        body: buildPadding());
+  }
 
-                /*MultiSelectFormField(
-                  autovalidate: false,
-                  title: Text(''),
-                  validator: (value) {
-                    if (value == null || value.legth == 0) {
-                      return 'Please select one or more options';
-                    }
-                  },
-                  dataSource: _datos,
-                  textField: 'display',
-                  valueField: 'value',
-                  okButtonLabel: 'OK',
-                  cancelButtonLabel: 'CANCEL',
-                  hintWidget: Text('Please choose one or more'),
-                ),
-                */
-                RaisedButton(
-                  child: Text('Add new User'),
-                  onPressed: () {
-                    if (formKey.currentState.validate()) {
-                      print(
-                          contra() + "------------>" + birthdayController.text);
-                    }
-                  },
+  Padding buildPadding() {
+    return Padding(
+      padding: const EdgeInsets.all(16.0),
+      child: Form(
+        key: formKey,
+        child: ListView(
+          children: <Widget>[
+            TextFormField(
+              controller: nameController,
+              decoration: InputDecoration(labelText: 'Nombre'),
+              onSaved: (value) {
+                name = value;
+              },
+              validator: (value) {
+                if (value.isEmpty) {
+                  return "Este campo no debe de estar vacio";
+                }
+              },
+            ),
+            TextFormField(
+              controller: cedulaController,
+              decoration: InputDecoration(labelText: 'Cedula'),
+              keyboardType: TextInputType.number,
+              onSaved: (value) {
+                name = value;
+              },
+              validator: (value) {
+                if (value.isEmpty) {
+                  return "Este campo no debe de estar vacio";
+                } else if (int.tryParse(value.toString()) == null) {
+                  return "Este campo solo admite numeros";
+                }
+              },
+            ),
+            TextFormField(
+              controller: telephoneController,
+              decoration: InputDecoration(labelText: 'Telefono'),
+              keyboardType: TextInputType.phone,
+              onSaved: (value) {
+                telephone = value;
+              },
+              validator: (value) {
+                if (value.isEmpty) {
+                  return "Este campo no debe de estar vacio";
+                }
+              },
+            ),
+            TextFormField(
+              controller: emailController,
+              decoration: InputDecoration(labelText: 'Email'),
+              keyboardType: TextInputType.emailAddress,
+              onSaved: (value) {
+                email = value;
+              },
+              validator: (value) {
+                if (value.isEmpty) {
+                  return "Este campo no debe de estar vacio";
+                } else if (!(value.contains("@"))) {
+                  return "Debes de agregar un correo electronico";
+                }
+              },
+            ),
+            Row(
+              mainAxisAlignment: MainAxisAlignment.spaceBetween,
+              children: <Widget>[
+                Text("Cargo:", style: TextStyle(fontSize: 20)),
+                DropdownButton(
+                  value: _currentCharge,
+                  items: _dropDownMenuItems,
+                  onChanged: changedDropDownItems,
                 ),
               ],
             ),
-          ),
-        ));
+            DateTimeField(
+              controller: birthdayController,
+              decoration: InputDecoration(labelText: 'Fecha Nacimiento'),
+              format: format,
+              onShowPicker: (context, currentValue) {
+                return showDatePicker(
+                    context: context,
+                    initialDate: currentValue ?? DateTime.now(),
+                    firstDate: DateTime(1920),
+                    lastDate: DateTime(2030));
+              },
+              onSaved: (value) {
+                fecha = value;
+              },
+              validator: (value) {
+                if (value.toString().isEmpty) {
+                  return "Debes de elegir una fecha de nacimiento";
+                }
+              },
+            ),
+            RaisedButton(
+              child: Text('Add new User'),
+              onPressed: () {
+                if (formKey.currentState.validate()) {
+                  saveAndSendData();
+                  clearData();
+                }
+              },
+            ),
+          ],
+        ),
+      ),
+    );
+  }
+
+  void clearData() {
+    nameController.text = "";
+    telephoneController.text = "";
+    emailController.text = "";
+    cargoController.text = "";
+    birthdayController.text = "";
+    cedulaController.text = "";
+    _currentCharge = "";
+  }
+
+  void saveAndSendData() async {
+    Map<String, dynamic> infoUsuario = new Map<String, dynamic>();
+    infoUsuario['birthday'] = birthdayController.text;
+    infoUsuario['charge'] = _currentCharge;
+    infoUsuario['email'] = emailController.text;
+    infoUsuario['name'] = nameController.text;
+    infoUsuario['telephone'] = telephoneController.text;
+    infoUsuario['haciendasResponsables'] = new List<String>();
+    infoUsuario['cedula'] = cedulaController.text;
+    infoUsuario['urlfoto'] =
+        "https://image.freepik.com/vector-gratis/perfil-empresario-dibujos-animados_18591-58479.jpg";
+    print(infoUsuario);
+    obtenerUID(cedulaController.text, emailController.text);
+    print(service.usuarioUID + "DESDE EL OBTENER EN EL AGREGAR");
+    infoUsuario['id_user'] = service.usuarioUID;
+    await FirebaseFirestore.instance
+        .collection('Ingenio')
+        .doc('1')
+        .collection('users')
+        .doc(service.usuarioUID)
+        .set(infoUsuario);
+  }
+
+  void obtenerUID(String contra, String email) async {
+    service.agregarUsuario(contra, email);
   }
 
   void changedDropDownItems(String charge) {

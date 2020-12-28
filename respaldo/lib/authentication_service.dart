@@ -1,9 +1,10 @@
+import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:respaldo/src/pages/user/usuario.dart';
 
 class AuthenticationService {
   final FirebaseAuth _auth = FirebaseAuth.instance;
-
+  String usuarioUID;
   Usuario _userFromFirebaseUser(User fbUsuario) {
     return fbUsuario != null ? Usuario(id: fbUsuario.uid) : null;
   }
@@ -43,5 +44,17 @@ class AuthenticationService {
 
   void signOut() async {
     await _auth.signOut();
+  }
+
+  void agregarUsuario(String contra, String email) async {
+    try {
+      await _auth
+          .createUserWithEmailAndPassword(email: email, password: contra)
+          .then((value) {
+        usuarioUID = value.user.uid;
+      });
+    } catch (e) {
+      print(e.toString());
+    }
   }
 }

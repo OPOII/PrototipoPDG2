@@ -7,10 +7,13 @@ class PushNotificationProvider {
   FirebaseMessaging _firebaseMessaging = FirebaseMessaging();
   final _streamController = StreamController<String>.broadcast();
   Stream<String> get mensajes => _streamController.stream;
+  String tokenDispositivo;
+  String tokenActual;
   initNotifications() {
     _firebaseMessaging.requestNotificationPermissions();
     _firebaseMessaging.getToken().then((token) {
       print('===== FCM ==========');
+      tokenActual = token;
       print(token);
       //f8qcHr3vSB218d6Gs0Au1T:APA91bHzdLSFei1aHzgVTXJchNYs_QU_oypRcBZ0_Icl_2PmHwgkZ808ciXdQglLCUgSNidcszVICes3AwLIAELQEzJpl7wOTRzVdrXKiCPQA3Af3h9tf5amFTcrQUOb6ZsOPTxP6TXe
       //Hay que guardar este token en una base de datos

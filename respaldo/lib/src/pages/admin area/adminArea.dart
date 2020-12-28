@@ -1,6 +1,6 @@
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
-
+import 'package:respaldo/src/pages/admin%20area/verUsuarios.dart';
 import 'agregarTareas.dart';
 import 'agregarUsuarios.dart';
 
@@ -101,7 +101,10 @@ class Cards extends StatelessWidget {
                                 TareaView(title: 'Agregar Tarea')))
                   }
                 else if (name == "Ver usuarios")
-                  {print("opcion 3")}
+                  {
+                    Navigator.push(context,
+                        MaterialPageRoute(builder: (context) => Allusers()))
+                  }
                 else if (name == "Ver tareas")
                   {print("opcion 4")}
               },

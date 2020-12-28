@@ -10,7 +10,8 @@ class Services {
   final String serverToken =
       "AAAAmxMwoxU:APA91bFCUe2VQ6573KLpxubdN_cKhpK0MkQCY2O1f8DACIGEBfXNmQ_8mptBvbLR1Cv87KxL5gZYg6GdTGtPowkQpss9Tu90kMmcfCiTOzKNnpoS8oLPzo1hK45s99DM59LWRarMxOSK";
   //Esto es para enviar el mensaje de notificacion
-  Future<Map<String, dynamic>> sendAndRetrieveMessage() async {
+  Future<Map<String, dynamic>> sendAndRetrieveMessage(
+      String tokenDestino, String titulo, String mensaje) async {
     await firebaseMessaging.requestNotificationPermissions(
       const IosNotificationSettings(
           sound: true, badge: true, alert: true, provisional: false),
@@ -24,18 +25,14 @@ class Services {
       },
       body: jsonEncode(
         <String, dynamic>{
-          'notification': <String, dynamic>{
-            'body': 'Enviame un screen shot de la notificacion',
-            'title': 'this is a title'
-          },
+          'notification': <String, dynamic>{'body': mensaje, 'title': titulo},
           'priority': 'high',
           'data': <String, dynamic>{
             'click_action': 'FLUTTER_NOTIFICATION_CLICK',
             'id': '1',
             'status': 'done'
           },
-          'to':
-              "dNgzK0QfTS-d5-BL1PlL8-:APA91bEakU-jYYZvORa9S7IJmch5Xj_Q29cAMqFWjw6E9YKAOpE2UoEclnTdYpGObmtXlUzMPATXfpZHqIps8q1XltNy7gBCaz107xpW38Tgp2U9X4F10rfxM_47aL_xgMp70vMWsVRH",
+          'to': tokenDestino,
         },
       ),
     );

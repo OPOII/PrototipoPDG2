@@ -21,17 +21,42 @@ class HaciendaView extends StatelessWidget {
         title: Text('Información Hacienda',
             style: TextStyle(color: Colors.white, fontWeight: FontWeight.bold)),
       ),
-      body: Stack(
+      body: SingleChildScrollView(
+          child: Column(
+        mainAxisAlignment: MainAxisAlignment.center,
         children: <Widget>[
-          Column(
-            children: <Widget>[
-              mapaMiniatura(hacienda.data()['location']),
-              contenerInfo(hacienda),
-              boton(context, hacienda)
-            ],
-          )
+          mapaMiniatura(hacienda.data()['location']),
+          SizedBox(
+            height: 20,
+          ),
+          CostumInfo(
+              text: '' + hacienda.data()['hacienda_name'],
+              press: () => {},
+              icon: Icons.location_on),
+          CostumInfo(
+            text: 'Identificación ' + hacienda.data()['id_hacienda'].toString(),
+            press: () => {},
+            icon: Icons.article,
+          ),
+          CostumInfo(
+            text: "Tareas Hechas 55",
+            press: () => {},
+            icon: Icons.done,
+          ),
+          CostumInfo(
+            text: 'Tareas Totales 88',
+            press: () => {},
+            icon: Icons.note_add,
+          ),
+          CostumInfo(
+            text: 'Porcentaje: ' + ((55 / 88) * 100).toStringAsFixed(1),
+            press: () => {},
+            icon: Icons.bar_chart,
+          ),
+          // contenerInfo(hacienda),
+          boton(context, hacienda)
         ],
-      ),
+      )),
     );
   }
 }
@@ -55,7 +80,7 @@ Container boton(BuildContext context, QueryDocumentSnapshot hacienda) {
 Container mapaMiniatura(GeoPoint parametro) {
   LatLng centro = new LatLng(parametro.latitude, parametro.longitude);
   return Container(
-    width: 300,
+    width: 400,
     height: 300,
     child: FlutterMap(
       options: new MapOptions(center: centro, minZoom: 5),
@@ -81,48 +106,37 @@ Container mapaMiniatura(GeoPoint parametro) {
   );
 }
 
-Container contenerInfo(QueryDocumentSnapshot hacienda) {
-  return Container(
-    width: 400,
-    height: 300,
-    child: Stack(
-      children: <Widget>[
-        Column(
-          mainAxisAlignment: MainAxisAlignment.spaceEvenly,
-          children: <Widget>[
-            CostumInfo('Hacienda', hacienda.data()['hacienda_name']),
-            CostumInfo(
-                'Identificación', hacienda.data()['id_hacienda'].toString()),
-            CostumInfo('Tareas Hechas', "55"),
-            CostumInfo('Tareas Totales', "88"),
-            CostumInfo('Porcentaje', ((55 / 88) * 100).toStringAsFixed(1))
-          ],
-        ),
-      ],
-    ),
-  );
-}
-
 // ignore: must_be_immutable
 class CostumInfo extends StatelessWidget {
-  String ladoIzq;
-  String ladoDer;
-  CostumInfo(this.ladoIzq, this.ladoDer);
+  String text;
+  VoidCallback press;
+  IconData icon;
+  CostumInfo({this.text, this.press, this.icon});
 
   @override
   Widget build(BuildContext context) {
-    return Row(
-      mainAxisAlignment: MainAxisAlignment.spaceAround,
-      children: <Widget>[
-        Padding(
-          padding: const EdgeInsets.only(left: 50.0),
-          child: Text(
-            ladoIzq,
-            style: TextStyle(fontSize: 16.0),
-          ),
+    return Padding(
+      padding: EdgeInsets.symmetric(horizontal: 20, vertical: 10),
+      child: FlatButton(
+        padding: EdgeInsets.all(20),
+        shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(15)),
+        color: Color(0xFFF5F6F9),
+        onPressed: press,
+        child: Row(
+          children: [
+            Icon(
+              icon,
+              color: Colors.black,
+            ),
+            SizedBox(width: 20),
+            Expanded(
+                child: Text(
+              text,
+              textAlign: TextAlign.justify,
+            )),
+          ],
         ),
-        Text(ladoDer, style: TextStyle(fontSize: 16.0))
-      ],
+      ),
     );
   }
 }
