@@ -14,6 +14,7 @@ class AgregarUsuarios extends StatefulWidget {
 
 class _UsersState extends State<AgregarUsuarios> {
   final formKey = GlobalKey<FormState>();
+  final _scaffoldKey = GlobalKey<ScaffoldState>();
   AuthenticationService service = new AuthenticationService();
   String name, telephone, email, cargo, hacienda, url;
   String uid;
@@ -157,8 +158,9 @@ class _UsersState extends State<AgregarUsuarios> {
               child: Text('Add new User'),
               onPressed: () {
                 if (formKey.currentState.validate()) {
-                  saveAndSendData();
-                  clearData();
+                  obtenerUID(cedulaController.text, emailController.text);
+                  // saveAndSendData();
+                  // clearData();
                 }
               },
             ),
@@ -178,7 +180,7 @@ class _UsersState extends State<AgregarUsuarios> {
     _currentCharge = "";
   }
 
-  void saveAndSendData() async {
+  void saveAndSendData(String tokenUsuario) async {
     Map<String, dynamic> infoUsuario = new Map<String, dynamic>();
     infoUsuario['birthday'] = birthdayController.text;
     infoUsuario['charge'] = _currentCharge;
@@ -189,20 +191,25 @@ class _UsersState extends State<AgregarUsuarios> {
     infoUsuario['cedula'] = cedulaController.text;
     infoUsuario['urlfoto'] =
         "https://image.freepik.com/vector-gratis/perfil-empresario-dibujos-animados_18591-58479.jpg";
+    //print(service.usuarioUID + "DESDE EL OBTENER EN EL AGREGAR");
+    infoUsuario['id_user'] = tokenUsuario;
     print(infoUsuario);
-    obtenerUID(cedulaController.text, emailController.text);
-    print(service.usuarioUID + "DESDE EL OBTENER EN EL AGREGAR");
-    infoUsuario['id_user'] = service.usuarioUID;
     await FirebaseFirestore.instance
         .collection('Ingenio')
         .doc('1')
         .collection('users')
-        .doc(service.usuarioUID)
+        .doc(tokenUsuario)
         .set(infoUsuario);
   }
 
   void obtenerUID(String contra, String email) async {
-    service.agregarUsuario(contra, email);
+    String resulta = "";
+    // ignore: await_only_futures
+    dynamic resultado = await service.agregarUsuario(contra, email);
+    setState(() {
+      resulta = resultado;
+      saveAndSendData(resulta);
+    });
   }
 
   void changedDropDownItems(String charge) {

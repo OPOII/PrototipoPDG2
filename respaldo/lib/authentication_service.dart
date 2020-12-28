@@ -46,13 +46,16 @@ class AuthenticationService {
     await _auth.signOut();
   }
 
-  void agregarUsuario(String contra, String email) async {
+  Future agregarUsuario(String contra, String email) async {
+    String retorno = "";
     try {
       await _auth
           .createUserWithEmailAndPassword(email: email, password: contra)
           .then((value) {
         usuarioUID = value.user.uid;
+        retorno = value.user.uid;
       });
+      return retorno;
     } catch (e) {
       print(e.toString());
     }

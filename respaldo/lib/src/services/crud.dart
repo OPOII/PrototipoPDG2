@@ -66,6 +66,7 @@ class CrudConsultas {
           haciendas.add(element);
         });
       });
+      print(haciendas.length.toString() + "En el crud");
       return haciendas;
     } catch (e) {
       print(e.toString());
@@ -74,6 +75,7 @@ class CrudConsultas {
   }
 
   Future obtenerListadoSuertes(String id) async {
+    print(id + "En el crud");
     List haciendas = [];
     try {
       await FirebaseFirestore.instance
@@ -88,6 +90,7 @@ class CrudConsultas {
           haciendas.add(element);
         });
       });
+      print(haciendas.length);
       return haciendas;
     } catch (e) {
       print(e.toString());

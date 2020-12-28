@@ -89,6 +89,7 @@ class _LobbyState extends State<Lobby> {
 
     guardarToken();
     probar();
+    obtenerHaciendas();
   }
 
   @override
@@ -104,6 +105,14 @@ class _LobbyState extends State<Lobby> {
       usuario = resultado;
     });
     print(usuario.toList());
+  }
+
+  obtenerHaciendas() async {
+    dynamic resultado = await consultas.obtenerListadoHaciendas();
+    setState(() {
+      haciendasNuevo = resultado;
+      print(haciendasNuevo.length.toString() + "En el lobby");
+    });
   }
 
   guardarToken() async {
@@ -143,7 +152,7 @@ class _LobbyState extends State<Lobby> {
               default:
                 return Scaffold(
                     backgroundColor: Colors.white,
-                    appBar: iconoBuscarHaciendas(context),
+                    appBar: iconoBuscarHaciendas(context, haciendasNuevo),
                     body: SingleChildScrollView(
                       child: Stack(
                         children: <Widget>[
@@ -305,7 +314,7 @@ class CustomListTile extends StatelessWidget {
   }
 }
 
-Widget iconoBuscarHaciendas(BuildContext context) {
+Widget iconoBuscarHaciendas(BuildContext context, List haciendasNuevo) {
   Icon usIcon = Icon(Icons.search);
   return AppBar(
     iconTheme: IconThemeData(color: Colors.white),
@@ -319,8 +328,9 @@ Widget iconoBuscarHaciendas(BuildContext context) {
           tooltip: 'search',
           icon: usIcon,
           onPressed: () {
-            Navigator.push(
-                context, MaterialPageRoute(builder: (context) => SearchPage()));
+            showSearch(
+                context: context,
+                delegate: HaciendaSearch(listado: haciendasNuevo));
           })
     ],
     backgroundColor: Colors.green,
@@ -496,121 +506,82 @@ Widget barraInfo(Ingenio ingenio) {
 }
 
 // Mejorar el metodo de buscar
-class SearchPage extends StatefulWidget {
-  @override
-  _SearchPage createState() => _SearchPage();
-}
+class HaciendaSearch extends SearchDelegate<dynamic> {
+  List listado;
+  HaciendaSearch({this.listado});
 
-class _SearchPage extends State<SearchPage> {
-  TextEditingController search = TextEditingController();
-  final database = FirebaseFirestore.instance;
-  String searchString;
   @override
-  Widget build(BuildContext context) {
-    return Scaffold(
-      appBar: AppBar(
-        iconTheme: IconThemeData(color: Colors.white),
-        elevation: 0,
-        backgroundColor: Colors.green,
-        centerTitle: true,
-        title: Text(
-          'Buscar Haciendas',
-          style: TextStyle(color: Colors.white),
-        ),
-      ),
-      body: Column(
-        children: <Widget>[
-          Expanded(
-            child: Column(
-              children: <Widget>[
-                Padding(
-                    padding: const EdgeInsets.all(15.0),
-                    child: Container(
-                        child: TextField(
-                      onChanged: (val) {
-                        setState(() {
-                          searchString = val.toLowerCase();
-                        });
-                      },
-                      controller: search,
-                      decoration: InputDecoration(
-                        suffixIcon: IconButton(
-                            icon: Icon(Icons.clear),
-                            onPressed: () => search.clear()),
-                        hintText: 'Search the hacienda',
-                        hintStyle: TextStyle(
-                            color: Colors.grey,
-                            fontFamily: 'Antra',
-                            fontSize: 20),
-                      ),
-                    ))),
-                Expanded(
-                  child: StreamBuilder<QuerySnapshot>(
-                    stream: (searchString == null || searchString.trim() == '')
-                        ? FirebaseFirestore.instance
-                            .collection('Ingenio')
-                            .doc('1')
-                            .collection('Hacienda')
-                            .snapshots()
-                        : FirebaseFirestore.instance
-                            .collection('Ingenio')
-                            .doc('1')
-                            .collection('Hacienda')
-                            .where('searchIndex', arrayContains: searchString)
-                            .snapshots(),
-                    builder: (context, snapshot) {
-                      if (snapshot.hasError) {
-                        return Text('We got an error ${snapshot.error}');
-                      }
-                      switch (snapshot.connectionState) {
-                        case ConnectionState.waiting:
-                          return Loading();
-                        case ConnectionState.none:
-                          return Text('There is no data');
-                        case ConnectionState.done:
-                          return Text('Done');
-                        default:
-                          return new ListView(
-                            children: snapshot.data.docs
-                                .map((DocumentSnapshot document) {
-                              return new ListTile(
-                                onTap: () {
-                                  Navigator.push(
-                                      context,
-                                      MaterialPageRoute(
-                                          builder: (context) => HaciendaView(
-                                              hacienda: document)));
-                                },
-                                title: Column(
-                                  crossAxisAlignment: CrossAxisAlignment.start,
-                                  children: <Widget>[
-                                    Text(
-                                      document['hacienda_name'],
-                                      style: TextStyle(fontSize: 20),
-                                    ),
-                                    Text(
-                                        'ID hacienda: ' +
-                                            document['id_hacienda'].toString(),
-                                        style: TextStyle(color: Colors.grey)),
-                                    Divider()
-                                  ],
-                                ),
-                                leading: CircleAvatar(
-                                    backgroundImage:
-                                        NetworkImage(document['imagen']),
-                                    backgroundColor: Colors.transparent),
-                              );
-                            }).toList(),
-                          );
-                      }
-                    },
-                  ),
-                )
-              ],
-            ),
-          )
-        ],
-      ),
+  List<Widget> buildActions(BuildContext context) {
+    return [
+      IconButton(
+        icon: Icon(Icons.clear),
+        onPressed: () {
+          query = "";
+        },
+      )
+    ];
+  }
+
+  @override
+  Widget buildLeading(BuildContext context) {
+    return IconButton(
+      onPressed: () {
+        close(context, null);
+      },
+      icon: Icon(Icons.arrow_back),
     );
+  }
+
+  @override
+  Widget buildResults(BuildContext context) {
+    throw UnimplementedError();
+  }
+
+  @override
+  Widget buildSuggestions(BuildContext context) {
+    print(listado.length.toString());
+    List myList = query.isEmpty
+        ? listado
+        : listado
+            .where((p) => p['id_hacienda'].toString().startsWith(query))
+            .toList();
+    return myList.isEmpty
+        ? Text(
+            'No resoults found...',
+            style: TextStyle(fontSize: 20),
+          )
+        : ListView.builder(
+            itemCount: myList
+                .length, //Aqui esta el problema, si lo pongo listado.length.compareTo(0) entonces solo me deja ver el primer elemento => update, el error era que le estaba pasando el "listado" en vez de "myList"
+            itemBuilder: (context, index) {
+              QueryDocumentSnapshot nuevoListado = myList[index];
+              return ListTile(
+                onTap: () {
+                  Navigator.push(
+                      context,
+                      MaterialPageRoute(
+                          builder: (context) => HaciendaView(
+                                hacienda: nuevoListado,
+                              )));
+                },
+                title: Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: <Widget>[
+                    Text(
+                      nuevoListado['hacienda_name'],
+                      style: TextStyle(fontSize: 20),
+                    ),
+                    Text(
+                        'Id hacienda: ' +
+                            nuevoListado['id_hacienda'].toString(),
+                        style: TextStyle(color: Colors.grey)),
+                    Divider()
+                  ],
+                ),
+                leading: CircleAvatar(
+                  backgroundImage: NetworkImage(nuevoListado['imagen']),
+                ),
+              );
+            });
   }
 }

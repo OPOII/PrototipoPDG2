@@ -34,6 +34,7 @@ class _TareaViewState extends State<TareaView> {
   String idUser = "";
   String idHacienda = "";
   String idSuerte = "";
+  String message = "";
   @override
   void initState() {
     super.initState();
@@ -61,6 +62,7 @@ class _TareaViewState extends State<TareaView> {
   TextEditingController pendienteController = TextEditingController();
   TextEditingController observacionController = TextEditingController();
   TextEditingController delegadoController = TextEditingController();
+  TextEditingController messageController = TextEditingController();
   // Method to Submit Feedback and save it in Google Sheets
   Future<void> _submitForm() async {
     // Validate returns true if the form is valid, or false
@@ -143,10 +145,8 @@ class _TareaViewState extends State<TareaView> {
   void enviarNotificacion() async {
     for (var i = 0; i < usuarios.length; i++) {
       if (usuarios[i]['name'] == currentUser) {
-        await servicios.sendAndRetrieveMessage(
-            usuarios[i]['Token_ID'],
-            "Se te ha encargado la tarea: " + actividadController.text,
-            "Este es el cuerpo del mensaje");
+        await servicios.sendAndRetrieveMessage(usuarios[i]['Token_ID'],
+            "Nueva tarea: " + actividadController.text, messageController.text);
       }
     }
   }
@@ -379,6 +379,22 @@ class _TareaViewState extends State<TareaView> {
                                 onChanged: changedUsuarioItem)
                           ],
                         ),
+                        TextFormField(
+                          controller: messageController,
+                          validator: (input) {
+                            if (input.isEmpty) {
+                              return 'Please, enter a description';
+                            }
+                            return null;
+                          },
+                          onSaved: (input) => message = input,
+                          decoration: InputDecoration(
+                              hintText: 'Cuerpo de la notificación',
+                              labelText:
+                                  'Entre la descripción de la notificación',
+                              border: OutlineInputBorder()),
+                          maxLines: 10,
+                        )
                       ],
                     ),
                   )),
@@ -411,9 +427,12 @@ class CostumTextForField extends StatelessWidget {
         }
         return null;
       },
+
       keyboardType: tipoTeclado,
       //keyboardType: TextInputType.multiline,
-      decoration: InputDecoration(labelText: texto),
+      decoration: InputDecoration(
+        labelText: texto,
+      ),
     );
   }
 }

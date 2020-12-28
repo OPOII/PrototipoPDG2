@@ -5,12 +5,33 @@ import 'package:respaldo/src/services/crud.dart';
 
 import '../loading.dart';
 
-// ignore: must_be_immutable
-class ListadoSuerte extends StatelessWidget {
+class ListadoSuerte extends StatefulWidget {
   final QueryDocumentSnapshot listadoSuertes;
   ListadoSuerte({Key key, this.listadoSuertes}) : super(key: key);
+  @override
+  _ListadoSuerte createState() => _ListadoSuerte(listadoSuertes);
+}
+
+class _ListadoSuerte extends State<ListadoSuerte> {
+  final QueryDocumentSnapshot listadoSuertes;
+  _ListadoSuerte(this.listadoSuertes);
   CrudConsultas consultas = new CrudConsultas();
   Icon usIcon = Icon(Icons.search);
+  List suertesListado = [];
+
+  @override
+  void initState() {
+    super.initState();
+    obtenerListado();
+  }
+
+  void obtenerListado() async {
+    dynamic listado = await consultas.obtenerListadoSuertes(listadoSuertes.id);
+    setState(() {
+      suertesListado = listado;
+    });
+  }
+
   @override
   Widget build(BuildContext context) {
     Stream suertes = consultas.obtenerSuertes(listadoSuertes.id);
@@ -45,11 +66,9 @@ class ListadoSuerte extends StatelessWidget {
                     tooltip: 'search',
                     icon: usIcon,
                     onPressed: () {
-                      Navigator.push(
-                          context,
-                          MaterialPageRoute(
-                              builder: (context) =>
-                                  SearchPages(listadoSuertes.id)));
+                      showSearch(
+                          context: context,
+                          delegate: SuerteSearch(listado: suertesListado));
                     },
                   )
                 ],
@@ -111,137 +130,81 @@ class ListadoSuerte extends StatelessWidget {
   }
 }
 
-class SearchPages extends StatefulWidget {
-  final String id;
-  SearchPages(this.id);
-  @override
-  State<StatefulWidget> createState() {
-    return _SearchPageSuerte();
-  }
-}
+class SuerteSearch extends SearchDelegate<dynamic> {
+  List listado;
+  SuerteSearch({this.listado});
 
-class _SearchPageSuerte extends State<SearchPages> {
-  String idDoc;
   @override
-  void initState() {
-    idDoc = widget.id;
-    super.initState();
+  List<Widget> buildActions(BuildContext context) {
+    return [
+      IconButton(
+        icon: Icon(Icons.clear),
+        onPressed: () {
+          query = "";
+        },
+      )
+    ];
   }
 
-  TextEditingController search = TextEditingController();
-  final database = FirebaseFirestore.instance;
-  String searchString;
   @override
-  Widget build(BuildContext context) {
-    return Scaffold(
-      appBar: AppBar(
-        iconTheme: IconThemeData(color: Colors.white),
-        elevation: 0,
-        backgroundColor: Colors.green,
-        centerTitle: true,
-        title: Text(
-          'Busca tu suerte',
-          style: TextStyle(color: Colors.white),
-        ),
-      ),
-      body: Column(
-        children: <Widget>[
-          Expanded(
-            child: Column(
-              children: <Widget>[
-                Padding(
-                    padding: const EdgeInsets.all(15.0),
-                    child: Container(
-                        child: TextField(
-                      onChanged: (val) {
-                        setState(() {
-                          searchString = val.toLowerCase();
-                        });
-                      },
-                      controller: search,
-                      decoration: InputDecoration(
-                        suffixIcon: IconButton(
-                            icon: Icon(Icons.clear),
-                            onPressed: () => search.clear()),
-                        hintText: 'Search the suerte',
-                        hintStyle: TextStyle(
-                            color: Colors.grey,
-                            fontFamily: 'Antra',
-                            fontSize: 20),
-                      ),
-                    ))),
-                Expanded(
-                  child: StreamBuilder<QuerySnapshot>(
-                    stream: (searchString == null || searchString.trim() == '')
-                        ? FirebaseFirestore.instance
-                            .collection('Ingenio')
-                            .doc('1')
-                            .collection('Hacienda')
-                            .doc(idDoc)
-                            .collection('Suerte')
-                            .snapshots()
-                        : FirebaseFirestore.instance
-                            .collection('Ingenio')
-                            .doc('1')
-                            .collection('Hacienda')
-                            .doc(idDoc)
-                            .collection('Suerte')
-                            .where('searchIndex', arrayContains: searchString)
-                            .snapshots(),
-                    builder: (context, snapshot) {
-                      if (snapshot.hasError) {
-                        return Text('We got an error ${snapshot.error}');
-                      }
-                      switch (snapshot.connectionState) {
-                        case ConnectionState.waiting:
-                          return Loading();
-                        case ConnectionState.none:
-                          return Text('There is no data');
-                        case ConnectionState.done:
-                          return Text('Done');
-                        default:
-                          return new ListView(
-                            children: snapshot.data.docs
-                                .map((DocumentSnapshot document) {
-                              return new ListTile(
-                                onTap: () {
-                                  Navigator.push(
-                                      context,
-                                      MaterialPageRoute(
-                                          builder: (context) => SuerteView(
-                                                suerte: document,
-                                              )));
-                                },
-                                title: Column(
-                                  crossAxisAlignment: CrossAxisAlignment.start,
-                                  children: <Widget>[
-                                    Text(
-                                      'ID suerte: ' + document['id_suerte'],
-                                      style: TextStyle(fontSize: 20),
-                                    ),
-                                    Text(
-                                        'Area suerte: ' +
-                                            document['area'].toString(),
-                                        style: TextStyle(color: Colors.grey)),
-                                    Divider()
-                                  ],
-                                ),
-                                leading: CircleAvatar(
-                                    backgroundImage: NetworkImage(
-                                        'https://www.teldeactualidad.com/userfiles/economia/2020/06/5621/AURI%20SAAVEDRA%20VISITA%20LA%20FINCA%20LA%20SUERTE.jpeg'),
-                                    backgroundColor: Colors.transparent),
-                              );
-                            }).toList(),
-                          );
-                      }
-                    },
-                  ),
-                )
-              ],
-            ),
-          )
-        ],
-      ),
+  Widget buildLeading(BuildContext context) {
+    return IconButton(
+      onPressed: () {
+        close(context, null);
+      },
+      icon: Icon(Icons.arrow_back),
     );
+  }
+
+  @override
+  Widget buildResults(BuildContext context) {
+    throw UnimplementedError();
+  }
+
+  @override
+  Widget buildSuggestions(BuildContext context) {
+    print(listado.length.toString());
+    List myList = query.isEmpty
+        ? listado
+        : listado
+            .where((p) => p['id_hacienda'].toString().startsWith(query))
+            .toList();
+    return myList.isEmpty
+        ? Text(
+            'No resoults found...',
+            style: TextStyle(fontSize: 20),
+          )
+        : ListView.builder(
+            itemCount: myList
+                .length, //Aqui esta el problema, si lo pongo listado.length.compareTo(0) entonces solo me deja ver el primer elemento => update, el error era que le estaba pasando el "listado" en vez de "myList"
+            itemBuilder: (context, index) {
+              QueryDocumentSnapshot nuevoListado = myList[index];
+              return ListTile(
+                onTap: () {
+                  Navigator.push(
+                      context,
+                      MaterialPageRoute(
+                          builder: (context) => SuerteView(
+                                suerte: nuevoListado,
+                              )));
+                },
+                title: Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: <Widget>[
+                    Text(
+                      'Area de la suerte: ' + nuevoListado['area'].toString(),
+                      style: TextStyle(fontSize: 20),
+                    ),
+                    Text('Id suerte: ' + nuevoListado['id_suerte'].toString(),
+                        style: TextStyle(color: Colors.grey)),
+                    Divider()
+                  ],
+                ),
+                leading: CircleAvatar(
+                  backgroundImage: NetworkImage(
+                      'https://www.teldeactualidad.com/userfiles/economia/2020/06/5621/AURI%20SAAVEDRA%20VISITA%20LA%20FINCA%20LA%20SUERTE.jpeg'),
+                ),
+              );
+            });
   }
 }
