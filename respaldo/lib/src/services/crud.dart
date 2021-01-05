@@ -2,7 +2,9 @@ import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:respaldo/authentication_service.dart';
 
 class CrudConsultas {
+  AuthenticationService service = new AuthenticationService();
   String suerteID = "";
+  String idUsuario = "";
   final CollectionReference lista = FirebaseFirestore.instance
       .collection('Ingenio')
       .doc('1')
@@ -16,6 +18,46 @@ class CrudConsultas {
         .collection('Hacienda')
         .snapshots();
     return aux;
+  }
+
+  Future obtenerListaHaciendas() async {
+    List haciendas = [];
+    DocumentSnapshot ref = await FirebaseFirestore.instance
+        .collection('Ingenio')
+        .doc('1')
+        .collection('users')
+        .doc(service.uid)
+        .get();
+    if (ref.data()['charge'] == 'admin') {
+      await FirebaseFirestore.instance
+          .collection('Ingenio')
+          .doc('1')
+          .collection('Hacienda')
+          .get()
+          .then((value) {
+        value.docs.forEach((element) {
+          haciendas.add(element);
+        });
+      }).whenComplete(() => {print('Termino')});
+      print(haciendas.length.toString() + "En el crud");
+    } else if (ref.data()['charge'] == 'user') {
+      List<dynamic> group = ref.get("haciendasResponsables");
+      await FirebaseFirestore.instance
+          .collection('Ingenio')
+          .doc('1')
+          .collection('Hacienda')
+          .get()
+          .then((value) {
+        value.docs.forEach((element) {
+          if (group.contains(element.data()['hacienda_name'])) {
+            haciendas.add(element);
+          }
+        });
+      });
+    }
+    print(haciendas.length.toString() +
+        " Estas son las haciendas en su documento");
+    return haciendas;
   }
 
 //
@@ -127,13 +169,16 @@ class CrudConsultas {
           .then((value) {
         value.docs.forEach((element) {
           if (element.data()['name'] == nombre) {
-            idUsuario = element.id;
+            idUsuario = element.data()['id_user'];
+            print(element.data()['Token_ID'] +
+                "En el crud de obtener ID usuario");
           }
         });
       });
     } catch (e) {
       print(e.toString());
     }
+    print(idUsuario);
     return idUsuario;
   }
 

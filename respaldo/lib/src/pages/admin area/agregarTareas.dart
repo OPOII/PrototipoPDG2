@@ -70,6 +70,7 @@ class _TareaViewState extends State<TareaView> {
     if (_formKey.currentState.validate()) {
       FormController formController = FormController();
       _showSnackbar("Se esta agregando la tarea");
+
       Map<String, dynamic> planSemanal = new Map<String, dynamic>();
       Map<String, dynamic> tareaUsuario = new Map<String, dynamic>();
       planSemanal['HDA-STE'] = hdasteController.text;
@@ -117,14 +118,35 @@ class _TareaViewState extends State<TareaView> {
       tareaUsuario['Terminado'] = false;
       tareaUsuario['Clave_Hacienda'] = idHacienda;
       tareaUsuario['Clave_Suerte'] = idSuerte;
-      DocumentReference refTarea = await FirebaseFirestore.instance
+      tareaUsuario['Id_Actividad'] = referencia.id;
+      await FirebaseFirestore.instance
           .collection('Ingenio')
           .doc('1')
           .collection('users')
           .doc(idUser)
           .collection('tareas')
-          .add(tareaUsuario);
-      refTarea.update({'Id_Actividad': refTarea.id});
+          .doc(referencia.id)
+          .set(tareaUsuario);
+      DocumentReference overwrite = FirebaseFirestore.instance
+          .collection('Ingenio')
+          .doc('1')
+          .collection('users')
+          .doc(idUser);
+      DocumentSnapshot listadoHacienda = await FirebaseFirestore.instance
+          .collection('Ingenio')
+          .doc('1')
+          .collection('users')
+          .doc(idUser)
+          .get();
+      List<dynamic> haciendasEncargadas =
+          listadoHacienda.get("haciendasResponsables");
+      if (!(haciendasEncargadas.contains(currentHacienda))) {
+        var list = List<dynamic>();
+        list.add(currentHacienda);
+        print('No la contiene y entro en este condicional');
+        overwrite
+            .update({'haciendasResponsables': FieldValue.arrayUnion(list)});
+      }
       enviarNotificacion();
       _showSnackbar("La tarea se agrego exitosamente");
       //clearData();
@@ -144,7 +166,9 @@ class _TareaViewState extends State<TareaView> {
 
   void enviarNotificacion() async {
     for (var i = 0; i < usuarios.length; i++) {
-      if (usuarios[i]['name'] == currentUser) {
+      if (usuarios[i]['id_user'] == idUser) {
+        //Buscar por que aqui te trae el tokenid que no es
+        print(usuarios[i]['Token_ID'] + "En el agregar");
         await servicios.sendAndRetrieveMessage(usuarios[i]['Token_ID'],
             "Nueva tarea: " + actividadController.text, messageController.text);
       }
@@ -167,6 +191,8 @@ class _TareaViewState extends State<TareaView> {
     actividadController.text = "";
     currentUser = "";
     observacionController.text = "";
+    currentSuerte = "";
+    messageController.text = "";
   }
 
   obtenerHaciendas() async {
@@ -232,11 +258,8 @@ class _TareaViewState extends State<TareaView> {
           id = haciendas[i]['clave_hacienda'];
         }
       }
+      currentSuerte = "";
       obtenerSuertes(id);
-    } else if (currentHacienda == "seleccione una hacienda") {
-      setState(() {
-        suertes = [];
-      });
     }
   }
 
@@ -253,6 +276,14 @@ class _TareaViewState extends State<TareaView> {
   }
 
   void obtenerIdUsuario(String nombre) async {
+    for (var i = 0; i < usuarios.length; i++) {
+      if (usuarios[i]['name'] == nombre) {
+        setState(() {
+          idUser = usuarios[i]['id_user'];
+        });
+      }
+    }
+
     dynamic resultado = await consultas.obtenerIdUsuario(nombre);
     setState(() {
       idUser = resultado;
@@ -260,19 +291,23 @@ class _TareaViewState extends State<TareaView> {
   }
 
   void obtenerClaveHacienda(String nombre) async {
-    dynamic resultad;
-    resultad = await consultas.obtenerIDHacienda(nombre);
-    setState(() {
-      idHacienda = resultad;
-    });
+    for (var i = 0; i < haciendas.length; i++) {
+      if (haciendas[i]['hacienda_name'] == nombre) {
+        setState(() {
+          idHacienda = haciendas[i]['clave_hacienda'];
+        });
+      }
+    }
   }
 
   void obtenerClaveSuerte(String nombreSuerte, String idHacienda) async {
-    dynamic resultad;
-    resultad = await consultas.obtenerIDSuerte(nombreSuerte, idHacienda);
-    setState(() {
-      idSuerte = consultas.suerteID;
-    });
+    for (var i = 0; i < suertes.length; i++) {
+      if (suertes[i]['id_suerte'] == nombreSuerte) {
+        setState(() {
+          idSuerte = suertes[i]['claveSuerte'];
+        });
+      }
+    }
   }
 
   _showSnackbar(String message) {
@@ -291,7 +326,7 @@ class _TareaViewState extends State<TareaView> {
         backgroundColor: Colors.green,
         centerTitle: true,
         title: Text(
-          widget.title,
+          "Asignar Tarea",
           style: TextStyle(color: Colors.white, fontWeight: FontWeight.bold),
         ),
       ),
@@ -310,7 +345,7 @@ class _TareaViewState extends State<TareaView> {
                         CostumTextForField(hdasteController, "HDA-STE",
                             TextInputType.multiline),
                         CostumTextForField(
-                            areaController, "Area", TextInputType.multiline),
+                            areaController, "Area", TextInputType.number),
                         CostumTextForField(
                             corteController, "Corte", TextInputType.multiline),
                         CostumTextForField(
@@ -398,11 +433,22 @@ class _TareaViewState extends State<TareaView> {
                       ],
                     ),
                   )),
-              RaisedButton(
-                color: Colors.blue,
-                textColor: Colors.white,
-                onPressed: _submitForm,
-                child: Text('Agregar tarea'),
+              Row(
+                mainAxisAlignment: MainAxisAlignment.spaceAround,
+                children: [
+                  RaisedButton(
+                    color: Colors.blue,
+                    textColor: Colors.white,
+                    onPressed: _submitForm,
+                    child: Text('Agregar tarea'),
+                  ),
+                  RaisedButton(
+                    color: Colors.blue,
+                    textColor: Colors.white,
+                    onPressed: clearData,
+                    child: Text('Limpiar datos'),
+                  ),
+                ],
               ),
             ],
           ),

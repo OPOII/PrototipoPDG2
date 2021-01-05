@@ -89,7 +89,7 @@ class _LobbyState extends State<Lobby> {
 
     guardarToken();
     probar();
-    obtenerHaciendas();
+    haciendasOrganizadas();
   }
 
   @override
@@ -98,20 +98,22 @@ class _LobbyState extends State<Lobby> {
     connectivityStream.cancel();
   }
 
+  haciendasOrganizadas() async {
+    dynamic resultado = await consultas.obtenerListaHaciendas();
+  }
+
   probar() async {
     dynamic resultado = await consultas
         .getEmpleadoActual(_authenticationService.currentUser.uid);
     setState(() {
       usuario = resultado;
     });
-    print(usuario.toList());
   }
 
   obtenerHaciendas() async {
     dynamic resultado = await consultas.obtenerListadoHaciendas();
     setState(() {
       haciendasNuevo = resultado;
-      print(haciendasNuevo.length.toString() + "En el lobby");
     });
   }
 
@@ -135,50 +137,41 @@ class _LobbyState extends State<Lobby> {
     } else {
       pruebas.cargarSuertes();
       pruebas.cargarHacienda();
-      listado = pruebas.listado;
       pruebas.cargarTodo();
       //Filtrar por haciendas encargadas
       Stream haciendas = consultas.haciendas;
-      return StreamBuilder<QuerySnapshot>(
-          stream: haciendas,
-          builder:
-              (BuildContext context, AsyncSnapshot<QuerySnapshot> snapshot) {
-            if (snapshot.hasError) {
-              return Text('Error: ${snapshot.error}');
-            }
-            switch (snapshot.connectionState) {
-              case ConnectionState.waiting:
-                return Loading();
-              default:
-                return Scaffold(
-                    backgroundColor: Colors.white,
-                    appBar: iconoBuscarHaciendas(context, haciendasNuevo),
-                    body: SingleChildScrollView(
-                      child: Stack(
-                        children: <Widget>[
-                          Column(
-                            children: [
-                              barraInfo(pruebas),
-                              Padding(
-                                padding: const EdgeInsets.all(8.0),
-                                child: haciendaListado(context, snapshot),
-                              ),
-                            ],
-                          )
-                        ],
-                      ),
-                    ),
-                    drawer: Container(
-                      width: 200,
-                      //Esta condicion ternaria es para que cuando le pida el estado para que se cargue
-                      //le de el tiempo de que se cargue y no se muestre un null, por eso se muestra la pantalla del loading
-                      //Esto sirve por que la funcion es asincrona, entonces mientras se carga muestra el widget de loading
-                      child: usuario != null
-                          ? menuDeslizante(context, usuario)
-                          : Loading(),
-                    ));
-            }
-          });
+      return FutureBuilder<dynamic>(
+        future: consultas.obtenerListaHaciendas(),
+        builder: (BuildContext context, AsyncSnapshot<dynamic> snapshot) {
+          if (snapshot.connectionState == ConnectionState.waiting) {
+            return Loading();
+          } else {
+            return Scaffold(
+              appBar: iconoBuscarHaciendas(context, snapshot.data),
+              body: SingleChildScrollView(
+                child: Stack(
+                  children: <Widget>[
+                    Column(
+                      children: <Widget>[
+                        barraInfo(pruebas),
+                        Padding(
+                          padding: const EdgeInsets.all(8.0),
+                          child: haciendaListado(context, snapshot),
+                        )
+                      ],
+                    )
+                  ],
+                ),
+              ),
+              drawer: Container(
+                  width: 200,
+                  child: usuario != null
+                      ? menuDeslizante(context, usuario)
+                      : Loading()),
+            );
+          }
+        },
+      );
     }
   }
 }
@@ -340,7 +333,7 @@ Widget iconoBuscarHaciendas(BuildContext context, List haciendasNuevo) {
 
 Widget haciendaListado(
   BuildContext context,
-  AsyncSnapshot<QuerySnapshot> snapshot,
+  AsyncSnapshot<dynamic> snapshot,
 ) {
   return SizedBox(
     height: 500,
@@ -349,7 +342,7 @@ Widget haciendaListado(
       body: Container(
           padding: EdgeInsets.only(right: 15.0, left: 10),
           child: GridView.builder(
-              itemCount: snapshot.data.docs.length,
+              itemCount: snapshot.data.length,
               gridDelegate:
                   SliverGridDelegateWithFixedCrossAxisCount(crossAxisCount: 2),
               itemBuilder: (BuildContext context, int index) {
@@ -358,12 +351,11 @@ Widget haciendaListado(
                       vertical: 4.0, horizontal: 4.0),
                   child: InkWell(
                     onTap: () {
-                      print(snapshot.data.docs[index].data());
                       Navigator.push(
                           context,
                           MaterialPageRoute(
                               builder: (context) => HaciendaView(
-                                  hacienda: snapshot.data.docs[index]))); //
+                                  hacienda: snapshot.data[index]))); //
                     },
                     child: SingleChildScrollView(
                       child: Card(
@@ -379,7 +371,7 @@ Widget haciendaListado(
                                   borderRadius:
                                       BorderRadius.all(Radius.circular(20))),
                               child: Image.network(
-                                  snapshot.data.docs[index].data()['imagen']),
+                                  snapshot.data[index].data()['imagen']),
                             ),
                             SizedBox(
                               height: 5.0,
@@ -388,7 +380,7 @@ Widget haciendaListado(
                               direction: Axis.horizontal,
                               children: <Widget>[
                                 Text('Ingenio:'),
-                                Text(snapshot.data.docs[index]
+                                Text(snapshot.data[index]
                                     .data()['hacienda_name'])
                               ],
                             ),
@@ -396,7 +388,7 @@ Widget haciendaListado(
                               direction: Axis.horizontal,
                               children: [
                                 Text('Identificación:'),
-                                Text(snapshot.data.docs[index]
+                                Text(snapshot.data[index]
                                     .data()['id_hacienda']
                                     .toString())
                               ],
@@ -539,7 +531,6 @@ class HaciendaSearch extends SearchDelegate<dynamic> {
 
   @override
   Widget buildSuggestions(BuildContext context) {
-    print(listado.length.toString());
     List myList = query.isEmpty
         ? listado
         : listado
