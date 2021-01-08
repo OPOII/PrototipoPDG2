@@ -26,6 +26,7 @@ dependencies:
   percent_indicator: "^2.1.7+2"
   flutter_map:
   latlong:
+  animate_do:
   path:
   flutter:
     sdk: flutter

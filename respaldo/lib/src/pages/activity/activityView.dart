@@ -1,4 +1,7 @@
+import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:flutter/material.dart';
+import 'package:respaldo/authentication_service.dart';
+import 'package:respaldo/src/pages/activity/activityLobby.dart';
 import 'package:respaldo/src/services/crud.dart';
 
 class ActividadReview extends StatefulWidget {
@@ -13,6 +16,9 @@ class _ReviewActivity extends State<ActividadReview> {
   final dynamic activ;
   dynamic datos;
   CrudConsultas consultas = new CrudConsultas();
+  AuthenticationService service = new AuthenticationService();
+  TextEditingController descriptionController = new TextEditingController();
+  String texto;
   _ReviewActivity(this.activ);
   @override
   void initState() {
@@ -23,6 +29,42 @@ class _ReviewActivity extends State<ActividadReview> {
     datos = await consultas.obtenerSuerteActual(
         activ['Clave_Hacienda'], activ['Clave_Suerte']);
     print(datos);
+  }
+
+  enviarComentario() async {
+    await FirebaseFirestore.instance
+        .collection('Ingenio')
+        .doc('1')
+        .collection('users')
+        .doc(service.uid)
+        .collection('tareas')
+        .doc(activ['Id_Actividad'])
+        .update({'Observacion': descriptionController.text});
+    DocumentSnapshot referencia = await FirebaseFirestore.instance
+        .collection('Ingenio')
+        .doc('1')
+        .collection('users')
+        .doc(service.uid)
+        .collection('tareas')
+        .doc(activ['Id_Actividad'])
+        .get();
+    await FirebaseFirestore.instance
+        .collection('Ingenio')
+        .doc('1')
+        .collection('tasks')
+        .doc(referencia.data()['Id_Actividad'])
+        .set(referencia.data());
+    await FirebaseFirestore.instance
+        .collection('Ingenio')
+        .doc('1')
+        .collection('users')
+        .doc(service.uid)
+        .collection('tareas')
+        .doc(activ['Id_Actividad'])
+        .delete();
+    print(referencia.data());
+    Navigator.push(
+        context, MaterialPageRoute(builder: (context) => ActivityWidget()));
   }
 
   @override
@@ -79,6 +121,62 @@ class _ReviewActivity extends State<ActividadReview> {
               icon: Icons.timer,
               press: () => {},
             ),
+            Row(
+              mainAxisAlignment: MainAxisAlignment.spaceAround,
+              children: <Widget>[
+                RaisedButton(
+                    color: Colors.blue,
+                    child: Text('Ver descripción'),
+                    onPressed: () {
+                      showDialog(
+                          context: context,
+                          builder: (context) => AlertDialog(
+                                title: Text(
+                                  'Descripción de la tarea',
+                                  style: TextStyle(fontWeight: FontWeight.bold),
+                                ),
+                                actions: <Widget>[
+                                  Wrap(
+                                    direction: Axis.horizontal,
+                                    children: [
+                                      Text(activ['Observacion_tarea'])
+                                    ],
+                                  )
+                                ],
+                              ));
+                    }),
+                RaisedButton(
+                    color: Colors.blue,
+                    child: Text('Terminar Tarea'),
+                    onPressed: () {
+                      showDialog(
+                          context: context,
+                          builder: (context) => SimpleDialog(
+                                title:
+                                    Text('Por favor ingrese una descripción'),
+                                children: <Widget>[
+                                  TextFormField(
+                                    controller: descriptionController,
+                                    validator: (input) {
+                                      if (input.isEmpty) {
+                                        return 'Please, enter a description';
+                                      }
+                                      return null;
+                                    },
+                                    onSaved: (input) => texto = input,
+                                    maxLines: 10,
+                                  ),
+                                  Center(
+                                    child: FlatButton(
+                                      child: Text('Done'),
+                                      onPressed: enviarComentario,
+                                    ),
+                                  )
+                                ],
+                              ));
+                    })
+              ],
+            )
           ],
         ),
       ),

@@ -70,7 +70,6 @@ class _TareaViewState extends State<TareaView> {
     if (_formKey.currentState.validate()) {
       FormController formController = FormController();
       _showSnackbar("Se esta agregando la tarea");
-
       Map<String, dynamic> planSemanal = new Map<String, dynamic>();
       Map<String, dynamic> tareaUsuario = new Map<String, dynamic>();
       planSemanal['HDA-STE'] = hdasteController.text;
@@ -104,7 +103,6 @@ class _TareaViewState extends State<TareaView> {
           .collection('plansemanal')
           .add(planSemanal);
       referencia.update({'Id_Tarea': referencia.id});
-
       tareaUsuario['Nombre_Hacienda'] = currentHacienda;
       tareaUsuario['Dia_Inicio'] = fechaController.text;
       tareaUsuario['Nombre_Suerte'] = currentSuerte;
@@ -115,10 +113,12 @@ class _TareaViewState extends State<TareaView> {
       tareaUsuario['Horas_Faltantes'] =
           int.tryParse(horasProgramadasController.text);
       tareaUsuario['Observacion'] = "";
+      tareaUsuario['Observacion_tarea'] = messageController.text;
       tareaUsuario['Terminado'] = false;
       tareaUsuario['Clave_Hacienda'] = idHacienda;
       tareaUsuario['Clave_Suerte'] = idSuerte;
       tareaUsuario['Id_Actividad'] = referencia.id;
+      tareaUsuario['Usuario_Encargado'] = currentUser;
       await FirebaseFirestore.instance
           .collection('Ingenio')
           .doc('1')
@@ -127,17 +127,22 @@ class _TareaViewState extends State<TareaView> {
           .collection('tareas')
           .doc(referencia.id)
           .set(tareaUsuario);
+
+      //Obtengo la referencia del usuario para poder mirar si la hacienda que se le encargo ya la tenia encargada
       DocumentReference overwrite = FirebaseFirestore.instance
           .collection('Ingenio')
           .doc('1')
           .collection('users')
           .doc(idUser);
+      //Obtengo el listado de las haciendas del usuario loggeado en la app
       DocumentSnapshot listadoHacienda = await FirebaseFirestore.instance
           .collection('Ingenio')
           .doc('1')
           .collection('users')
           .doc(idUser)
           .get();
+      //Paso el listado de las haciendas para ver cuales tiene y luego compararlas con la que le voy a pasar
+      //Si ya la tiene encargada, no se la paso, sin embargo, si no la tiene encargada, se la paso.
       List<dynamic> haciendasEncargadas =
           listadoHacienda.get("haciendasResponsables");
       if (!(haciendasEncargadas.contains(currentHacienda))) {
@@ -147,6 +152,13 @@ class _TareaViewState extends State<TareaView> {
         overwrite
             .update({'haciendasResponsables': FieldValue.arrayUnion(list)});
       }
+      /* DocumentReference poolTasks = await FirebaseFirestore.instance
+          .collection('Ingenio')
+          .doc('1')
+          .collection('tasks')
+          .add(tareaUsuario);
+      poolTasks.update({'Id_task': poolTasks.id});
+      */
       enviarNotificacion();
       _showSnackbar("La tarea se agrego exitosamente");
       //clearData();
@@ -347,7 +359,7 @@ class _TareaViewState extends State<TareaView> {
                         CostumTextForField(
                             areaController, "Area", TextInputType.number),
                         CostumTextForField(
-                            corteController, "Corte", TextInputType.multiline),
+                            corteController, "Corte", TextInputType.number),
                         CostumTextForField(
                             edadController, "Edad", TextInputType.number),
                         CostumTextForField(nombreActividadController,

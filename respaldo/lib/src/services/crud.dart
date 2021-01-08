@@ -38,8 +38,7 @@ class CrudConsultas {
         value.docs.forEach((element) {
           haciendas.add(element);
         });
-      }).whenComplete(() => {print('Termino')});
-      print(haciendas.length.toString() + "En el crud");
+      }).whenComplete(() => {});
     } else if (ref.data()['charge'] == 'user') {
       List<dynamic> group = ref.get("haciendasResponsables");
       await FirebaseFirestore.instance
@@ -55,8 +54,6 @@ class CrudConsultas {
         });
       });
     }
-    print(haciendas.length.toString() +
-        " Estas son las haciendas en su documento");
     return haciendas;
   }
 
@@ -156,6 +153,114 @@ class CrudConsultas {
       });
       return usuarios;
     } catch (e) {}
+  }
+
+  Future buscarPorHacienda(String hacienda) async {
+    List filtradoHacienda = [];
+    try {
+      await FirebaseFirestore.instance
+          .collection('Ingenio')
+          .doc('1')
+          .collection('tasks')
+          .where("Nombre_Hacienda", isEqualTo: hacienda)
+          .get()
+          .then((value) {
+        value.docs.forEach((element) {
+          filtradoHacienda.add(element);
+        });
+      });
+      return filtradoHacienda;
+    } catch (e) {
+      print(e.toString());
+      return null;
+    }
+  }
+
+  Future buscarPorHaciendaSuerte(String hacienda, String suerte) async {
+    List filtradoHaciendaSuerte = [];
+    try {
+      await FirebaseFirestore.instance
+          .collection('Ingenio')
+          .doc('1')
+          .collection('tasks')
+          .where("Nombre_Hacienda", isEqualTo: hacienda)
+          .where("Nombre_Suerte", isEqualTo: suerte)
+          .get()
+          .then((value) {
+        value.docs.forEach((element) {
+          filtradoHaciendaSuerte.add(element);
+        });
+      });
+      return filtradoHaciendaSuerte;
+    } catch (e) {
+      print(e.toString());
+      return null;
+    }
+  }
+
+  Future buscarPorHaciendaSuerteUsuario(
+      String hacienda, String suerte, String usuario) async {
+    List filtradoHaciendaSuerteUsuario = [];
+    try {
+      await FirebaseFirestore.instance
+          .collection('Ingenio')
+          .doc('1')
+          .collection('tasks')
+          .where("Nombre_Hacienda", isEqualTo: hacienda)
+          .where("Nombre_Suerte", isEqualTo: suerte)
+          .where("Usuario_Encargado", isEqualTo: usuario)
+          .get()
+          .then((value) {
+        value.docs.forEach((element) {
+          filtradoHaciendaSuerteUsuario.add(element);
+        });
+      });
+      return filtradoHaciendaSuerteUsuario;
+    } catch (e) {
+      print(e.toString());
+      return null;
+    }
+  }
+
+  Future traerTodasLasTareas() async {
+    List tareas = [];
+    try {
+      await FirebaseFirestore.instance
+          .collection('Ingenio')
+          .doc('1')
+          .collection('tasks')
+          .get()
+          .then((value) {
+        value.docs.forEach((element) {
+          tareas.add(element);
+        });
+      });
+      return tareas;
+    } catch (e) {
+      print(e.toString());
+      return null;
+    }
+  }
+
+  Future buscarPorUsuario(String usuario) async {
+    List filtradoUsuarios = [];
+    try {
+      await FirebaseFirestore.instance
+          .collection('Ingenio')
+          .doc('1')
+          .collection('tasks')
+          .where("Usuario_Encargado", isEqualTo: usuario)
+          .get()
+          .then((value) {
+        value.docs.forEach((element) {
+          filtradoUsuarios.add(element);
+        });
+      });
+      return filtradoUsuarios;
+    } catch (e) {
+      print(e.toString());
+      return null;
+    }
   }
 
   Future<String> obtenerIdUsuario(String nombre) async {

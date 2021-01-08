@@ -1,5 +1,6 @@
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
+import 'package:respaldo/src/pages/admin%20area/verTareas.dart';
 import 'package:respaldo/src/pages/admin%20area/verUsuarios.dart';
 import 'agregarTareas.dart';
 import 'agregarUsuarios.dart';
@@ -106,7 +107,10 @@ class Cards extends StatelessWidget {
                         MaterialPageRoute(builder: (context) => Allusers()))
                   }
                 else if (name == "Ver tareas")
-                  {print("opcion 4")}
+                  {
+                    Navigator.push(context,
+                        MaterialPageRoute(builder: (context) => AllTasks()))
+                  }
               },
               child: GridTile(
                 footer: Container(

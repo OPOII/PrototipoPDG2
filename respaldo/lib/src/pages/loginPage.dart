@@ -158,13 +158,23 @@ class _LoginPageState extends State<LoginPage> {
                                           FlatButton(
                                             child: Text('OK'),
                                             onPressed: () {
-                                              Navigator.of(context).pop();
+                                              Navigator.pushReplacement(
+                                                  context,
+                                                  MaterialPageRoute(
+                                                      builder: (BuildContext
+                                                              context) =>
+                                                          LoginPage()));
                                             },
                                           ),
                                           FlatButton(
                                             child: Text('Cancel'),
                                             onPressed: () {
-                                              Navigator.of(context).pop();
+                                              Navigator.pushReplacement(
+                                                  context,
+                                                  MaterialPageRoute(
+                                                      builder: (BuildContext
+                                                              context) =>
+                                                          LoginPage()));
                                             },
                                           )
                                         ],

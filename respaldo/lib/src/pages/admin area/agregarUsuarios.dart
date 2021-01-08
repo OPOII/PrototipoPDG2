@@ -191,7 +191,6 @@ class _UsersState extends State<AgregarUsuarios> {
     infoUsuario['cedula'] = cedulaController.text;
     infoUsuario['urlfoto'] =
         "https://image.freepik.com/vector-gratis/perfil-empresario-dibujos-animados_18591-58479.jpg";
-    //print(service.usuarioUID + "DESDE EL OBTENER EN EL AGREGAR");
     infoUsuario['id_user'] = tokenUsuario;
     print(infoUsuario);
     await FirebaseFirestore.instance

@@ -1,6 +1,7 @@
 import 'dart:async';
 import 'dart:io';
 
+import 'package:animate_do/animate_do.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:connectivity/connectivity.dart';
 import 'package:firebase_auth/firebase_auth.dart';
@@ -138,8 +139,6 @@ class _LobbyState extends State<Lobby> {
       pruebas.cargarSuertes();
       pruebas.cargarHacienda();
       pruebas.cargarTodo();
-      //Filtrar por haciendas encargadas
-      Stream haciendas = consultas.haciendas;
       return FutureBuilder<dynamic>(
         future: consultas.obtenerListaHaciendas(),
         builder: (BuildContext context, AsyncSnapshot<dynamic> snapshot) {
@@ -177,37 +176,32 @@ class _LobbyState extends State<Lobby> {
 }
 
 Drawer menuDeslizante(context, List usuario) {
-  //Aqui se imprime el token
-  // Services nuevo = new Services();
-
   return Drawer(
     child: ListView(
       children: <Widget>[
         DrawerHeader(
-            decoration: BoxDecoration(color: Colors.white),
-            child: Container(
-              child: Column(
-                children: <Widget>[
-                  Material(
-                    borderRadius: BorderRadius.all(Radius.circular(50)),
-                    child: Padding(
-                        padding: EdgeInsets.all(8.0),
-                        child: Image.network(
-                          usuario[0]['urlfoto'],
-                          width: 80,
-                          height: 80,
-                        )),
-                  ),
-                  Padding(
-                    padding: EdgeInsets.all(8.0),
-                    child: Text(
-                      usuario[0]['name'],
-                      style: TextStyle(color: Colors.black, fontSize: 15.0),
+          decoration: BoxDecoration(color: Colors.blue),
+          child: Column(
+            children: <Widget>[
+              SizedBox(
+                height: 115,
+                width: 120,
+                child: Stack(
+                  fit: StackFit.expand,
+                  overflow: Overflow.visible,
+                  children: [
+                    CircleAvatar(
+                      backgroundColor: Colors.transparent,
+                      backgroundImage: NetworkImage(usuario[0]['urlfoto']),
                     ),
-                  )
-                ],
+                  ],
+                ),
               ),
-            )),
+              Text(usuario[0]['name'],
+                  style: TextStyle(color: Colors.black, fontSize: 15.0)),
+            ],
+          ),
+        ),
         CustomListTile(
             Icons.assessment,
             'Resumen',
@@ -379,7 +373,7 @@ Widget haciendaListado(
                             Wrap(
                               direction: Axis.horizontal,
                               children: <Widget>[
-                                Text('Ingenio:'),
+                                Text('Hacienda:'),
                                 Text(snapshot.data[index]
                                     .data()['hacienda_name'])
                               ],
@@ -546,31 +540,34 @@ class HaciendaSearch extends SearchDelegate<dynamic> {
                 .length, //Aqui esta el problema, si lo pongo listado.length.compareTo(0) entonces solo me deja ver el primer elemento => update, el error era que le estaba pasando el "listado" en vez de "myList"
             itemBuilder: (context, index) {
               QueryDocumentSnapshot nuevoListado = myList[index];
-              return ListTile(
-                onTap: () {
-                  Navigator.push(
-                      context,
-                      MaterialPageRoute(
-                          builder: (context) => HaciendaView(
-                                hacienda: nuevoListado,
-                              )));
-                },
-                title: Column(
-                  crossAxisAlignment: CrossAxisAlignment.start,
-                  children: <Widget>[
-                    Text(
-                      nuevoListado['hacienda_name'],
-                      style: TextStyle(fontSize: 20),
-                    ),
-                    Text(
-                        'Id hacienda: ' +
-                            nuevoListado['id_hacienda'].toString(),
-                        style: TextStyle(color: Colors.grey)),
-                    Divider()
-                  ],
-                ),
-                leading: CircleAvatar(
-                  backgroundImage: NetworkImage(nuevoListado['imagen']),
+              return FadeIn(
+                delay: Duration(milliseconds: 100 * index),
+                child: ListTile(
+                  onTap: () {
+                    Navigator.push(
+                        context,
+                        MaterialPageRoute(
+                            builder: (context) => HaciendaView(
+                                  hacienda: nuevoListado,
+                                )));
+                  },
+                  title: Column(
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    children: <Widget>[
+                      Text(
+                        nuevoListado['hacienda_name'],
+                        style: TextStyle(fontSize: 20),
+                      ),
+                      Text(
+                          'Id hacienda: ' +
+                              nuevoListado['id_hacienda'].toString(),
+                          style: TextStyle(color: Colors.grey)),
+                      Divider()
+                    ],
+                  ),
+                  leading: CircleAvatar(
+                    backgroundImage: NetworkImage(nuevoListado['imagen']),
+                  ),
                 ),
               );
             });

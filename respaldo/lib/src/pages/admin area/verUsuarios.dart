@@ -1,3 +1,4 @@
+import 'package:animate_do/animate_do.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:flutter/material.dart';
 import 'package:respaldo/src/pages/user/userView.dart';
@@ -50,28 +51,32 @@ class _AllusersState extends State<Allusers> {
       body: ListView.builder(
           itemCount: usuarios.length,
           itemBuilder: (context, index) {
-            return ListTile(
-              onTap: () {
-                Navigator.push(
-                    context,
-                    MaterialPageRoute(
-                        builder: (context) => UserView(user: usuarios[index])));
-              },
-              title: Column(
-                crossAxisAlignment: CrossAxisAlignment.start,
-                children: <Widget>[
-                  Text(
-                    'Nombre: ' + usuarios[index]['name'],
-                    style: TextStyle(fontSize: 20),
-                  ),
-                  Text('Cedula: ' + usuarios[index]['cedula'].toString(),
-                      style: TextStyle(color: Colors.grey)),
-                  Divider()
-                ],
+            return FadeInLeft(
+              delay: Duration(milliseconds: 100 * index),
+              child: ListTile(
+                onTap: () {
+                  Navigator.push(
+                      context,
+                      MaterialPageRoute(
+                          builder: (context) =>
+                              UserView(user: usuarios[index])));
+                },
+                title: Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: <Widget>[
+                    Text(
+                      'Nombre: ' + usuarios[index]['name'],
+                      style: TextStyle(fontSize: 20),
+                    ),
+                    Text('Cedula: ' + usuarios[index]['cedula'].toString(),
+                        style: TextStyle(color: Colors.grey)),
+                    Divider()
+                  ],
+                ),
+                leading: CircleAvatar(
+                    backgroundImage: NetworkImage(usuarios[index]['urlfoto']),
+                    backgroundColor: Colors.transparent),
               ),
-              leading: CircleAvatar(
-                  backgroundImage: NetworkImage(usuarios[index]['urlfoto']),
-                  backgroundColor: Colors.transparent),
             );
           }),
     );
