@@ -18,6 +18,7 @@ class _LoginPageState extends State<LoginPage> {
   StreamSubscription connectivityStream;
   ConnectivityResult oldres;
   bool dialogshown = false;
+  // ignore: missing_return
   Future<bool> checkInternet() async {
     try {
       final result = await InternetAddress.lookup('google.com');

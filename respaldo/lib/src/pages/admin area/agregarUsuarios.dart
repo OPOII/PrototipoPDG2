@@ -14,7 +14,7 @@ class AgregarUsuarios extends StatefulWidget {
 
 class _UsersState extends State<AgregarUsuarios> {
   final formKey = GlobalKey<FormState>();
-  final _scaffoldKey = GlobalKey<ScaffoldState>();
+  //final _scaffoldKey = GlobalKey<ScaffoldState>();
   AuthenticationService service = new AuthenticationService();
   String name, telephone, email, cargo, hacienda, url;
   String uid;
@@ -78,6 +78,7 @@ class _UsersState extends State<AgregarUsuarios> {
                 if (value.isEmpty) {
                   return "Este campo no debe de estar vacio";
                 }
+                return null;
               },
             ),
             TextFormField(
@@ -93,6 +94,7 @@ class _UsersState extends State<AgregarUsuarios> {
                 } else if (int.tryParse(value.toString()) == null) {
                   return "Este campo solo admite numeros";
                 }
+                return null;
               },
             ),
             TextFormField(
@@ -106,6 +108,7 @@ class _UsersState extends State<AgregarUsuarios> {
                 if (value.isEmpty) {
                   return "Este campo no debe de estar vacio";
                 }
+                return null;
               },
             ),
             TextFormField(
@@ -121,6 +124,7 @@ class _UsersState extends State<AgregarUsuarios> {
                 } else if (!(value.contains("@"))) {
                   return "Debes de agregar un correo electronico";
                 }
+                return null;
               },
             ),
             Row(
@@ -152,6 +156,7 @@ class _UsersState extends State<AgregarUsuarios> {
                 if (value.toString().isEmpty) {
                   return "Debes de elegir una fecha de nacimiento";
                 }
+                return null;
               },
             ),
             RaisedButton(

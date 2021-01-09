@@ -1,7 +1,6 @@
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:flutter/material.dart';
 import 'package:respaldo/authentication_service.dart';
-import 'package:respaldo/src/pages/activity/activityLobby.dart';
 import 'package:respaldo/src/services/crud.dart';
 
 class ActividadReview extends StatefulWidget {
@@ -31,7 +30,8 @@ class _ReviewActivity extends State<ActividadReview> {
     print(datos);
   }
 
-  enviarComentario() async {
+  enviarActividad() async {
+    //Actualizo la observacion que se hizo
     await FirebaseFirestore.instance
         .collection('Ingenio')
         .doc('1')
@@ -40,6 +40,7 @@ class _ReviewActivity extends State<ActividadReview> {
         .collection('tareas')
         .doc(activ['Id_Actividad'])
         .update({'Observacion': descriptionController.text});
+    //Saco el documento para poder enviarlo
     DocumentSnapshot referencia = await FirebaseFirestore.instance
         .collection('Ingenio')
         .doc('1')
@@ -48,12 +49,14 @@ class _ReviewActivity extends State<ActividadReview> {
         .collection('tareas')
         .doc(activ['Id_Actividad'])
         .get();
+    //Llego y le paso todo el dato por parametro
     await FirebaseFirestore.instance
         .collection('Ingenio')
         .doc('1')
         .collection('tasks')
         .doc(referencia.data()['Id_Actividad'])
         .set(referencia.data());
+    //Elimino esto de mi base de datos y la paso al de tareas para revision
     await FirebaseFirestore.instance
         .collection('Ingenio')
         .doc('1')
@@ -63,8 +66,9 @@ class _ReviewActivity extends State<ActividadReview> {
         .doc(activ['Id_Actividad'])
         .delete();
     print(referencia.data());
-    Navigator.push(
-        context, MaterialPageRoute(builder: (context) => ActivityWidget()));
+    Navigator.pop(context);
+    Navigator.pop(context);
+    Navigator.pop(context);
   }
 
   @override
@@ -169,7 +173,7 @@ class _ReviewActivity extends State<ActividadReview> {
                                   Center(
                                     child: FlatButton(
                                       child: Text('Done'),
-                                      onPressed: enviarComentario,
+                                      onPressed: enviarActividad,
                                     ),
                                   )
                                 ],

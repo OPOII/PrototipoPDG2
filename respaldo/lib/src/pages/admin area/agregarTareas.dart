@@ -1,7 +1,6 @@
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/widgets.dart';
-import 'package:respaldo/controller/form_controller.dart';
 import 'package:datetime_picker_formfield/datetime_picker_formfield.dart';
 import 'package:respaldo/src/services/crud.dart';
 import 'package:intl/intl.dart';
@@ -68,7 +67,7 @@ class _TareaViewState extends State<TareaView> {
     // Validate returns true if the form is valid, or false
     // otherwise.
     if (_formKey.currentState.validate()) {
-      FormController formController = FormController();
+      //FormController formController = FormController();
       _showSnackbar("Se esta agregando la tarea");
       Map<String, dynamic> planSemanal = new Map<String, dynamic>();
       Map<String, dynamic> tareaUsuario = new Map<String, dynamic>();
@@ -119,6 +118,7 @@ class _TareaViewState extends State<TareaView> {
       tareaUsuario['Clave_Suerte'] = idSuerte;
       tareaUsuario['Id_Actividad'] = referencia.id;
       tareaUsuario['Usuario_Encargado'] = currentUser;
+      tareaUsuario['Id_Usuario'] = idUser;
       await FirebaseFirestore.instance
           .collection('Ingenio')
           .doc('1')
@@ -273,6 +273,12 @@ class _TareaViewState extends State<TareaView> {
       currentSuerte = "";
       obtenerSuertes(id);
     }
+    if (currentHacienda == "") {
+      setState(() {
+        menuSuertes.clear();
+        menuSuertes.add(new DropdownMenuItem(value: "", child: Text("")));
+      });
+    }
   }
 
   void changedSuerteItem(String change) {
@@ -390,6 +396,7 @@ class _TareaViewState extends State<TareaView> {
                             if (value.toString().isEmpty) {
                               return "Debes de elegir una fecha de nacimiento";
                             }
+                            return null;
                           },
                         ),
                         Row(

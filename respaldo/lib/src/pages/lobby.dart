@@ -40,6 +40,7 @@ class _LobbyState extends State<Lobby> {
   ConnectivityResult oldres;
   StreamSubscription connectivityStream;
   bool dialogshown = false;
+  // ignore: missing_return
   Future<bool> checkInternet() async {
     try {
       final result = await InternetAddress.lookup('google.com');
@@ -100,6 +101,7 @@ class _LobbyState extends State<Lobby> {
   }
 
   haciendasOrganizadas() async {
+    // ignore: unused_local_variable
     dynamic resultado = await consultas.obtenerListaHaciendas();
   }
 
@@ -180,7 +182,7 @@ Drawer menuDeslizante(context, List usuario) {
     child: ListView(
       children: <Widget>[
         DrawerHeader(
-          decoration: BoxDecoration(color: Colors.blue),
+          decoration: BoxDecoration(color: Colors.white),
           child: Column(
             children: <Widget>[
               SizedBox(

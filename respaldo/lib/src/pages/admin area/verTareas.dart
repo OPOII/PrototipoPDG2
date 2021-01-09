@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:respaldo/src/pages/tarea/tareaView.dart';
 import 'package:respaldo/src/services/crud.dart';
 
 class AllTasks extends StatefulWidget {
@@ -51,6 +52,14 @@ class _AlltasksState extends State<AllTasks> {
         tareas = resultado;
       });
     }
+    //Buscar por hacienda y usuario
+    else if (suerte == "") {
+      dynamic resultado =
+          await consultas.buscarPorHaciendaUsuario(hacienda, usuario);
+      setState(() {
+        tareas = resultado;
+      });
+    }
     //Buscar por los tres
     else if (hacienda != "" && suerte != "" && usuario != "") {
       dynamic resultado = await consultas.buscarPorHaciendaSuerteUsuario(
@@ -58,7 +67,7 @@ class _AlltasksState extends State<AllTasks> {
       setState(() {
         tareas = resultado;
       });
-    } else if (hacienda == "" && suerte == "" && usuario == "") {
+    } else {
       dynamic resultado = await consultas.traerTodasLasTareas();
       setState(() {
         tareas = resultado;
@@ -130,6 +139,12 @@ class _AlltasksState extends State<AllTasks> {
       currentSuerte = "";
       obtenerSuertes(id);
     }
+    if (currentHacienda == "") {
+      setState(() {
+        menuSuertes.clear();
+        menuSuertes.add(new DropdownMenuItem(value: "", child: Text("")));
+      });
+    }
   }
 
   void changedSuerteItem(String change) {
@@ -157,58 +172,63 @@ class _AlltasksState extends State<AllTasks> {
           style: TextStyle(color: Colors.white, fontWeight: FontWeight.bold),
         ),
       ),
-      body: Column(
-        mainAxisSize: MainAxisSize.min,
-        children: <Widget>[
-          Container(
-            child: Column(
-              children: <Widget>[
-                Center(
-                  child:
-                      Text('Filtrar Busqueda', style: TextStyle(fontSize: 20)),
-                ),
-                Row(
-                  mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                  children: <Widget>[
-                    Text("Filtrar por haciendas",
-                        style: TextStyle(fontSize: 15)),
-                    DropdownButton(
-                      value: currentHacienda,
-                      items: menuHaciendas,
-                      onChanged: changedHaciendaItem,
-                    )
-                  ],
-                ),
-                Row(
-                  mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                  children: <Widget>[
-                    Text("Filtrar por suertes", style: TextStyle(fontSize: 15)),
-                    DropdownButton(
-                        value: currentSuerte,
-                        items: menuSuertes,
-                        onChanged: changedSuerteItem)
-                  ],
-                ),
-                Row(
-                  mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                  children: <Widget>[
-                    Text("Encargado", style: TextStyle(fontSize: 20)),
-                    DropdownButton(
-                        value: currentUser,
-                        items: menuUsuarios,
-                        onChanged: changedUsuarioItem)
-                  ],
-                ),
-                RaisedButton(
-                  color: Colors.blue,
-                  child: Text('Buscar'),
-                  onPressed: () {},
-                ),
-              ],
+      body: SingleChildScrollView(
+        child: Column(
+          mainAxisSize: MainAxisSize.min,
+          children: <Widget>[
+            Container(
+              child: Column(
+                children: <Widget>[
+                  Center(
+                    child: Text('Filtrar Busqueda',
+                        style: TextStyle(fontSize: 20)),
+                  ),
+                  Row(
+                    mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                    children: <Widget>[
+                      Text("Filtrar por haciendas",
+                          style: TextStyle(fontSize: 15)),
+                      DropdownButton(
+                        value: currentHacienda,
+                        items: menuHaciendas,
+                        onChanged: changedHaciendaItem,
+                      )
+                    ],
+                  ),
+                  Row(
+                    mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                    children: <Widget>[
+                      Text("Filtrar por suertes",
+                          style: TextStyle(fontSize: 15)),
+                      DropdownButton(
+                          value: currentSuerte,
+                          items: menuSuertes,
+                          onChanged: changedSuerteItem)
+                    ],
+                  ),
+                  Row(
+                    mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                    children: <Widget>[
+                      Text("Encargado", style: TextStyle(fontSize: 20)),
+                      DropdownButton(
+                          value: currentUser,
+                          items: menuUsuarios,
+                          onChanged: changedUsuarioItem)
+                    ],
+                  ),
+                  RaisedButton(
+                      color: Colors.blue,
+                      child: Text('Buscar'),
+                      onPressed: () {
+                        buscarFiltros(
+                            currentHacienda, currentSuerte, currentUser);
+                      }),
+                  listadoFiltradoTareas(context, tareas),
+                ],
+              ),
             ),
-          ),
-          listadoFiltradoTareas(context, tareas),
-        ],
+          ],
+        ),
       ),
     );
   }
@@ -217,25 +237,37 @@ class _AlltasksState extends State<AllTasks> {
 Widget listadoFiltradoTareas(BuildContext context, List tareas) {
   return tareas.isEmpty
       ? Container(
-          child: Text('Hi'),
-          color: Colors.blue,
+          child: Image.asset("assets/imgs/no_task_vector.png"),
+          color: Colors.transparent,
         )
       : ListView.builder(
-          itemCount: 5,
+          physics: NeverScrollableScrollPhysics(),
+          itemCount: tareas.length,
           shrinkWrap: true,
           itemBuilder: (context, index) {
             return ListTile(
+              onTap: () {
+                Navigator.push(
+                    context,
+                    MaterialPageRoute(
+                        builder: (context) => TaskView(task: tareas[index])));
+              },
               title: Column(
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: <Widget>[
-                  Text('Hacienda:'),
-                  SizedBox(height: 2.0),
-                  Text('Suerte:'),
-                  SizedBox(height: 2.0),
-                  Text('Encargado:'),
-                  SizedBox(height: 2.0),
+                  Text('Hacienda:  ' +
+                      tareas[index]['Nombre_Hacienda'].toString()),
+                  Text('Suerte:  ' + tareas[index]['Nombre_Suerte'].toString()),
+                  Text(
+                      'Encargado:' +
+                          tareas[index]['Usuario_Encargado'].toString(),
+                      style: TextStyle(color: Colors.grey)),
+                  Divider()
                 ],
               ),
+              leading: CircleAvatar(
+                  child: Image.asset("assets/imgs/taskDone.png"),
+                  backgroundColor: Colors.transparent),
             );
           });
 }

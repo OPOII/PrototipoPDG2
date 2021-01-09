@@ -198,6 +198,28 @@ class CrudConsultas {
     }
   }
 
+  Future buscarPorHaciendaUsuario(String hacienda, String usuario) async {
+    List filtradoHaciendaSuerte = [];
+    try {
+      await FirebaseFirestore.instance
+          .collection('Ingenio')
+          .doc('1')
+          .collection('tasks')
+          .where("Nombre_Hacienda", isEqualTo: hacienda)
+          .where("Usuario_Encargado", isEqualTo: usuario)
+          .get()
+          .then((value) {
+        value.docs.forEach((element) {
+          filtradoHaciendaSuerte.add(element);
+        });
+      });
+      return filtradoHaciendaSuerte;
+    } catch (e) {
+      print(e.toString());
+      return null;
+    }
+  }
+
   Future buscarPorHaciendaSuerteUsuario(
       String hacienda, String suerte, String usuario) async {
     List filtradoHaciendaSuerteUsuario = [];
