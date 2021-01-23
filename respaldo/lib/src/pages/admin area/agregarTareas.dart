@@ -96,6 +96,7 @@ class _TareaViewState extends State<TareaView> {
       obtenerIdUsuario(currentUser);
       planSemanal['Id_usuario'] = idUser;
       print(planSemanal);
+      //Guardo esto en plan semanal
       DocumentReference referencia = await FirebaseFirestore.instance
           .collection('Ingenio')
           .doc('1')
@@ -119,6 +120,7 @@ class _TareaViewState extends State<TareaView> {
       tareaUsuario['Id_Actividad'] = referencia.id;
       tareaUsuario['Usuario_Encargado'] = currentUser;
       tareaUsuario['Id_Usuario'] = idUser;
+      //Guardo esto en la coleccion de tareas de los usuarios
       await FirebaseFirestore.instance
           .collection('Ingenio')
           .doc('1')

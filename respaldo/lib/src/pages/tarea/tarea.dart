@@ -17,8 +17,9 @@ class Tarea {
   String ejecutable; //double
   String pendiente; //double
   String observacion;
+  String encargado;
   Tarea(
-      this.hdaste,
+      {this.hdaste,
       this.area,
       this.corte,
       this.edad,
@@ -34,26 +35,29 @@ class Tarea {
       this.actividad,
       this.ejecutable,
       this.pendiente,
-      this.observacion);
+      this.observacion,
+      this.encargado});
   factory Tarea.fromJson(dynamic json) {
     return Tarea(
-        "${json['hdaste']}",
-        "${json['area']}",
-        "${json['corte']}",
-        "${json['edad']}",
-        "${json['nombreActividad']}",
-        "${json['grupo']}",
-        "${json['distrito']}",
-        "${json['tipoCultivo']}",
-        "${json['nombreHacienda']}",
-        "${json['fecha']}",
-        "${json['hacienda']}",
-        "${json['suerte']}",
-        "${json['programa']}",
-        "${json['actividad']}",
-        "${json['horasEjecutadas']}",
-        "${json['pendiente']}",
-        "${json['observacion']}");
+      hdaste: "${json['hdaste']}",
+      area: "${json['area']}",
+      corte: "${json['corte']}",
+      edad: "${json['edad']}",
+      nombreActividad: "${json['nombreActividad']}",
+      grupo: "${json['grupo']}",
+      distrito: "${json['distrito']}",
+      tipoCultivo: "${json['tipoCultivo']}",
+      nombreHacienda: "${json['nombreHacienda']}",
+      fecha: "${json['fecha']}",
+      hacienda: "${json['hacienda']}",
+      suerte: "${json['suerte']}",
+      programa: "${json['programa']}",
+      actividad: "${json['actividad']}",
+      ejecutable: "${json['ejecutable']}",
+      pendiente: "${json['pendiente']}",
+      observacion: "${json['observacion']}",
+      encargado: "${json['encargado']}",
+    );
   }
 
   // Method to make GET parameters.
@@ -75,5 +79,49 @@ class Tarea {
         'ejecutable': ejecutable,
         'pendiente': pendiente,
         'observacion': observacion,
+        'encargado': encargado
       };
+  Map<String, dynamic> toMap() {
+    return {
+      "hdaste": hdaste,
+      "area": area,
+      "corte": corte,
+      "edad": edad,
+      "nombreActividad": nombreActividad,
+      "grupo": grupo,
+      "distrito": distrito,
+      "tipoCultivo": tipoCultivo,
+      "nombreHacienda": nombreHacienda,
+      "fecha": fecha,
+      "hacienda": hacienda,
+      "suerte": suerte,
+      "programa": programa,
+      "actividad": actividad,
+      "ejecutable": ejecutable,
+      "pendiente": pendiente,
+      "observacion": observacion,
+      "encargado": encargado
+    };
+  }
+
+  Tarea.fromMap(Map<String, dynamic> map) {
+    hdaste = map['name'];
+    area = map['area']; //doublle
+    corte = map['corte']; //int
+    edad = map['edad']; //double
+    nombreActividad = map['nombreActividad'];
+    grupo = map['grupo'];
+    distrito = map['distrito'];
+    tipoCultivo = map['tipoCultivo'];
+    nombreHacienda = map['nombreHacienda'];
+    fecha = map['fecha']; //DateTime
+    hacienda = map['hacienda']; //int
+    suerte = map['suerte'];
+    programa = map['programa']; //double
+    actividad = map['actividad']; //int
+    ejecutable = map['ejecutable']; //double
+    pendiente = map['pendiente']; //double
+    observacion = map['observacion'];
+    encargado = map['encargado'];
+  }
 }

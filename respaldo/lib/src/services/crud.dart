@@ -1,5 +1,10 @@
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:respaldo/authentication_service.dart';
+import 'package:respaldo/src/pages/Database.dart';
+import 'package:respaldo/src/pages/tarea/tarea.dart';
+import 'package:http/http.dart' as http;
+import 'dart:convert' as convert;
+import 'dart:convert';
 
 class CrudConsultas {
   AuthenticationService service = new AuthenticationService();
@@ -22,6 +27,7 @@ class CrudConsultas {
 
   Future obtenerListaHaciendas() async {
     List haciendas = [];
+    await listadoExcels();
     DocumentSnapshot ref = await FirebaseFirestore.instance
         .collection('Ingenio')
         .doc('1')
@@ -55,6 +61,38 @@ class CrudConsultas {
       });
     }
     return haciendas;
+  }
+
+  Future<List<Tarea>> listadoExcels() async {
+    List<Tarea> listados = List<Tarea>();
+    var raw = await http.get(
+        "https://script.google.com/macros/s/AKfycbx_7Zv5RIidsvtufVEmuQeSycC8PZ_A3O6tmhaHj5WMOBMrucLx/exec");
+    var jsonFeedback = convert.jsonDecode(raw.body);
+    await jsonFeedback.forEach((element) {
+      Tarea actual = new Tarea();
+      actual.hdaste = element['hdaste'].toString();
+      actual.area = element['area'].toString();
+      actual.corte = element['corte'].toString();
+      actual.edad = element['edad'].toString();
+      actual.nombreActividad = element['nombre_actividad'].toString();
+      actual.grupo = element['grupo'].toString();
+      actual.distrito = element['distrito'].toString();
+      actual.tipoCultivo = element['tipo_cultivo'].toString();
+      actual.nombreHacienda = element['nombre_hacienda'].toString();
+      actual.fecha = element['fecha'].toString();
+      actual.hacienda = element['hacienda'].toString();
+      actual.suerte = element['suerte'].toString();
+      actual.programa = element['horas_programadas'].toString();
+      actual.actividad = element['actividad'].toString();
+      actual.ejecutable = element['ejecutable'].toString();
+      actual.pendiente = element['pendiente'].toString();
+      actual.observacion = element['observacion'].toString();
+      actual.encargado = element['encargado'].toString();
+      listados.add(actual);
+    });
+    await DataBaseOffLine.instance.clearTable();
+    await DataBaseOffLine.instance.llenarTabla(listados);
+    return listados;
   }
 
 //

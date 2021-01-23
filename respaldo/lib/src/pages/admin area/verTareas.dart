@@ -187,7 +187,7 @@ class _AlltasksState extends State<AllTasks> {
                     mainAxisAlignment: MainAxisAlignment.spaceBetween,
                     children: <Widget>[
                       Text("Filtrar por haciendas",
-                          style: TextStyle(fontSize: 15)),
+                          style: TextStyle(fontSize: 18)),
                       DropdownButton(
                         value: currentHacienda,
                         items: menuHaciendas,
@@ -199,7 +199,7 @@ class _AlltasksState extends State<AllTasks> {
                     mainAxisAlignment: MainAxisAlignment.spaceBetween,
                     children: <Widget>[
                       Text("Filtrar por suertes",
-                          style: TextStyle(fontSize: 15)),
+                          style: TextStyle(fontSize: 18)),
                       DropdownButton(
                           value: currentSuerte,
                           items: menuSuertes,

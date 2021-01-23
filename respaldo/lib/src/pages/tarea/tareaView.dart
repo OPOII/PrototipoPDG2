@@ -91,70 +91,105 @@ class _TaskView extends State<TaskView> {
               Row(
                 mainAxisAlignment: MainAxisAlignment.spaceBetween,
                 children: <Widget>[
-                  Text('Nombre Actividad:', style: TextStyle(fontSize: 20)),
-                  Text(task['Nombre_Actividad'].toString(),
-                      style: TextStyle(fontSize: 20))
+                  Flexible(
+                    child: Text('Nombre Actividad:',
+                        style: TextStyle(fontSize: 20)),
+                  ),
+                  Flexible(
+                    child: Text(task['Nombre_Actividad'].toString(),
+                        style: TextStyle(fontSize: 20)),
+                  )
                 ],
               ),
               Row(
                 mainAxisAlignment: MainAxisAlignment.spaceBetween,
                 children: <Widget>[
-                  Text('Nombre Hacienda:', style: TextStyle(fontSize: 20)),
-                  Text(task['Nombre_Hacienda'].toString(),
-                      style: TextStyle(fontSize: 20))
+                  Flexible(
+                    child: Text('Nombre Hacienda:',
+                        style: TextStyle(fontSize: 20)),
+                  ),
+                  Flexible(
+                    child: Text(task['Nombre_Hacienda'].toString(),
+                        style: TextStyle(fontSize: 20)),
+                  ),
                 ],
               ),
               Row(
                 mainAxisAlignment: MainAxisAlignment.spaceBetween,
                 children: <Widget>[
-                  Text('Suerte:', style: TextStyle(fontSize: 20)),
-                  Text(task['Nombre_Suerte'].toString(),
-                      style: TextStyle(fontSize: 20))
+                  Flexible(
+                    child: Text('Suerte:', style: TextStyle(fontSize: 20)),
+                  ),
+                  Flexible(
+                    child: Text(task['Nombre_Suerte'].toString(),
+                        style: TextStyle(fontSize: 20)),
+                  ),
                 ],
               ),
               Row(
                 mainAxisAlignment: MainAxisAlignment.spaceBetween,
                 children: <Widget>[
-                  Text('Horas Programadas:', style: TextStyle(fontSize: 20)),
-                  Text(task['Horas_Programadas'].toString(),
-                      style: TextStyle(fontSize: 20))
+                  Flexible(
+                    child: Text('Horas Programadas:',
+                        style: TextStyle(fontSize: 20)),
+                  ),
+                  Flexible(
+                    child: Text(task['Horas_Programadas'].toString(),
+                        style: TextStyle(fontSize: 20)),
+                  ),
                 ],
               ),
               Row(
                 mainAxisAlignment: MainAxisAlignment.spaceBetween,
                 children: <Widget>[
-                  Text('Horas Hechas:', style: TextStyle(fontSize: 20)),
-                  Text(task['Horas_Hechas'].toString(),
-                      style: TextStyle(fontSize: 20))
+                  Flexible(
+                    child:
+                        Text('Horas Hechas:', style: TextStyle(fontSize: 20)),
+                  ),
+                  Flexible(
+                    child: Text(task['Horas_Hechas'].toString(),
+                        style: TextStyle(fontSize: 20)),
+                  ),
                 ],
               ),
               Row(
                 mainAxisAlignment: MainAxisAlignment.spaceBetween,
                 children: <Widget>[
-                  Text('Horas Faltantes:', style: TextStyle(fontSize: 20)),
-                  Text(
-                      (task['Horas_Programadas'] - task['Horas_Hechas'])
-                          .toString(),
-                      style: TextStyle(fontSize: 20))
+                  Flexible(
+                    child: Text('Horas Faltantes:',
+                        style: TextStyle(fontSize: 20)),
+                  ),
+                  Flexible(
+                    child: Text(
+                        (task['Horas_Programadas'] - task['Horas_Hechas'])
+                            .toString(),
+                        style: TextStyle(fontSize: 20)),
+                  ),
                 ],
               ),
               Row(
                 mainAxisAlignment: MainAxisAlignment.spaceBetween,
                 children: <Widget>[
-                  Text('Encargado:', style: TextStyle(fontSize: 20)),
-                  Text(task['Usuario_Encargado'].toString(),
-                      style: TextStyle(fontSize: 20))
+                  Flexible(
+                    child: Text('Encargado:', style: TextStyle(fontSize: 20)),
+                  ),
+                  Flexible(
+                    child: Text(task['Usuario_Encargado'].toString(),
+                        style: TextStyle(fontSize: 20)),
+                  ),
                 ],
               ),
               Center(
-                child: Text('Observación de la tarea'),
+                child: Text('Observación de la tarea',
+                    style: TextStyle(fontSize: 17)),
               ),
               TextField(
                 controller: observacionTareaController,
                 maxLines: 4,
               ),
               Center(
-                child: Text('Observación del usuario'),
+                child: Text('Observación del usuario',
+                    style: TextStyle(fontSize: 17)),
               ),
               TextField(
                 controller: observacionUsuarioController,

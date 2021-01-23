@@ -5,7 +5,10 @@ import 'package:connectivity/connectivity.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:respaldo/databaseConnection.dart';
+import 'package:respaldo/src/DatabaseView.dart';
 import 'package:respaldo/src/pages/loading.dart';
+import 'package:respaldo/src/pages/tarea/tarea.dart';
+import 'package:respaldo/src/services/crud.dart';
 import '../../authentication_service.dart';
 import 'lobby.dart';
 
@@ -46,9 +49,11 @@ class _LoginPageState extends State<LoginPage> {
             actions: <Widget>[
               FlatButton(
                 onPressed: () => {
-                  SystemChannels.platform.invokeMethod('SystemNavigator.pop'),
+                  Navigator.push(context,
+                      MaterialPageRoute(builder: (context) => DatabaseInfo())),
+                  //SystemChannels.platform.invokeMethod('SystemNavigator.pop'),
                 },
-                child: Text('Exit'),
+                child: Text('Ir al modo OffLine'),
               )
             ],
           ),

@@ -167,7 +167,7 @@ class SuerteSearch extends SearchDelegate<dynamic> {
     List myList = query.isEmpty
         ? listado
         : listado
-            .where((p) => p['id_hacienda'].toString().startsWith(query))
+            .where((p) => p['id_suerte'].toString().startsWith(query))
             .toList();
     return myList.isEmpty
         ? Text(

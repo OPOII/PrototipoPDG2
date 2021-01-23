@@ -1,6 +1,11 @@
 import 'dart:async';
+import 'dart:convert';
 import 'dart:io';
-
+import 'package:intl/intl.dart';
+import 'package:intl/date_symbol_data_local.dart';
+import 'package:respaldo/src/DatabaseView.dart';
+import 'package:respaldo/src/pages/tarea/tarea.dart';
+import 'package:respaldo/src/services/filesNoConnection.dart';
 import 'package:animate_do/animate_do.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:connectivity/connectivity.dart';
@@ -22,6 +27,8 @@ import 'Calendarrio/CalendarioView.dart';
 import 'admin area/adminArea.dart';
 import 'hacienda/hacienda.dart';
 import 'hacienda/haciendaView.dart';
+import 'package:http/http.dart' as http;
+import 'dart:convert' as convert;
 
 class Lobby extends StatefulWidget {
   @override
@@ -35,11 +42,11 @@ class _LobbyState extends State<Lobby> {
   List<Hacienda> listado = new List<Hacienda>();
   List idHaciendas = [];
   List usuario;
-  List<HaciendaPrueba> listadoHacienda = new List<HaciendaPrueba>();
   CrudConsultas consultas = new CrudConsultas();
   ConnectivityResult oldres;
   StreamSubscription connectivityStream;
   bool dialogshown = false;
+  List<Tarea> listadoExcel = new List<Tarea>();
   // ignore: missing_return
   Future<bool> checkInternet() async {
     try {
@@ -55,7 +62,6 @@ class _LobbyState extends State<Lobby> {
   @override
   void initState() {
     super.initState();
-
     connectivityStream =
         Connectivity().onConnectivityChanged.listen((ConnectivityResult resu) {
       if (resu == ConnectivityResult.none) {
@@ -69,9 +75,11 @@ class _LobbyState extends State<Lobby> {
             actions: <Widget>[
               FlatButton(
                 onPressed: () => {
-                  SystemChannels.platform.invokeMethod('SystemNavigator.pop'),
+                  Navigator.push(context,
+                      MaterialPageRoute(builder: (context) => DatabaseInfo())),
+                  //SystemChannels.platform.invokeMethod('SystemNavigator.pop'),
                 },
-                child: Text('Exit'),
+                child: Text('Ir al modo OffLine'),
               )
             ],
           ),
@@ -88,10 +96,9 @@ class _LobbyState extends State<Lobby> {
       }
       oldres = resu;
     });
-
+    losListados();
     guardarToken();
     probar();
-    haciendasOrganizadas();
   }
 
   @override
@@ -110,6 +117,14 @@ class _LobbyState extends State<Lobby> {
         .getEmpleadoActual(_authenticationService.currentUser.uid);
     setState(() {
       usuario = resultado;
+    });
+    //await guardarEnTxt();
+  }
+
+  losListados() async {
+    dynamic resultado = await consultas.listadoExcels();
+    setState(() {
+      listadoExcel = resultado;
     });
   }
 
@@ -138,9 +153,6 @@ class _LobbyState extends State<Lobby> {
     if (_authenticationService.currentUser == null) {
       Navigator.of(context).pop();
     } else {
-      pruebas.cargarSuertes();
-      pruebas.cargarHacienda();
-      pruebas.cargarTodo();
       return FutureBuilder<dynamic>(
         future: consultas.obtenerListaHaciendas(),
         builder: (BuildContext context, AsyncSnapshot<dynamic> snapshot) {
@@ -154,11 +166,14 @@ class _LobbyState extends State<Lobby> {
                   children: <Widget>[
                     Column(
                       children: <Widget>[
-                        barraInfo(pruebas),
-                        Padding(
-                          padding: const EdgeInsets.all(8.0),
+                        barraInfo(listadoExcel, pruebas),
+                        dataBody(listadoExcel)
+
+                        /* Padding(
+                          padding: const EdgeInsets.only(top: 50),
                           child: haciendaListado(context, snapshot),
                         )
+                        */
                       ],
                     )
                   ],
@@ -167,7 +182,7 @@ class _LobbyState extends State<Lobby> {
               drawer: Container(
                   width: 200,
                   child: usuario != null
-                      ? menuDeslizante(context, usuario)
+                      ? menuDeslizante(context, usuario, listadoExcel)
                       : Loading()),
             );
           }
@@ -177,7 +192,7 @@ class _LobbyState extends State<Lobby> {
   }
 }
 
-Drawer menuDeslizante(context, List usuario) {
+Drawer menuDeslizante(context, List usuario, List<Tarea> listadoExcel) {
   return Drawer(
     child: ListView(
       children: <Widget>[
@@ -210,7 +225,7 @@ Drawer menuDeslizante(context, List usuario) {
             () => {
                   Navigator.push(
                     context,
-                    MaterialPageRoute(builder: (context) => Tabla()),
+                    MaterialPageRoute(builder: (context) => DatabaseInfo()),
                   )
                 }),
         CustomListTile(
@@ -400,100 +415,169 @@ Widget haciendaListado(
   );
 }
 
-//Implementarlo con la base de datos
-Widget barraInfo(Ingenio ingenio) {
-  int totalTareas = ingenio.totalTareas(ingenio.listado);
-  int totalTareasRealizadas = ingenio.totalTareasHechas(ingenio.listado);
-  double porcentaje = (totalTareasRealizadas / totalTareas) * 100;
-  return Container(
-    decoration: BoxDecoration(
-      borderRadius: BorderRadius.only(
-          topRight: Radius.circular(10.0), bottomRight: Radius.circular(10.0)),
+SingleChildScrollView dataBody(List<Tarea> listadoExcel) {
+  return SingleChildScrollView(
+    scrollDirection: Axis.horizontal,
+    child: DataTable(
+      sortColumnIndex: 0,
+      columns: [
+        DataColumn(
+          label: Text("Labores"),
+          numeric: false,
+          tooltip: "Labores",
+        ),
+        DataColumn(
+          label: Text("Horas Programadas"),
+          numeric: false,
+          tooltip: "Horas Programadas",
+        ),
+        DataColumn(
+          label: Text("Ejecutable"),
+          numeric: false,
+          tooltip: "Ejecutable",
+        ),
+        DataColumn(
+          label: Text("Pendiente"),
+          numeric: false,
+          tooltip: "Pendiente",
+        ),
+      ],
+      rows: listadoExcel
+          .map(
+            (user) => DataRow(
+              cells: [
+                DataCell(
+                  Text(user.nombreActividad),
+                  onTap: () {
+                    print('Selected ${user.nombreActividad}');
+                  },
+                ),
+                DataCell(
+                  Text(user.programa),
+                ),
+                DataCell(
+                  Text(user.ejecutable),
+                ),
+                DataCell(
+                  Text(user.pendiente),
+                ),
+              ],
+            ),
+          )
+          .toList(),
     ),
+  );
+}
+
+//Implementarlo con la base de datos
+Widget barraInfo(List<Tarea> listadoExcel, Ingenio pruebas) {
+  int tareasTerminadas = 0;
+  for (var i = 0; i < listadoExcel.length; i++) {
+    if (listadoExcel[i].pendiente == "0") {
+      tareasTerminadas++;
+    }
+  }
+  int dayYear = int.parse(DateFormat("D").format(DateTime.now()));
+  DateTime date = new DateTime.now();
+  int semana = ((dayYear - date.weekday + 10) / 7).floor();
+  double porcentaje = (tareasTerminadas / listadoExcel.length) * 100;
+  initializeDateFormatting();
+  DateTime now = DateTime.now();
+  String lunes = DateFormat('MMMMEEEEd')
+      .format(now.subtract(Duration(days: DateTime.now().weekday - 1)));
+  DateTime tr = DateTime.now();
+  while (tr.weekday != 5) {
+    tr = tr.add(Duration(days: 1));
+  }
+  String viernesEstatico = DateFormat('MMMMEEEEd').format(tr);
+
+  return Container(
+    color: Colors.white,
     child: Column(
+      crossAxisAlignment: CrossAxisAlignment.center,
       children: <Widget>[
-        Row(
-          mainAxisAlignment: MainAxisAlignment.center,
-          children: [
-            Text(
-              'Información de las haciendas',
-              style: TextStyle(fontSize: 20),
-            )
-          ],
+        Text(
+          "Semana",
+          textScaleFactor: 2,
         ),
-        Row(
-          mainAxisAlignment: MainAxisAlignment.spaceAround,
-          children: <Widget>[
-            Column(
-              mainAxisAlignment: MainAxisAlignment.center,
-              children: [
-                Text('Total Tareas'),
+        Padding(
+          padding: const EdgeInsets.only(left: 75),
+          child: Table(
+            children: [
+              TableRow(children: [
                 Text(
-                  totalTareas.toString(),
-                  style: TextStyle(fontSize: 20, fontWeight: FontWeight.bold),
-                )
-              ],
-            ),
-            Column(
-              mainAxisAlignment: MainAxisAlignment.center,
-              children: [
-                Text('Tareas Realizadas'),
-                Text(
-                  totalTareasRealizadas.toString(),
-                  style: TextStyle(fontSize: 20, fontWeight: FontWeight.bold),
-                )
-              ],
-            )
-          ],
-        ),
-        Row(
-          children: [
-            Padding(
-              padding: const EdgeInsets.only(left: 55),
-              child: Text(
-                'Porcentaje de progreso',
-                style: TextStyle(fontSize: 18),
-              ),
-            ),
-          ],
-        ),
-        Row(
-          children: [
-            Padding(
-              padding: const EdgeInsets.only(left: 55.0),
-              child: Container(
-                height: 10,
-                width: 100,
-                child: ClipRRect(
-                  borderRadius: BorderRadius.all(Radius.circular(10)),
-                  child: LinearPercentIndicator(
-                    progressColor: ingenio.progreso(porcentaje),
-                    animation: true,
-                    animationDuration: 3000,
-                    lineHeight: 20.0,
-                    percent: porcentaje / 100,
-                    backgroundColor: Colors.grey,
+                  "Semana",
+                  textScaleFactor: 1.5,
+                ),
+                Text("Calendario", textScaleFactor: 1.5),
+              ]),
+              TableRow(children: [
+                Padding(
+                  padding: const EdgeInsets.only(left: 30),
+                  child: Text(
+                    semana.toString(),
+                    textScaleFactor: 1.5,
                   ),
                 ),
-              ),
-            ),
-            Padding(
-              padding: const EdgeInsets.only(left: 8.0),
-              child: Text(
-                porcentaje.toStringAsFixed(1) + '%',
-                style: TextStyle(fontSize: 15, fontWeight: FontWeight.bold),
-              ),
-            )
-          ],
+                Text(lunes + "\n" + "to" + "\n" + viernesEstatico),
+              ]),
+            ],
+          ),
         ),
-        Text('Estado'),
-        Text(ingenio.estado(porcentaje))
+        Text("Labores", textScaleFactor: 2),
+        Padding(
+          padding: const EdgeInsets.only(left: 75),
+          child: Table(
+            children: [
+              TableRow(children: [
+                Text(
+                  "Programadas",
+                  textScaleFactor: 1.5,
+                ),
+                Text("Realizadas", textScaleFactor: 1.5),
+              ]),
+              TableRow(
+                children: [
+                  Padding(
+                    padding: const EdgeInsets.only(left: 30),
+                    child: Text(
+                      listadoExcel.length.toString(),
+                      textScaleFactor: 1.5,
+                    ),
+                  ),
+                  Padding(
+                    padding: const EdgeInsets.only(left: 30),
+                    child:
+                        Text(tareasTerminadas.toString(), textScaleFactor: 1.5),
+                  ),
+                ],
+              )
+            ],
+          ),
+        ),
+        Container(
+          height: 15,
+          width: 300,
+          child: ClipRRect(
+              borderRadius: BorderRadius.all(Radius.circular(10)),
+              child: porcentaje != 0
+                  ? LinearPercentIndicator(
+                      progressColor: pruebas.progreso(porcentaje),
+                      animation: true,
+                      animationDuration: 3000,
+                      lineHeight: 20.0,
+                      percent: porcentaje / 100,
+                      backgroundColor: Colors.grey,
+                      animateFromLastPercent: true,
+                      center: Text(porcentaje.toStringAsFixed(1) + "%"),
+                    )
+                  : Loading()),
+        ),
       ],
     ),
   );
 }
 
-// Mejorar el metodo de buscar
 class HaciendaSearch extends SearchDelegate<dynamic> {
   List listado;
   HaciendaSearch({this.listado});
