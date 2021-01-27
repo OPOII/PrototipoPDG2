@@ -7,8 +7,6 @@ import 'package:flutter/services.dart';
 import 'package:respaldo/databaseConnection.dart';
 import 'package:respaldo/src/DatabaseView.dart';
 import 'package:respaldo/src/pages/loading.dart';
-import 'package:respaldo/src/pages/tarea/tarea.dart';
-import 'package:respaldo/src/services/crud.dart';
 import '../../authentication_service.dart';
 import 'lobby.dart';
 

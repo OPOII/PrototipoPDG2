@@ -1,26 +1,21 @@
 import 'dart:async';
-import 'dart:convert';
 import 'dart:io';
 import 'package:intl/intl.dart';
 import 'package:intl/date_symbol_data_local.dart';
 import 'package:respaldo/src/DatabaseView.dart';
 import 'package:respaldo/src/pages/tarea/tarea.dart';
-import 'package:respaldo/src/services/filesNoConnection.dart';
 import 'package:animate_do/animate_do.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:connectivity/connectivity.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:firebase_messaging/firebase_messaging.dart';
 import 'package:flutter/material.dart';
-import 'package:flutter/services.dart';
 import 'package:percent_indicator/linear_percent_indicator.dart';
 import 'package:respaldo/authentication_service.dart';
 import 'package:respaldo/src/pages/Ingenio.dart';
 import 'package:respaldo/src/pages/activity/activityLobby.dart';
-import 'package:respaldo/src/pages/hacienda/haciendaPrueba.dart';
 import 'package:respaldo/src/pages/loading.dart';
 import 'package:respaldo/src/pages/loginPage.dart';
-import 'package:respaldo/src/pages/tablaDatos/tablaDatos.dart';
 import 'package:respaldo/src/pages/user/userView.dart';
 import 'package:respaldo/src/services/crud.dart';
 import 'Calendarrio/CalendarioView.dart';
@@ -42,11 +37,12 @@ class _LobbyState extends State<Lobby> {
   List<Hacienda> listado = new List<Hacienda>();
   List idHaciendas = [];
   List usuario;
+  List<Tarea> listadoExcel = new List<Tarea>();
   CrudConsultas consultas = new CrudConsultas();
+
   ConnectivityResult oldres;
   StreamSubscription connectivityStream;
   bool dialogshown = false;
-  List<Tarea> listadoExcel = new List<Tarea>();
   // ignore: missing_return
   Future<bool> checkInternet() async {
     try {
@@ -105,11 +101,6 @@ class _LobbyState extends State<Lobby> {
   void dispose() {
     super.dispose();
     connectivityStream.cancel();
-  }
-
-  haciendasOrganizadas() async {
-    // ignore: unused_local_variable
-    dynamic resultado = await consultas.obtenerListaHaciendas();
   }
 
   probar() async {

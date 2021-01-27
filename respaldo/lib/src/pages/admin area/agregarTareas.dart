@@ -1,7 +1,12 @@
+import 'dart:async';
+import 'dart:io';
+
 import 'package:cloud_firestore/cloud_firestore.dart';
+import 'package:connectivity/connectivity.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/widgets.dart';
 import 'package:datetime_picker_formfield/datetime_picker_formfield.dart';
+import 'package:respaldo/src/DatabaseView.dart';
 import 'package:respaldo/src/services/crud.dart';
 import 'package:intl/intl.dart';
 import 'package:respaldo/src/services/notificationServices.dart';
@@ -15,6 +20,9 @@ class TareaView extends StatefulWidget {
 
 // ignore: non_constant_identifier_names
 class _TareaViewState extends State<TareaView> {
+  ConnectivityResult oldres;
+  StreamSubscription connectivityStream;
+  bool dialogshown = false;
   final _formKey = GlobalKey<FormState>();
   final _scaffoldKey = GlobalKey<ScaffoldState>();
   DateTime fecha;
@@ -37,11 +45,62 @@ class _TareaViewState extends State<TareaView> {
   @override
   void initState() {
     super.initState();
+    connectivityStream =
+        Connectivity().onConnectivityChanged.listen((ConnectivityResult resu) {
+      if (resu == ConnectivityResult.none) {
+        dialogshown = true;
+        showDialog(
+          context: context,
+          barrierDismissible: false,
+          child: AlertDialog(
+            title: Text('Error'),
+            content: Text('No Data Connection Available'),
+            actions: <Widget>[
+              FlatButton(
+                onPressed: () => {
+                  Navigator.push(context,
+                      MaterialPageRoute(builder: (context) => DatabaseInfo())),
+                  //SystemChannels.platform.invokeMethod('SystemNavigator.pop'),
+                },
+                child: Text('Ir al modo OffLine'),
+              )
+            ],
+          ),
+        );
+      } else if (oldres == ConnectivityResult.none) {
+        checkInternet().then((result) {
+          if (result == true) {
+            if (dialogshown == true) {
+              dialogshown = false;
+              Navigator.pop(context);
+            }
+          }
+        });
+      }
+      oldres = resu;
+    });
     obtenerHaciendas();
     obtenerUsuarios();
     currentHacienda = "seleccione una hacienda";
     currentSuerte = "";
     currentUser = "";
+  }
+
+  @override
+  void dispose() {
+    super.dispose();
+    connectivityStream.cancel();
+  }
+
+  Future<bool> checkInternet() async {
+    try {
+      final result = await InternetAddress.lookup('google.com');
+      if (result.isNotEmpty && result[0].rawAddress.isNotEmpty) {
+        return Future.value(true);
+      }
+    } on SocketException catch (_) {
+      return Future.value(false);
+    }
   }
 
   // ignore: non_constant_identifier_names

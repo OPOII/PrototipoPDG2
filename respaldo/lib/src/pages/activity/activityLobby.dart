@@ -1,7 +1,12 @@
+import 'dart:async';
+import 'dart:io';
+
+import 'package:connectivity/connectivity.dart';
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:intl/intl.dart';
 import 'package:respaldo/authentication_service.dart';
+import 'package:respaldo/src/DatabaseView.dart';
 import 'package:respaldo/src/pages/activity/activityView.dart';
 import 'package:respaldo/src/services/crud.dart';
 
@@ -18,11 +23,65 @@ class ActividadWidget extends State<ActivityWidget> {
   List tareas = [];
   CrudConsultas consultas = new CrudConsultas();
   AuthenticationService servicios = new AuthenticationService();
+  ConnectivityResult oldres;
+  StreamSubscription connectivityStream;
+  bool dialogshown = false;
+  Future<bool> checkInternet() async {
+    try {
+      final result = await InternetAddress.lookup('google.com');
+      if (result.isNotEmpty && result[0].rawAddress.isNotEmpty) {
+        return Future.value(true);
+      }
+    } on SocketException catch (_) {
+      return Future.value(false);
+    }
+  }
+
   @override
   void initState() {
+    super.initState();
+    connectivityStream =
+        Connectivity().onConnectivityChanged.listen((ConnectivityResult resu) {
+      if (resu == ConnectivityResult.none) {
+        dialogshown = true;
+        showDialog(
+          context: context,
+          barrierDismissible: false,
+          child: AlertDialog(
+            title: Text('Error'),
+            content: Text('No Data Connection Available'),
+            actions: <Widget>[
+              FlatButton(
+                onPressed: () => {
+                  Navigator.push(context,
+                      MaterialPageRoute(builder: (context) => DatabaseInfo())),
+                  //SystemChannels.platform.invokeMethod('SystemNavigator.pop'),
+                },
+                child: Text('Ir al modo OffLine'),
+              )
+            ],
+          ),
+        );
+      } else if (oldres == ConnectivityResult.none) {
+        checkInternet().then((result) {
+          if (result == true) {
+            if (dialogshown == true) {
+              dialogshown = false;
+              Navigator.pop(context);
+            }
+          }
+        });
+      }
+      oldres = resu;
+    });
     inicio();
     listadoTareas(servicios.currentUser.uid);
-    super.initState();
+  }
+
+  @override
+  void dispose() {
+    super.dispose();
+    connectivityStream.cancel();
   }
 
   listadoHaciendas() async {

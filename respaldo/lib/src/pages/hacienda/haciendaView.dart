@@ -1,16 +1,87 @@
+import 'dart:async';
+import 'dart:io';
+
 import 'package:cloud_firestore/cloud_firestore.dart';
+import 'package:connectivity/connectivity.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_map/flutter_map.dart';
 import 'package:latlong/latlong.dart';
+import 'package:respaldo/src/DatabaseView.dart';
 import 'package:respaldo/src/pages/suerte/lobbySuerte.dart';
 
-class HaciendaView extends StatelessWidget {
+class HaciendaView extends StatefulWidget {
   final QueryDocumentSnapshot hacienda;
   //No se por que pero es necesario usar lo del key para poder pasar los parametros que necesitamos
   HaciendaView({Key key, this.hacienda}) : super(key: key);
+
+  @override
+  _HaciendaViewState createState() => _HaciendaViewState();
+}
+
+class _HaciendaViewState extends State<HaciendaView> {
+  ConnectivityResult oldres;
+  StreamSubscription connectivityStream;
+  bool dialogshown = false;
+
+  Future<bool> checkInternet() async {
+    try {
+      final result = await InternetAddress.lookup('google.com');
+      if (result.isNotEmpty && result[0].rawAddress.isNotEmpty) {
+        return Future.value(true);
+      }
+    } on SocketException catch (_) {
+      return Future.value(false);
+    }
+  }
+
+  @override
+  void initState() {
+    super.initState();
+    connectivityStream =
+        Connectivity().onConnectivityChanged.listen((ConnectivityResult resu) {
+      if (resu == ConnectivityResult.none) {
+        dialogshown = true;
+        showDialog(
+          context: context,
+          barrierDismissible: false,
+          child: AlertDialog(
+            title: Text('Error'),
+            content: Text('No Data Connection Available'),
+            actions: <Widget>[
+              FlatButton(
+                onPressed: () => {
+                  Navigator.push(context,
+                      MaterialPageRoute(builder: (context) => DatabaseInfo())),
+                  //SystemChannels.platform.invokeMethod('SystemNavigator.pop'),
+                },
+                child: Text('Ir al modo OffLine'),
+              )
+            ],
+          ),
+        );
+      } else if (oldres == ConnectivityResult.none) {
+        checkInternet().then((result) {
+          if (result == true) {
+            if (dialogshown == true) {
+              dialogshown = false;
+              Navigator.pop(context);
+            }
+          }
+        });
+      }
+      oldres = resu;
+    });
+  }
+
+  @override
+  void dispose() {
+    super.dispose();
+    connectivityStream.cancel();
+  }
+
   @override
   Widget build(BuildContext context) {
-    print(hacienda.id);
+    print(widget.hacienda.id);
     return new Scaffold(
       backgroundColor: Colors.white,
       appBar: AppBar(
@@ -25,16 +96,17 @@ class HaciendaView extends StatelessWidget {
           child: Column(
         mainAxisAlignment: MainAxisAlignment.center,
         children: <Widget>[
-          mapaMiniatura(hacienda.data()['location']),
+          mapaMiniatura(widget.hacienda.data()['location']),
           SizedBox(
             height: 20,
           ),
           CostumInfo(
-              text: '' + hacienda.data()['hacienda_name'],
+              text: '' + widget.hacienda.data()['hacienda_name'],
               press: () => {},
               icon: Icons.location_on),
           CostumInfo(
-            text: 'Identificación ' + hacienda.data()['id_hacienda'].toString(),
+            text: 'Identificación ' +
+                widget.hacienda.data()['id_hacienda'].toString(),
             press: () => {},
             icon: Icons.article,
           ),
@@ -54,7 +126,7 @@ class HaciendaView extends StatelessWidget {
             icon: Icons.bar_chart,
           ),
           // contenerInfo(hacienda),
-          boton(context, hacienda)
+          boton(context, widget.hacienda)
         ],
       )),
     );

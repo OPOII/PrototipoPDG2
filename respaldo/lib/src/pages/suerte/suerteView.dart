@@ -1,12 +1,83 @@
+import 'dart:async';
+import 'dart:io';
+
 import 'package:cloud_firestore/cloud_firestore.dart';
+import 'package:connectivity/connectivity.dart';
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_map/flutter_map.dart';
 import 'package:latlong/latlong.dart';
+import 'package:respaldo/src/DatabaseView.dart';
 
-class SuerteView extends StatelessWidget {
+class SuerteView extends StatefulWidget {
   final QueryDocumentSnapshot suerte;
   SuerteView({Key key, this.suerte}) : super(key: key);
+
+  @override
+  _SuerteViewState createState() => _SuerteViewState();
+}
+
+class _SuerteViewState extends State<SuerteView> {
+  ConnectivityResult oldres;
+  StreamSubscription connectivityStream;
+  bool dialogshown = false;
+  // ignore: missing_return
+  Future<bool> checkInternet() async {
+    try {
+      final result = await InternetAddress.lookup('google.com');
+      if (result.isNotEmpty && result[0].rawAddress.isNotEmpty) {
+        return Future.value(true);
+      }
+    } on SocketException catch (_) {
+      return Future.value(false);
+    }
+  }
+
+  @override
+  void initState() {
+    super.initState();
+    connectivityStream =
+        Connectivity().onConnectivityChanged.listen((ConnectivityResult resu) {
+      if (resu == ConnectivityResult.none) {
+        dialogshown = true;
+        showDialog(
+          context: context,
+          barrierDismissible: false,
+          child: AlertDialog(
+            title: Text('Error'),
+            content: Text('No Data Connection Available'),
+            actions: <Widget>[
+              FlatButton(
+                onPressed: () => {
+                  Navigator.push(context,
+                      MaterialPageRoute(builder: (context) => DatabaseInfo())),
+                  //SystemChannels.platform.invokeMethod('SystemNavigator.pop'),
+                },
+                child: Text('Ir al modo OffLine'),
+              )
+            ],
+          ),
+        );
+      } else if (oldres == ConnectivityResult.none) {
+        checkInternet().then((result) {
+          if (result == true) {
+            if (dialogshown == true) {
+              dialogshown = false;
+              Navigator.pop(context);
+            }
+          }
+        });
+      }
+      oldres = resu;
+    });
+  }
+
+  @override
+  void dispose() {
+    super.dispose();
+    connectivityStream.cancel();
+  }
+
   @override
   Widget build(BuildContext context) {
     return new Scaffold(
@@ -17,24 +88,24 @@ class SuerteView extends StatelessWidget {
         backgroundColor: Colors.green,
         centerTitle: true,
         title: Text(
-          'Hacienda perteneciente: \n' + suerte['haciendaPerteneciente'],
+          'Hacienda perteneciente: \n' + widget.suerte['haciendaPerteneciente'],
           style: TextStyle(color: Colors.white),
         ),
       ),
       body: SingleChildScrollView(
           child: Column(
         children: <Widget>[
-          mapaMiniatura(suerte.data()['direccion']),
+          mapaMiniatura(widget.suerte.data()['direccion']),
           SizedBox(
             height: 20,
           ),
           CostumRow(
-            text: 'Suerte: ' + suerte['id_suerte'],
+            text: 'Suerte: ' + widget.suerte['id_suerte'],
             press: () => {},
             icon: Icons.location_on,
           ),
           CostumRow(
-            text: 'Ubicacion: ' + suerte['area'].toString(),
+            text: 'Ubicacion: ' + widget.suerte['area'].toString(),
             press: () => {},
             icon: Icons.article,
           ),
@@ -53,28 +124,10 @@ class SuerteView extends StatelessWidget {
             press: () => {},
             icon: Icons.bar_chart,
           ),
-          boton(context)
         ],
       )),
     );
   }
-}
-
-Container boton(BuildContext context) {
-  return Container(
-    child: RaisedButton(
-      child: Text('Ver tareas'),
-      onPressed: () {
-        Navigator.push(
-            context,
-            // ignore: missing_return
-            MaterialPageRoute(builder: (BuildContext context) {}));
-        // builder: (context) => ListadoSuerte(listadoSuertes: lista)));
-      },
-      shape:
-          RoundedRectangleBorder(borderRadius: new BorderRadius.circular(20.0)),
-    ),
-  );
 }
 
 Container mapaMiniatura(GeoPoint data) {

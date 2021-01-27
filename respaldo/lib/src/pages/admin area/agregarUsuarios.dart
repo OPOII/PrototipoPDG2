@@ -1,11 +1,15 @@
+import 'dart:async';
+import 'dart:io';
 import 'dart:math';
 
 import 'package:cloud_firestore/cloud_firestore.dart';
+import 'package:connectivity/connectivity.dart';
 import 'package:datetime_picker_formfield/datetime_picker_formfield.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:intl/intl.dart';
 import 'package:respaldo/authentication_service.dart';
+import 'package:respaldo/src/DatabaseView.dart';
 
 class AgregarUsuarios extends StatefulWidget {
   @override
@@ -13,6 +17,9 @@ class AgregarUsuarios extends StatefulWidget {
 }
 
 class _UsersState extends State<AgregarUsuarios> {
+  ConnectivityResult oldres;
+  StreamSubscription connectivityStream;
+  bool dialogshown = false;
   final formKey = GlobalKey<FormState>();
   //final _scaffoldKey = GlobalKey<ScaffoldState>();
   AuthenticationService service = new AuthenticationService();
@@ -29,11 +36,56 @@ class _UsersState extends State<AgregarUsuarios> {
   List _charges = ["", "admin", "user"];
   String _currentCharge;
   List<DropdownMenuItem<String>> _dropDownMenuItems;
+  Future<bool> checkInternet() async {
+    try {
+      final result = await InternetAddress.lookup('google.com');
+      if (result.isNotEmpty && result[0].rawAddress.isNotEmpty) {
+        return Future.value(true);
+      }
+    } on SocketException catch (_) {
+      return Future.value(false);
+    }
+  }
+
   @override
   void initState() {
+    super.initState();
     _dropDownMenuItems = getDropDownMenuItems();
     _currentCharge = _dropDownMenuItems[0].value;
-    super.initState();
+    connectivityStream =
+        Connectivity().onConnectivityChanged.listen((ConnectivityResult resu) {
+      if (resu == ConnectivityResult.none) {
+        dialogshown = true;
+        showDialog(
+          context: context,
+          barrierDismissible: false,
+          child: AlertDialog(
+            title: Text('Error'),
+            content: Text('No Data Connection Available'),
+            actions: <Widget>[
+              FlatButton(
+                onPressed: () => {
+                  Navigator.push(context,
+                      MaterialPageRoute(builder: (context) => DatabaseInfo())),
+                  //SystemChannels.platform.invokeMethod('SystemNavigator.pop'),
+                },
+                child: Text('Ir al modo OffLine'),
+              )
+            ],
+          ),
+        );
+      } else if (oldres == ConnectivityResult.none) {
+        checkInternet().then((result) {
+          if (result == true) {
+            if (dialogshown == true) {
+              dialogshown = false;
+              Navigator.pop(context);
+            }
+          }
+        });
+      }
+      oldres = resu;
+    });
   }
 
   List<DropdownMenuItem<String>> getDropDownMenuItems() {
@@ -44,6 +96,12 @@ class _UsersState extends State<AgregarUsuarios> {
       items.add(new DropdownMenuItem(value: city, child: new Text(city)));
     }
     return items;
+  }
+
+  @override
+  void dispose() {
+    super.dispose();
+    connectivityStream.cancel();
   }
 
   @override

@@ -194,7 +194,9 @@ class TablaDatos extends State<Tabla> {
         title: Text("Tabla de datos"),
       ),
       body: SingleChildScrollView(
-          scrollDirection: Axis.vertical, child: bodyData()),
+        scrollDirection: Axis.vertical,
+        child: bodyData(),
+      ),
     );
   }
 }
