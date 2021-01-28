@@ -64,35 +64,70 @@ class CrudConsultas {
   }
 
   Future<List<Tarea>> listadoExcels() async {
-    List<Tarea> listados = List<Tarea>();
-    var raw = await http.get(
-        "https://script.google.com/macros/s/AKfycbx_7Zv5RIidsvtufVEmuQeSycC8PZ_A3O6tmhaHj5WMOBMrucLx/exec");
-    var jsonFeedback = convert.jsonDecode(raw.body);
-    await jsonFeedback.forEach((element) {
-      Tarea actual = new Tarea();
-      actual.hdaste = element['hdaste'].toString();
-      actual.area = element['area'].toString();
-      actual.corte = element['corte'].toString();
-      actual.edad = element['edad'].toString();
-      actual.nombreActividad = element['nombre_actividad'].toString();
-      actual.grupo = element['grupo'].toString();
-      actual.distrito = element['distrito'].toString();
-      actual.tipoCultivo = element['tipo_cultivo'].toString();
-      actual.nombreHacienda = element['nombre_hacienda'].toString();
-      actual.fecha = element['fecha'].toString();
-      actual.hacienda = element['hacienda'].toString();
-      actual.suerte = element['suerte'].toString();
-      actual.programa = element['horas_programadas'].toString();
-      actual.actividad = element['actividad'].toString();
-      actual.ejecutable = element['ejecutable'].toString();
-      actual.pendiente = element['pendiente'].toString();
-      actual.observacion = element['observacion'].toString();
-      actual.encargado = element['encargado'].toString();
-      listados.add(actual);
-    });
-    await DataBaseOffLine.instance.clearTable();
-    await DataBaseOffLine.instance.llenarTabla(listados);
-    return listados;
+    DateTime lunes = DateTime.now();
+    if (lunes.weekday == 1) {
+      print("Es jueves");
+      List<Tarea> listados = List<Tarea>();
+      var raw = await http.get(
+          "https://script.google.com/macros/s/AKfycbx_7Zv5RIidsvtufVEmuQeSycC8PZ_A3O6tmhaHj5WMOBMrucLx/exec");
+      var jsonFeedback = convert.jsonDecode(raw.body);
+      int i = 0;
+      await jsonFeedback.forEach((element) {
+        Tarea actual = new Tarea();
+        actual.hdaste = element['hdaste'].toString();
+        actual.area = element['area'].toString();
+        actual.corte = element['corte'].toString();
+        actual.edad = element['edad'].toString();
+        actual.nombreActividad = element['nombre_actividad'].toString();
+        actual.grupo = element['grupo'].toString();
+        actual.distrito = element['distrito'].toString();
+        actual.tipoCultivo = element['tipo_cultivo'].toString();
+        actual.nombreHacienda = element['nombre_hacienda'].toString();
+        actual.fecha = element['fecha'].toString();
+        actual.hacienda = element['hacienda'].toString();
+        actual.suerte = element['suerte'].toString();
+        actual.programa = element['horas_programadas'].toString();
+        actual.actividad = element['actividad'].toString();
+        actual.ejecutable = element['ejecutable'].toString();
+        actual.pendiente = element['pendiente'].toString();
+        actual.observacion = element['observacion'].toString();
+        actual.encargado = element['encargado'].toString();
+        actual.id = i.toString();
+        listados.add(actual);
+        i++;
+      });
+      await DataBaseOffLine.instance.clearTable();
+      await DataBaseOffLine.instance.llenarTabla(listados);
+      return listados;
+    } else {
+      List<Map<String, dynamic>> mapas;
+      List<Tarea> lista = List<Tarea>();
+      mapas = await DataBaseOffLine.instance.queryAll();
+      for (var i = 0; i < mapas.length; i++) {
+        Tarea nueva = new Tarea();
+        nueva.hdaste = mapas[i]['hdaste'].toString();
+        nueva.area = mapas[i]['area'].toString();
+        nueva.corte = mapas[i]['corte'].toString();
+        nueva.edad = mapas[i]['edad'].toString();
+        nueva.nombreActividad = mapas[i]['nombreActividad'].toString();
+        nueva.grupo = mapas[i]['grupo'].toString();
+        nueva.distrito = mapas[i]['distrito'].toString();
+        nueva.tipoCultivo = mapas[i]['tipoCultivo'].toString();
+        nueva.nombreHacienda = mapas[i]['nombreHacienda'].toString();
+        nueva.fecha = mapas[i]['fecha'].toString();
+        nueva.hacienda = mapas[i]['hacienda'].toString();
+        nueva.suerte = mapas[i]['suerte'].toString();
+        nueva.programa = mapas[i]['programa'].toString();
+        nueva.actividad = mapas[i]['actividad'].toString();
+        nueva.ejecutable = mapas[i]['ejecutable'].toString();
+        nueva.pendiente = mapas[i]['pendiente'].toString();
+        nueva.observacion = mapas[i]['observacion'].toString();
+        nueva.encargado = mapas[i]['encargado'].toString();
+        nueva.id = i.toString();
+        lista.add(nueva);
+      }
+      return lista;
+    }
   }
 
 //

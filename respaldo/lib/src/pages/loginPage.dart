@@ -4,7 +4,6 @@ import 'dart:io';
 import 'package:connectivity/connectivity.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
-import 'package:respaldo/databaseConnection.dart';
 import 'package:respaldo/src/DatabaseView.dart';
 import 'package:respaldo/src/pages/loading.dart';
 import '../../authentication_service.dart';
@@ -79,7 +78,6 @@ class _LoginPageState extends State<LoginPage> {
   String email, password;
   final GlobalKey<FormState> _formKey = GlobalKey<FormState>();
   final AuthenticationService _authenticationService = AuthenticationService();
-  final ConeccionBaseDatos baseDatos = ConeccionBaseDatos();
   bool loading = false;
   @override
   Widget build(BuildContext context) {
@@ -103,40 +101,7 @@ class _LoginPageState extends State<LoginPage> {
                     SingleChildScrollView(
                       child: Form(
                         key: _formKey,
-                        child: Column(
-                          mainAxisAlignment: MainAxisAlignment.spaceAround,
-                          children: <Widget>[
-                            Padding(
-                              padding: const EdgeInsets.only(top: 20.0),
-                              child: TextFormField(
-                                // ignore: missing_return
-                                validator: (input) {
-                                  if (input.isEmpty) {
-                                    return 'Please enter an email';
-                                  }
-                                },
-                                onSaved: (input) => email = input,
-                                decoration: InputDecoration(labelText: 'Email'),
-                                keyboardType: TextInputType.emailAddress,
-                              ),
-                            ),
-                            Padding(
-                              padding: const EdgeInsets.only(top: 40),
-                              child: TextFormField(
-                                // ignore: missing_return
-                                validator: (input) {
-                                  if (input.length < 6) {
-                                    return 'You have to enter at least 6 characters';
-                                  }
-                                },
-                                onSaved: (input) => password = input,
-                                decoration:
-                                    InputDecoration(labelText: 'Password'),
-                                obscureText: true,
-                              ),
-                            ),
-                          ],
-                        ),
+                        child: buildColumn(),
                       ),
                     ),
                     Padding(
@@ -201,5 +166,41 @@ class _LoginPageState extends State<LoginPage> {
               ),
             ),
           );
+  }
+
+  Column buildColumn() {
+    return Column(
+      mainAxisAlignment: MainAxisAlignment.spaceAround,
+      children: <Widget>[
+        Padding(
+          padding: const EdgeInsets.only(top: 20.0),
+          child: TextFormField(
+            // ignore: missing_return
+            validator: (input) {
+              if (input.isEmpty) {
+                return 'Please enter an email';
+              }
+            },
+            onSaved: (input) => email = input,
+            decoration: InputDecoration(labelText: 'Email'),
+            keyboardType: TextInputType.emailAddress,
+          ),
+        ),
+        Padding(
+          padding: const EdgeInsets.only(top: 40),
+          child: TextFormField(
+            // ignore: missing_return
+            validator: (input) {
+              if (input.length < 6) {
+                return 'You have to enter at least 6 characters';
+              }
+            },
+            onSaved: (input) => password = input,
+            decoration: InputDecoration(labelText: 'Password'),
+            obscureText: true,
+          ),
+        ),
+      ],
+    );
   }
 }

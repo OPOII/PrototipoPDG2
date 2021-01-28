@@ -18,6 +18,7 @@ class Tarea {
   String pendiente; //double
   String observacion;
   String encargado;
+  String id;
   Tarea(
       {this.hdaste,
       this.area,
@@ -36,28 +37,29 @@ class Tarea {
       this.ejecutable,
       this.pendiente,
       this.observacion,
-      this.encargado});
+      this.encargado,
+      this.id});
   factory Tarea.fromJson(dynamic json) {
     return Tarea(
-      hdaste: "${json['hdaste']}",
-      area: "${json['area']}",
-      corte: "${json['corte']}",
-      edad: "${json['edad']}",
-      nombreActividad: "${json['nombreActividad']}",
-      grupo: "${json['grupo']}",
-      distrito: "${json['distrito']}",
-      tipoCultivo: "${json['tipoCultivo']}",
-      nombreHacienda: "${json['nombreHacienda']}",
-      fecha: "${json['fecha']}",
-      hacienda: "${json['hacienda']}",
-      suerte: "${json['suerte']}",
-      programa: "${json['programa']}",
-      actividad: "${json['actividad']}",
-      ejecutable: "${json['ejecutable']}",
-      pendiente: "${json['pendiente']}",
-      observacion: "${json['observacion']}",
-      encargado: "${json['encargado']}",
-    );
+        hdaste: "${json['hdaste']}",
+        area: "${json['area']}",
+        corte: "${json['corte']}",
+        edad: "${json['edad']}",
+        nombreActividad: "${json['nombreActividad']}",
+        grupo: "${json['grupo']}",
+        distrito: "${json['distrito']}",
+        tipoCultivo: "${json['tipoCultivo']}",
+        nombreHacienda: "${json['nombreHacienda']}",
+        fecha: "${json['fecha']}",
+        hacienda: "${json['hacienda']}",
+        suerte: "${json['suerte']}",
+        programa: "${json['programa']}",
+        actividad: "${json['actividad']}",
+        ejecutable: "${json['ejecutable']}",
+        pendiente: "${json['pendiente']}",
+        observacion: "${json['observacion']}",
+        encargado: "${json['encargado']}",
+        id: "${json['id']}");
   }
 
   // Method to make GET parameters.
@@ -79,7 +81,8 @@ class Tarea {
         'ejecutable': ejecutable,
         'pendiente': pendiente,
         'observacion': observacion,
-        'encargado': encargado
+        'encargado': encargado,
+        'id': id
       };
   Map<String, dynamic> toMap() {
     return {
@@ -100,7 +103,8 @@ class Tarea {
       "ejecutable": ejecutable,
       "pendiente": pendiente,
       "observacion": observacion,
-      "encargado": encargado
+      "encargado": encargado,
+      "id": id
     };
   }
 
@@ -123,5 +127,6 @@ class Tarea {
     pendiente = map['pendiente']; //double
     observacion = map['observacion'];
     encargado = map['encargado'];
+    id = map['id'];
   }
 }

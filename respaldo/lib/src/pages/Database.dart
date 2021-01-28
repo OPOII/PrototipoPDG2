@@ -11,6 +11,7 @@ class DataBaseOffLine {
   static final _dbVersion = 1;
   static final _tableName = 'TASKS';
 
+  static final columnId = 'id';
   static final columnhdaste = 'hdaste';
   static final columnarea = 'area';
   static final columncorte = 'corte';
@@ -49,6 +50,8 @@ class DataBaseOffLine {
     await db.execute("create table " +
         _tableName +
         " (" +
+        columnId +
+        " integer primary key, " +
         columnhdaste +
         " text, " +
         columnarea +
@@ -100,6 +103,12 @@ class DataBaseOffLine {
   clearTable() async {
     Database db = await instance.database;
     db.execute("delete from " + _tableName);
+  }
+
+  Future<int> update(Map<String, dynamic> row) async {
+    Database db = await instance.database;
+    int id = row[columnId];
+    db.update(_tableName, row, where: '$columnId=?', whereArgs: [id]);
   }
 
   llenarTabla(List<Tarea> listado) {

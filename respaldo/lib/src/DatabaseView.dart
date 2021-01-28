@@ -10,6 +10,7 @@ class DatabaseInfo extends StatefulWidget {
 
 class DatabaseView extends State<DatabaseInfo> {
   List<Map<String, dynamic>> listado;
+  TextEditingController ejecutableController = new TextEditingController();
   @override
   void initState() {
     super.initState();
@@ -67,54 +68,9 @@ class DatabaseView extends State<DatabaseInfo> {
                 DataTable(
                   columns: [
                     DataColumn(
-                      label: Text("hdaste"),
+                      label: Text("id"),
                       numeric: false,
-                      tooltip: "hdaste",
-                    ),
-                    DataColumn(
-                      label: Text("area"),
-                      numeric: false,
-                      tooltip: "area",
-                    ),
-                    DataColumn(
-                      label: Text("corte"),
-                      numeric: false,
-                      tooltip: "corte",
-                    ),
-                    DataColumn(
-                      label: Text("edad"),
-                      numeric: false,
-                      tooltip: "edad",
-                    ),
-                    DataColumn(
-                      label: Text("nombreActividad"),
-                      numeric: false,
-                      tooltip: "nombreActividad",
-                    ),
-                    DataColumn(
-                      label: Text("grupo"),
-                      numeric: false,
-                      tooltip: "grupo",
-                    ),
-                    DataColumn(
-                      label: Text("distrito"),
-                      numeric: false,
-                      tooltip: "distrito",
-                    ),
-                    DataColumn(
-                      label: Text("tipocultivo"),
-                      numeric: false,
-                      tooltip: "tipocultivo",
-                    ),
-                    DataColumn(
-                      label: Text("nombrehacienda"),
-                      numeric: false,
-                      tooltip: "nombrehacienda",
-                    ),
-                    DataColumn(
-                      label: Text("fecha"),
-                      numeric: false,
-                      tooltip: "fecha",
+                      tooltip: "id",
                     ),
                     DataColumn(
                       label: Text("hacienda"),
@@ -127,7 +83,7 @@ class DatabaseView extends State<DatabaseInfo> {
                       tooltip: "suerte",
                     ),
                     DataColumn(
-                      label: Text("programa"),
+                      label: Text("Hectareas \nprogramadas"),
                       numeric: false,
                       tooltip: "programa",
                     ),
@@ -151,48 +107,14 @@ class DatabaseView extends State<DatabaseInfo> {
                       numeric: false,
                       tooltip: "observacion",
                     ),
-                    DataColumn(
-                      label: Text("encargado"),
-                      numeric: false,
-                      tooltip: "encargado",
-                    ),
                   ],
                   rows: listado
                       .map(
                         (epa) => DataRow(
                           cells: [
                             DataCell(
-                              Text(epa['hdaste']),
-                              onTap: () {},
-                            ),
-                            DataCell(
-                              Text(epa['area']),
-                            ),
-                            DataCell(
-                              Text(epa['corte']),
-                            ),
-                            DataCell(
-                              Text(epa['edad']),
-                            ),
-                            DataCell(
-                              Text(epa['nombreActividad']),
-                              onTap: () {},
-                            ),
-                            DataCell(
-                              Text(epa['grupo']),
-                            ),
-                            DataCell(
-                              Text(epa['distrito']),
-                            ),
-                            DataCell(
-                              Text(epa['tipoCultivo']),
-                            ),
-                            DataCell(
-                              Text(epa['nombreHacienda']),
-                              onTap: () {},
-                            ),
-                            DataCell(
-                              Text(epa['fecha']),
+                              Text(epa['id'].toString()),
+                              onTap: null,
                             ),
                             DataCell(
                               Text(epa['hacienda']),
@@ -209,16 +131,49 @@ class DatabaseView extends State<DatabaseInfo> {
                             ),
                             DataCell(
                               Text(epa['ejecutable']),
+                              onTap: () {
+                                showDialog(
+                                    context: context,
+                                    builder: (context) => SimpleDialog(
+                                          title: Text(
+                                              'Inserte el número de hectareas realizadas hasta ahora'),
+                                          children: <Widget>[
+                                            TextFormField(
+                                              keyboardType:
+                                                  TextInputType.number,
+                                              controller: ejecutableController,
+                                              validator: (input) {
+                                                if (input.isEmpty) {
+                                                  return 'Por favor no deje el campo vacio';
+                                                }
+                                                return null;
+                                              },
+                                            ),
+                                            Center(
+                                                child: FlatButton(
+                                              child: Text('Guardar'),
+                                              onPressed: () {
+                                                if (ejecutableController
+                                                    .text.isEmpty) {
+                                                } else {
+                                                  updateRow(
+                                                      ejecutableController.text,
+                                                      epa['id']);
+                                                }
+                                              },
+                                            ))
+                                          ],
+                                        ));
+
+                                print(epa['id']);
+                              },
                             ),
                             DataCell(
-                              Text(epa['pendiente']),
+                              buildText(epa),
                             ),
                             DataCell(
                               Text(epa['observacion']),
                               onTap: () {},
-                            ),
-                            DataCell(
-                              Text(epa['encargado']),
                             ),
                           ],
                         ),
@@ -231,5 +186,24 @@ class DatabaseView extends State<DatabaseInfo> {
         ),
       ),
     );
+  }
+
+  updateRow(String referencia, epa) {
+    DataBaseOffLine.instance.update({
+      DataBaseOffLine.columnId: epa,
+      DataBaseOffLine.columnejecutable: referencia
+    });
+    Navigator.pop(context);
+  }
+
+  Text buildText(Map<String, dynamic> epa) {
+    double ejecutable = double.tryParse(epa['ejecutable']);
+    double programadas = double.tryParse(epa['programa']);
+    double respuesta = programadas - ejecutable;
+    if (respuesta < 0) {
+      return Text("");
+    } else {
+      return Text(respuesta.toStringAsFixed(2));
+    }
   }
 }
