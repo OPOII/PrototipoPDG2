@@ -95,9 +95,36 @@ class DataBaseOffLine {
     return await db.insert(_tableName, row);
   }
 
-  Future<List<Map<String, dynamic>>> queryAll() async {
+  Future<List<Tarea>> queryAll() async {
     Database db = await instance.database;
-    return await db.query(_tableName);
+    List<Map<String, dynamic>> querys = await db.query(_tableName);
+    List<Tarea> retornar = List<Tarea>();
+    // ignore: await_only_futures
+    await querys.forEach((element) {
+      Tarea actual = new Tarea();
+      actual.hdaste = element['hdaste'].toString();
+      actual.area = element['area'].toString();
+      actual.corte = element['corte'].toString();
+      actual.edad = element['edad'].toString();
+      actual.nombreActividad = element['nombreActividad'].toString();
+      actual.grupo = element['grupo'].toString();
+      actual.distrito = element['distrito'].toString();
+      actual.tipoCultivo = element['tipoCultivo'].toString();
+      actual.nombreHacienda = element['nombreHacienda'].toString();
+      actual.fecha = element['fecha'].toString();
+      actual.hacienda = element['hacienda'].toString();
+      actual.suerte = element['suerte'].toString();
+      actual.programa = element['programa'].toString();
+      actual.actividad = element['actividad'].toString();
+      actual.ejecutable = element['ejecutable'].toString();
+      actual.pendiente = element['pendiente'].toString();
+      actual.observacion = element['observacion'].toString();
+      actual.encargado = element['encargado'].toString();
+      actual.id = element['id'];
+      retornar.add(actual);
+    });
+    print(retornar.length);
+    return retornar;
   }
 
   clearTable() async {
@@ -113,26 +140,41 @@ class DataBaseOffLine {
 
   llenarTabla(List<Tarea> listado) {
     for (var i = 0; i < listado.length; i++) {
-      insert({
-        DataBaseOffLine.columnhdaste: listado[i].hdaste,
-        DataBaseOffLine.columnarea: listado[i].area,
-        DataBaseOffLine.columncorte: listado[i].corte,
-        DataBaseOffLine.columnedad: listado[i].edad,
-        DataBaseOffLine.columnnombreActividad: listado[i].nombreActividad,
-        DataBaseOffLine.columngrupo: listado[i].grupo,
-        DataBaseOffLine.columndistrito: listado[i].distrito,
-        DataBaseOffLine.columntipoCultivo: listado[i].tipoCultivo,
-        DataBaseOffLine.columnnombreHacienda: listado[i].nombreHacienda,
-        DataBaseOffLine.columnfecha: listado[i].fecha,
-        DataBaseOffLine.columnhacienda: listado[i].hacienda,
-        DataBaseOffLine.columnsuerte: listado[i].suerte,
-        DataBaseOffLine.columnprograma: listado[i].programa,
-        DataBaseOffLine.columnactividad: listado[i].actividad,
-        DataBaseOffLine.columnejecutable: listado[i].ejecutable,
-        DataBaseOffLine.columnpendiente: listado[i].pendiente,
-        DataBaseOffLine.columnobservacion: listado[i].observacion,
-        DataBaseOffLine.columnencargado: listado[i].encargado,
-      });
+      insert(
+        {
+          DataBaseOffLine.columnId: listado[i].id,
+          DataBaseOffLine.columnhdaste: listado[i].hdaste,
+          DataBaseOffLine.columnarea: listado[i].area,
+          DataBaseOffLine.columncorte: listado[i].corte,
+          DataBaseOffLine.columnedad: listado[i].edad,
+          DataBaseOffLine.columnnombreActividad: listado[i].nombreActividad,
+          DataBaseOffLine.columngrupo: listado[i].grupo,
+          DataBaseOffLine.columndistrito: listado[i].distrito,
+          DataBaseOffLine.columntipoCultivo: listado[i].tipoCultivo,
+          DataBaseOffLine.columnnombreHacienda: listado[i].nombreHacienda,
+          DataBaseOffLine.columnfecha: listado[i].fecha,
+          DataBaseOffLine.columnhacienda: listado[i].hacienda,
+          DataBaseOffLine.columnsuerte: listado[i].suerte,
+          DataBaseOffLine.columnprograma: listado[i].programa,
+          DataBaseOffLine.columnactividad: listado[i].actividad,
+          DataBaseOffLine.columnejecutable: listado[i].ejecutable,
+          DataBaseOffLine.columnpendiente: listado[i].pendiente,
+          DataBaseOffLine.columnobservacion: listado[i].observacion,
+          DataBaseOffLine.columnencargado: listado[i].encargado,
+        },
+      );
     }
+  }
+
+  Future<int> verificarSiEstaVacia() async {
+    int devolver = 0;
+    Database db = await instance.database;
+    List<Map<String, dynamic>> querys = await db.query(_tableName);
+    if (querys.isEmpty) {
+      devolver = 0;
+    } else {
+      devolver = querys.length;
+    }
+    return Future.value(devolver);
   }
 }

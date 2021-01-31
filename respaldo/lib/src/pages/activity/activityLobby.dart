@@ -102,7 +102,6 @@ class ActividadWidget extends State<ActivityWidget> {
   void inicio() {
     int dayYear = int.parse(DateFormat("D").format(DateTime.now()));
     DateTime date = new DateTime.now();
-    print(dayYear);
     int semana = ((dayYear - date.weekday + 10) / 7).floor();
     print("Estamos en la semana #" + semana.toString() + " del año");
     cantidadSemanas = semana;

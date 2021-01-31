@@ -115,7 +115,7 @@ class _ReviewActivity extends State<ActividadReview> {
         .collection('tasks')
         .doc(referencia.data()['Id_Actividad'])
         .set(referencia.data());
-    //Elimino esto de mi base de datos y la paso al de tareas para revision
+    //Elimino esto de mi base de datos y la paso al de tasks para revision
     await FirebaseFirestore.instance
         .collection('Ingenio')
         .doc('1')
@@ -209,35 +209,36 @@ class _ReviewActivity extends State<ActividadReview> {
                               ));
                     }),
                 RaisedButton(
-                    color: Colors.blue,
-                    child: Text('Terminar Tarea'),
-                    onPressed: () {
-                      showDialog(
-                          context: context,
-                          builder: (context) => SimpleDialog(
-                                title:
-                                    Text('Por favor ingrese una descripción'),
-                                children: <Widget>[
-                                  TextFormField(
-                                    controller: descriptionController,
-                                    validator: (input) {
-                                      if (input.isEmpty) {
-                                        return 'Please, enter a description';
-                                      }
-                                      return null;
-                                    },
-                                    onSaved: (input) => texto = input,
-                                    maxLines: 10,
-                                  ),
-                                  Center(
-                                    child: FlatButton(
-                                      child: Text('Done'),
-                                      onPressed: enviarActividad,
-                                    ),
-                                  )
-                                ],
-                              ));
-                    })
+                  color: Colors.blue,
+                  child: Text('Terminar Tarea'),
+                  onPressed: () {
+                    showDialog(
+                      context: context,
+                      builder: (context) => SimpleDialog(
+                        title: Text('Por favor ingrese una descripción'),
+                        children: <Widget>[
+                          TextFormField(
+                            controller: descriptionController,
+                            validator: (input) {
+                              if (input.isEmpty) {
+                                return 'Please, enter a description';
+                              }
+                              return null;
+                            },
+                            onSaved: (input) => texto = input,
+                            maxLines: 10,
+                          ),
+                          Center(
+                            child: FlatButton(
+                              child: Text('Done'),
+                              onPressed: enviarActividad,
+                            ),
+                          )
+                        ],
+                      ),
+                    );
+                  },
+                )
               ],
             )
           ],

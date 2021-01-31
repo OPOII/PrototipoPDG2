@@ -7,6 +7,7 @@ import 'dart:convert' as convert;
 import 'dart:convert';
 
 class CrudConsultas {
+  static final coleccionBasesDatos = "repositorio";
   AuthenticationService service = new AuthenticationService();
   String suerteID = "";
   String idUsuario = "";
@@ -27,7 +28,6 @@ class CrudConsultas {
 
   Future obtenerListaHaciendas() async {
     List haciendas = [];
-    await listadoExcels();
     DocumentSnapshot ref = await FirebaseFirestore.instance
         .collection('Ingenio')
         .doc('1')
@@ -62,72 +62,117 @@ class CrudConsultas {
     }
     return haciendas;
   }
+  /**
+   * Este es el insumo del lunes en que el administrador cargara el listado de excel
+   */
 
-  Future<List<Tarea>> listadoExcels() async {
-    DateTime lunes = DateTime.now();
-    if (lunes.weekday == 1) {
-      print("Es jueves");
-      List<Tarea> listados = List<Tarea>();
-      var raw = await http.get(
-          "https://script.google.com/macros/s/AKfycbx_7Zv5RIidsvtufVEmuQeSycC8PZ_A3O6tmhaHj5WMOBMrucLx/exec");
-      var jsonFeedback = convert.jsonDecode(raw.body);
-      int i = 0;
-      await jsonFeedback.forEach((element) {
-        Tarea actual = new Tarea();
-        actual.hdaste = element['hdaste'].toString();
-        actual.area = element['area'].toString();
-        actual.corte = element['corte'].toString();
-        actual.edad = element['edad'].toString();
-        actual.nombreActividad = element['nombre_actividad'].toString();
-        actual.grupo = element['grupo'].toString();
-        actual.distrito = element['distrito'].toString();
-        actual.tipoCultivo = element['tipo_cultivo'].toString();
-        actual.nombreHacienda = element['nombre_hacienda'].toString();
-        actual.fecha = element['fecha'].toString();
-        actual.hacienda = element['hacienda'].toString();
-        actual.suerte = element['suerte'].toString();
-        actual.programa = element['horas_programadas'].toString();
-        actual.actividad = element['actividad'].toString();
-        actual.ejecutable = element['ejecutable'].toString();
-        actual.pendiente = element['pendiente'].toString();
-        actual.observacion = element['observacion'].toString();
-        actual.encargado = element['encargado'].toString();
-        actual.id = i.toString();
-        listados.add(actual);
-        i++;
-      });
-      await DataBaseOffLine.instance.clearTable();
-      await DataBaseOffLine.instance.llenarTabla(listados);
-      return listados;
-    } else {
-      List<Map<String, dynamic>> mapas;
-      List<Tarea> lista = List<Tarea>();
-      mapas = await DataBaseOffLine.instance.queryAll();
-      for (var i = 0; i < mapas.length; i++) {
-        Tarea nueva = new Tarea();
-        nueva.hdaste = mapas[i]['hdaste'].toString();
-        nueva.area = mapas[i]['area'].toString();
-        nueva.corte = mapas[i]['corte'].toString();
-        nueva.edad = mapas[i]['edad'].toString();
-        nueva.nombreActividad = mapas[i]['nombreActividad'].toString();
-        nueva.grupo = mapas[i]['grupo'].toString();
-        nueva.distrito = mapas[i]['distrito'].toString();
-        nueva.tipoCultivo = mapas[i]['tipoCultivo'].toString();
-        nueva.nombreHacienda = mapas[i]['nombreHacienda'].toString();
-        nueva.fecha = mapas[i]['fecha'].toString();
-        nueva.hacienda = mapas[i]['hacienda'].toString();
-        nueva.suerte = mapas[i]['suerte'].toString();
-        nueva.programa = mapas[i]['programa'].toString();
-        nueva.actividad = mapas[i]['actividad'].toString();
-        nueva.ejecutable = mapas[i]['ejecutable'].toString();
-        nueva.pendiente = mapas[i]['pendiente'].toString();
-        nueva.observacion = mapas[i]['observacion'].toString();
-        nueva.encargado = mapas[i]['encargado'].toString();
-        nueva.id = i.toString();
-        lista.add(nueva);
-      }
-      return lista;
-    }
+  insumoDiaLunesAdmin() async {
+    var raw = await http.get(
+        "https://script.google.com/macros/s/AKfycbx_7Zv5RIidsvtufVEmuQeSycC8PZ_A3O6tmhaHj5WMOBMrucLx/exec");
+    var jsonFeedback = convert.jsonDecode(raw.body);
+
+    jsonFeedback.forEach(
+      (element) async {
+        await FirebaseFirestore.instance
+            .collection('Ingenio')
+            .doc('1')
+            .collection(coleccionBasesDatos)
+            .doc(element['id'].toString())
+            .set(element);
+      },
+    );
+  }
+
+  Future<List<Tarea>> traerInsumoDeFirebase() async {
+    List<Tarea> listado = List<Tarea>();
+    await FirebaseFirestore.instance
+        .collection('Ingenio')
+        .doc('1')
+        .collection(coleccionBasesDatos)
+        .get()
+        .then(
+      (value) {
+        value.docs.forEach(
+          (element) {
+            Tarea actual = new Tarea();
+            actual.hdaste = element['hdaste'].toString();
+            actual.area = element['area'].toString();
+            actual.corte = element['corte'].toString();
+            actual.edad = element['edad'].toString();
+            actual.nombreActividad = element['nombre_actividad'].toString();
+            actual.grupo = element['grupo'].toString();
+            actual.distrito = element['distrito'].toString();
+            actual.tipoCultivo = element['tipo_cultivo'].toString();
+            actual.nombreHacienda = element['nombre_hacienda'].toString();
+            actual.fecha = element['fecha'].toString();
+            actual.hacienda = element['hacienda'].toString();
+            actual.suerte = element['suerte'].toString();
+            actual.programa = element['horas_programadas'].toString();
+            actual.actividad = element['actividad'].toString();
+            actual.ejecutable = element['ejecutable'].toString();
+            actual.pendiente = element['pendiente'].toString();
+            actual.observacion = element['observacion'].toString();
+            actual.encargado = element['encargado'].toString();
+            actual.id = element['id'];
+            print(actual.toJson());
+            listado.add(actual);
+          },
+        );
+      },
+    );
+    return Future.value(listado);
+  }
+
+  Future<List<Tarea>> extraerInfoExcel() async {
+    DocumentSnapshot referencia = await FirebaseFirestore.instance
+        .collection('Ingenio')
+        .doc('1')
+        .collection('users')
+        .doc(service.uid)
+        .get();
+    List<Tarea> listados = List<Tarea>();
+    var raw = await http.get(
+        "https://script.google.com/macros/s/AKfycbx_7Zv5RIidsvtufVEmuQeSycC8PZ_A3O6tmhaHj5WMOBMrucLx/exec");
+    var jsonFeedback = convert.jsonDecode(raw.body);
+    jsonFeedback.forEach(
+      (element) async {
+        if (referencia.data()['charge'] == 'user' &&
+            referencia.data()['codigo_hacienda'].toString() ==
+                element['hacienda'].toString() &&
+            referencia.data()['identificacion'].toString() ==
+                element['encargado']) {
+          Tarea actual = new Tarea();
+          actual.hdaste = element['hdaste'].toString();
+          actual.area = element['area'].toString();
+          actual.corte = element['corte'].toString();
+          actual.edad = element['edad'].toString();
+          actual.nombreActividad = element['nombre_actividad'].toString();
+          actual.grupo = element['grupo'].toString();
+          actual.distrito = element['distrito'].toString();
+          actual.tipoCultivo = element['tipo_cultivo'].toString();
+          actual.nombreHacienda = element['nombre_hacienda'].toString();
+          actual.fecha = element['fecha'].toString();
+          actual.hacienda = element['hacienda'].toString();
+          actual.suerte = element['suerte'].toString();
+          actual.programa = element['horas_programadas'].toString();
+          actual.actividad = element['actividad'].toString();
+          actual.ejecutable = element['ejecutable'].toString();
+          actual.pendiente = element['pendiente'].toString();
+          actual.observacion = element['observacion'].toString();
+          actual.encargado = element['encargado'].toString();
+          actual.id = element['id'];
+          listados.add(actual);
+        }
+      },
+    );
+    await DataBaseOffLine.instance.llenarTabla(listados);
+    return Future.value(listados);
+  }
+
+  Future<List<Tarea>> devolvereDeConsultaSql() async {
+    List<Tarea> tarea = List<Tarea>();
+    tarea = await DataBaseOffLine.instance.queryAll();
+    return tarea;
   }
 
 //
@@ -158,7 +203,7 @@ class CrudConsultas {
           }
         });
       });
-      return usuario;
+      return Future.value(usuario);
     } catch (e) {
       print(e.toString());
       return null;

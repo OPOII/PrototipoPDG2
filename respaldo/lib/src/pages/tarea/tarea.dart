@@ -18,7 +18,8 @@ class Tarea {
   String pendiente; //double
   String observacion;
   String encargado;
-  String id;
+  int id;
+  String idFirebase;
   Tarea(
       {this.hdaste,
       this.area,
@@ -38,28 +39,30 @@ class Tarea {
       this.pendiente,
       this.observacion,
       this.encargado,
-      this.id});
+      this.id,
+      this.idFirebase});
   factory Tarea.fromJson(dynamic json) {
     return Tarea(
-        hdaste: "${json['hdaste']}",
-        area: "${json['area']}",
-        corte: "${json['corte']}",
-        edad: "${json['edad']}",
-        nombreActividad: "${json['nombreActividad']}",
-        grupo: "${json['grupo']}",
-        distrito: "${json['distrito']}",
-        tipoCultivo: "${json['tipoCultivo']}",
-        nombreHacienda: "${json['nombreHacienda']}",
-        fecha: "${json['fecha']}",
-        hacienda: "${json['hacienda']}",
-        suerte: "${json['suerte']}",
-        programa: "${json['programa']}",
-        actividad: "${json['actividad']}",
-        ejecutable: "${json['ejecutable']}",
-        pendiente: "${json['pendiente']}",
-        observacion: "${json['observacion']}",
-        encargado: "${json['encargado']}",
-        id: "${json['id']}");
+        hdaste: "${json['hdaste'].toString()}",
+        area: "${json['area'].toString()}",
+        corte: "${json['corte'].toString()}",
+        edad: "${json['edad'].toString()}",
+        nombreActividad: "${json['nombreActividad'].toString()}",
+        grupo: "${json['grupo'].toString()}",
+        distrito: "${json['distrito'].toString()}",
+        tipoCultivo: "${json['tipoCultivo'].toString()}",
+        nombreHacienda: "${json['nombreHacienda'].toString()}",
+        fecha: "${json['fecha'].toString()}",
+        hacienda: "${json['hacienda'].toString()}",
+        suerte: "${json['suerte'].toString()}",
+        programa: "${json['programa'].toString()}",
+        actividad: "${json['actividad'].toString()}",
+        ejecutable: "${json['ejecutable'].toString()}",
+        pendiente: "${json['pendiente'].toString()}",
+        observacion: "${json['observacion'].toString()}",
+        encargado: "${json['encargado'].toString()}",
+        id: "${json['id']}" as int,
+        idFirebase: "${json['id'].toString()}");
   }
 
   // Method to make GET parameters.
@@ -82,7 +85,8 @@ class Tarea {
         'pendiente': pendiente,
         'observacion': observacion,
         'encargado': encargado,
-        'id': id
+        'id': id,
+        'idFirebase': idFirebase
       };
   Map<String, dynamic> toMap() {
     return {
@@ -104,7 +108,8 @@ class Tarea {
       "pendiente": pendiente,
       "observacion": observacion,
       "encargado": encargado,
-      "id": id
+      "id": id,
+      'idFirebase': idFirebase
     };
   }
 
@@ -128,5 +133,9 @@ class Tarea {
     observacion = map['observacion'];
     encargado = map['encargado'];
     id = map['id'];
+    idFirebase = map['idFirebase'];
+  }
+  void cambiarIdFirebase(String newId) {
+    this.idFirebase = newId;
   }
 }

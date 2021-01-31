@@ -23,7 +23,14 @@ class _UsersState extends State<AgregarUsuarios> {
   final formKey = GlobalKey<FormState>();
   //final _scaffoldKey = GlobalKey<ScaffoldState>();
   AuthenticationService service = new AuthenticationService();
-  String name, telephone, email, cargo, hacienda, url;
+  String name,
+      telephone,
+      email,
+      cargo,
+      hacienda,
+      url,
+      codigoHacienda,
+      identificacion;
   String uid;
   DateTime fecha;
   final nameController = TextEditingController();
@@ -32,6 +39,8 @@ class _UsersState extends State<AgregarUsuarios> {
   final cargoController = TextEditingController();
   final birthdayController = TextEditingController();
   final cedulaController = TextEditingController();
+  final haciendaController = TextEditingController();
+  final identificacionController = TextEditingController();
   final format = DateFormat("dd-MM-yyyy");
   List _charges = ["", "admin", "user"];
   String _currentCharge;
@@ -90,10 +99,10 @@ class _UsersState extends State<AgregarUsuarios> {
 
   List<DropdownMenuItem<String>> getDropDownMenuItems() {
     List<DropdownMenuItem<String>> items = new List();
-    for (String city in _charges) {
+    for (String cargos in _charges) {
       // here we are creating the drop down menu items, you can customize the item right here
       // but I'll just use a simple text for this
-      items.add(new DropdownMenuItem(value: city, child: new Text(city)));
+      items.add(new DropdownMenuItem(value: cargos, child: new Text(cargos)));
     }
     return items;
   }
@@ -170,6 +179,32 @@ class _UsersState extends State<AgregarUsuarios> {
               },
             ),
             TextFormField(
+              controller: haciendaController,
+              decoration: InputDecoration(labelText: 'Codigo Hacienda'),
+              onSaved: (value) {
+                codigoHacienda = value;
+              },
+              validator: (value) {
+                if (value.isEmpty) {
+                  return "Este campo no debe de estar vacio";
+                }
+                return null;
+              },
+            ),
+            TextFormField(
+              controller: identificacionController,
+              decoration: InputDecoration(labelText: 'Identificación'),
+              onSaved: (value) {
+                identificacion = value;
+              },
+              validator: (value) {
+                if (value.isEmpty) {
+                  return "Este campo no debe de estar vacio";
+                }
+                return null;
+              },
+            ),
+            TextFormField(
               controller: emailController,
               decoration: InputDecoration(labelText: 'Email'),
               keyboardType: TextInputType.emailAddress,
@@ -221,9 +256,7 @@ class _UsersState extends State<AgregarUsuarios> {
               child: Text('Add new User'),
               onPressed: () {
                 if (formKey.currentState.validate()) {
-                  obtenerUID(cedulaController.text, emailController.text);
-                  // saveAndSendData();
-                  // clearData();
+                  addNewUser(cedulaController.text, emailController.text);
                 }
               },
             ),
@@ -241,6 +274,8 @@ class _UsersState extends State<AgregarUsuarios> {
     birthdayController.text = "";
     cedulaController.text = "";
     _currentCharge = "";
+    haciendaController.text = "";
+    identificacionController.text = "";
   }
 
   void saveAndSendData(String tokenUsuario) async {
@@ -251,6 +286,8 @@ class _UsersState extends State<AgregarUsuarios> {
     infoUsuario['name'] = nameController.text;
     infoUsuario['telephone'] = telephoneController.text;
     infoUsuario['haciendasResponsables'] = new List<String>();
+    infoUsuario['codigo_hacienda'] = haciendaController.text;
+    infoUsuario['identificacion'] = identificacionController.text;
     infoUsuario['cedula'] = cedulaController.text;
     infoUsuario['urlfoto'] =
         "https://image.freepik.com/vector-gratis/perfil-empresario-dibujos-animados_18591-58479.jpg";
@@ -264,7 +301,7 @@ class _UsersState extends State<AgregarUsuarios> {
         .set(infoUsuario);
   }
 
-  void obtenerUID(String contra, String email) async {
+  void addNewUser(String contra, String email) async {
     String resulta = "";
     // ignore: await_only_futures
     dynamic resultado = await service.agregarUsuario(contra, email);

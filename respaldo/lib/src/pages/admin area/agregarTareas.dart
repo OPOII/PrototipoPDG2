@@ -237,11 +237,14 @@ class _TareaViewState extends State<TareaView> {
     }
   }
 
+/**
+ * Este metodo busca en la lista de los usuarios cual coincide con el id 
+ * que se escogio. Al encontrarlo, se llama al metodo que esta en la clase servicios
+ * para enviar la notificación al usuario en cuestion.
+ */
   void enviarNotificacion() async {
     for (var i = 0; i < usuarios.length; i++) {
       if (usuarios[i]['id_user'] == idUser) {
-        //Buscar por que aqui te trae el tokenid que no es
-        print(usuarios[i]['Token_ID'] + "En el agregar");
         await servicios.sendAndRetrieveMessage(usuarios[i]['Token_ID'],
             "Nueva tarea: " + actividadController.text, messageController.text);
       }

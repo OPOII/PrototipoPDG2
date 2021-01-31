@@ -3,6 +3,7 @@ import 'dart:io';
 import 'package:intl/intl.dart';
 import 'package:intl/date_symbol_data_local.dart';
 import 'package:respaldo/src/DatabaseView.dart';
+import 'package:respaldo/src/pages/Database.dart';
 import 'package:respaldo/src/pages/tarea/tarea.dart';
 import 'package:animate_do/animate_do.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
@@ -92,9 +93,8 @@ class _LobbyState extends State<Lobby> {
       }
       oldres = resu;
     });
-    losListados();
     guardarToken();
-    probar();
+    obtenerEmpleadoActual();
   }
 
   @override
@@ -103,20 +103,91 @@ class _LobbyState extends State<Lobby> {
     connectivityStream.cancel();
   }
 
-  probar() async {
-    dynamic resultado = await consultas
+  obtenerEmpleadoActual() async {
+    usuario = await consultas
         .getEmpleadoActual(_authenticationService.currentUser.uid);
-    setState(() {
-      usuario = resultado;
-    });
-    //await guardarEnTxt();
+
+    if (usuario[0]['charge'] == 'user') {
+      print('Entro en  la parte del usuario');
+      await traerListadoExcel();
+    } else if (usuario[0]['charge'] == 'admin') {
+      await listadoAdministrador();
+    }
   }
 
-  losListados() async {
-    dynamic resultado = await consultas.listadoExcels();
-    setState(() {
-      listadoExcel = resultado;
-    });
+  traerListadoExcel() async {
+    DateTime sabado = new DateTime.now();
+    //Obtengo la información del excel para crear el sqflite
+    print("Entrara a todo el proceso");
+    if (sabado.weekday == 1) {
+      DataBaseOffLine.instance.verificarSiEstaVacia().then(
+        (value) async {
+          if (value == 0) {
+            print(
+                "Entro al que tiene el valor de cero por que limpie la tabala");
+            dynamic resultado = await consultas.extraerInfoExcel();
+            setState(
+              () {
+                listadoExcel = resultado;
+              },
+            );
+          } else if (value != 0) {
+            dynamic resultado = await consultas.devolvereDeConsultaSql();
+            print("Entro aqui en el que no esta vacia");
+            setState(
+              () {
+                listadoExcel = resultado;
+              },
+            );
+          }
+        },
+      );
+    } else if (sabado.weekday != 1) {
+      DataBaseOffLine.instance.verificarSiEstaVacia().then(
+        (value) async {
+          if (value == 0) {
+            dynamic resultado = await consultas.extraerInfoExcel();
+            setState(
+              () {
+                listadoExcel = resultado;
+              },
+            );
+          } else if (value != 0) {
+            dynamic resultado = await consultas.devolvereDeConsultaSql();
+            setState(
+              () {
+                listadoExcel = resultado;
+              },
+            );
+          }
+        },
+      );
+    }
+  }
+
+  listadoAdministrador() async {
+    DateTime sabado = new DateTime.now();
+    final snapshot = await FirebaseFirestore.instance
+        .collection('Ingenio')
+        .doc('1')
+        .collection('repositorio')
+        .get();
+    if (sabado.weekday == 1 && snapshot.docs.length == 0) {
+      await consultas.insumoDiaLunesAdmin();
+      dynamic resultado = await consultas.traerInsumoDeFirebase();
+
+      setState(() {
+        listadoExcel = resultado;
+      });
+      print('Entro a construir en firebase');
+    } else if (sabado.weekday != 1) {
+      dynamic resultado = await consultas.traerInsumoDeFirebase();
+
+      setState(() {
+        listadoExcel = resultado;
+      });
+      print('Entro aqui por que ya hay datos en firebase');
+    }
   }
 
   obtenerHaciendas() async {
@@ -320,13 +391,18 @@ Widget iconoBuscarHaciendas(BuildContext context, List haciendasNuevo) {
     ),
     actions: <Widget>[
       IconButton(
-          tooltip: 'search',
-          icon: usIcon,
-          onPressed: () {
-            showSearch(
-                context: context,
-                delegate: HaciendaSearch(listado: haciendasNuevo));
-          })
+        tooltip: 'search',
+        icon: usIcon,
+        onPressed: () {
+          showSearch(
+              context: context,
+              delegate: HaciendaSearch(listado: haciendasNuevo));
+        },
+      ),
+      IconButton(
+        icon: Icon(Icons.grass),
+        onPressed: () {},
+      )
     ],
     backgroundColor: Colors.green,
     elevation: 0.0,
@@ -342,66 +418,69 @@ Widget haciendaListado(
     child: Scaffold(
       backgroundColor: Colors.transparent,
       body: Container(
-          padding: EdgeInsets.only(right: 15.0, left: 10),
-          child: GridView.builder(
-              itemCount: snapshot.data.length,
-              gridDelegate:
-                  SliverGridDelegateWithFixedCrossAxisCount(crossAxisCount: 2),
-              itemBuilder: (BuildContext context, int index) {
-                return Padding(
-                  padding: const EdgeInsets.symmetric(
-                      vertical: 4.0, horizontal: 4.0),
-                  child: InkWell(
-                    onTap: () {
-                      Navigator.push(
-                          context,
-                          MaterialPageRoute(
-                              builder: (context) => HaciendaView(
-                                  hacienda: snapshot.data[index]))); //
-                    },
-                    child: SingleChildScrollView(
-                      child: Card(
-                        color: Colors.transparent,
-                        elevation: 0,
-                        shape: RoundedRectangleBorder(
-                          borderRadius: BorderRadius.circular(10),
+        padding: EdgeInsets.only(right: 15.0, left: 10),
+        child: GridView.builder(
+          itemCount: snapshot.data.length,
+          gridDelegate:
+              SliverGridDelegateWithFixedCrossAxisCount(crossAxisCount: 2),
+          itemBuilder: (BuildContext context, int index) {
+            return Padding(
+              padding:
+                  const EdgeInsets.symmetric(vertical: 4.0, horizontal: 4.0),
+              child: InkWell(
+                onTap: () {
+                  Navigator.push(
+                    context,
+                    MaterialPageRoute(
+                      builder: (context) =>
+                          HaciendaView(hacienda: snapshot.data[index]),
+                    ),
+                  ); //
+                },
+                child: SingleChildScrollView(
+                  child: Card(
+                    color: Colors.transparent,
+                    elevation: 0,
+                    shape: RoundedRectangleBorder(
+                      borderRadius: BorderRadius.circular(10),
+                    ),
+                    child: new Wrap(
+                      children: <Widget>[
+                        Container(
+                          decoration: BoxDecoration(
+                              borderRadius:
+                                  BorderRadius.all(Radius.circular(20))),
+                          child: Image.network(
+                              snapshot.data[index].data()['imagen']),
                         ),
-                        child: new Wrap(
+                        SizedBox(
+                          height: 5.0,
+                        ),
+                        Wrap(
+                          direction: Axis.horizontal,
                           children: <Widget>[
-                            Container(
-                              decoration: BoxDecoration(
-                                  borderRadius:
-                                      BorderRadius.all(Radius.circular(20))),
-                              child: Image.network(
-                                  snapshot.data[index].data()['imagen']),
-                            ),
-                            SizedBox(
-                              height: 5.0,
-                            ),
-                            Wrap(
-                              direction: Axis.horizontal,
-                              children: <Widget>[
-                                Text('Hacienda:'),
-                                Text(snapshot.data[index]
-                                    .data()['hacienda_name'])
-                              ],
-                            ),
-                            Wrap(
-                              direction: Axis.horizontal,
-                              children: [
-                                Text('Identificación:'),
-                                Text(snapshot.data[index]
-                                    .data()['id_hacienda']
-                                    .toString())
-                              ],
-                            )
+                            Text('Hacienda:'),
+                            Text(snapshot.data[index].data()['hacienda_name'])
                           ],
                         ),
-                      ),
+                        Wrap(
+                          direction: Axis.horizontal,
+                          children: [
+                            Text('Identificación:'),
+                            Text(snapshot.data[index]
+                                .data()['id_hacienda']
+                                .toString())
+                          ],
+                        )
+                      ],
                     ),
                   ),
-                );
-              })),
+                ),
+              ),
+            );
+          },
+        ),
+      ),
     ),
   );
 }
@@ -460,11 +539,22 @@ SingleChildScrollView dataBody(List<Tarea> listadoExcel) {
   );
 }
 
+Text buildText(Tarea user) {
+  double programadas = double.tryParse(user.programa);
+  double ejecutable = double.tryParse(user.ejecutable);
+  double resultado = programadas - ejecutable;
+  return Text(resultado.toStringAsFixed(2));
+}
+
 //Implementarlo con la base de datos
 Widget barraInfo(List<Tarea> listadoExcel, Ingenio pruebas) {
   int tareasTerminadas = 0;
+  double respuesta = 0;
   for (var i = 0; i < listadoExcel.length; i++) {
-    if (listadoExcel[i].pendiente == "0") {
+    double ejecutable = double.tryParse(listadoExcel[i].ejecutable);
+    double programadas = double.tryParse(listadoExcel[i].programa);
+    respuesta = ejecutable - programadas;
+    if (respuesta == 0.0) {
       tareasTerminadas++;
     }
   }
@@ -550,23 +640,30 @@ Widget barraInfo(List<Tarea> listadoExcel, Ingenio pruebas) {
           height: 15,
           width: 300,
           child: ClipRRect(
-              borderRadius: BorderRadius.all(Radius.circular(10)),
-              child: porcentaje != 0
-                  ? LinearPercentIndicator(
-                      progressColor: pruebas.progreso(porcentaje),
-                      animation: true,
-                      animationDuration: 3000,
-                      lineHeight: 20.0,
-                      percent: porcentaje / 100,
-                      backgroundColor: Colors.grey,
-                      animateFromLastPercent: true,
-                      center: Text(porcentaje.toStringAsFixed(1) + "%"),
-                    )
-                  : Loading()),
+            borderRadius: BorderRadius.all(Radius.circular(10)),
+            child: percentIndicator(pruebas, porcentaje),
+          ),
         ),
       ],
     ),
   );
+}
+
+Widget percentIndicator(Ingenio pruebas, double porcentaje) {
+  if (porcentaje.isNaN) {
+    return Loading();
+  } else {
+    return LinearPercentIndicator(
+      progressColor: pruebas.progreso(porcentaje),
+      animation: true,
+      animationDuration: 3000,
+      lineHeight: 20.0,
+      percent: porcentaje / 100,
+      backgroundColor: Colors.grey,
+      animateFromLastPercent: true,
+      center: Text(porcentaje.toStringAsFixed(1) + "%"),
+    );
+  }
 }
 
 class HaciendaSearch extends SearchDelegate<dynamic> {
